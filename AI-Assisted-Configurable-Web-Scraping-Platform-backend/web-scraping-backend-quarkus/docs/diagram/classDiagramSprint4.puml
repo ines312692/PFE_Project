@@ -1,0 +1,86 @@
+@startuml classDiagramSprint4
+'=============================================================
+'  Diagramme de classes — Sprint 4
+'  Schémas d'extraction par IA, sécurité LLM, templates de jobs
+'=============================================================
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 60
+skinparam class {
+    BackgroundColor #F8FBFF
+    BorderColor #2E75B6
+    ArrowColor #2E75B6
+}
+hide methods
+hide circle
+
+' ====================== ENTITÉS ======================
+class ExtractionSchema {
+    - idExtractionSchema : UUID
+    - jobId : UUID
+    - llmModel : LlmModel
+    - fields : List<SchemaField>
+    - createdAt : Instant
+}
+
+class SchemaField {
+    - name : String
+    - type : SchemaFieldType
+    - description : String
+    - required : boolean
+}
+
+class LlmSecurityGuard {
+    - maxPromptLength : int
+    - blockedPatterns : List<String>
+    + validate(description) : boolean
+    + sanitize(html) : String
+}
+
+class Template {
+    - idTemplate : UUID
+    - name : String
+    - description : String
+    - category : TemplateCategory
+    - config : ScraperConfig
+    - createdAt : Instant
+}
+
+' ====================== ÉNUMÉRATIONS ======================
+enum SchemaFieldType {
+    TEXT
+    NUMBER
+    DATE
+    URL
+    BOOLEAN
+}
+
+enum LlmModel {
+    GROQ_LLAMA
+    GROQ_VISION
+}
+
+enum TemplateCategory {
+    ECOMMERCE
+    REAL_ESTATE
+    NEWS
+    JOBS
+}
+
+' ====================== ASSOCIATIONS ENTRE ENTITÉS ======================
+ExtractionSchema "1" --> "1..*" SchemaField : définit
+ExtractionSchema "1" --> "1" LlmSecurityGuard : protège
+
+' ====================== ÉNUMÉRATIONS : forcées EN BAS, alignées ======================
+ExtractionSchema -[hidden]down-> SchemaFieldType
+SchemaFieldType -[hidden]right-> LlmModel
+LlmModel -[hidden]right-> TemplateCategory
+
+SchemaField ..> SchemaFieldType
+ExtractionSchema ..> LlmModel
+Template ..> TemplateCategory
+
+@enduml

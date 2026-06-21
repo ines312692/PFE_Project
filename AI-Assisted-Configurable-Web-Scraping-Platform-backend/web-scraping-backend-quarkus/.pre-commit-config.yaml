@@ -1,0 +1,77 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.sql$
+      - id: end-of-file-fixer
+        exclude: \.sql$
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [ "--maxkb=1024" ]
+      - id: mixed-line-ending
+        args: [ "--fix=lf" ]
+      - id: detect-private-key
+
+  - repo: https://github.com/pre-commit/mirrors-google-java-format
+    rev: v1.22.0
+    hooks:
+      - id: google-java-format
+        args: [ "--aosp" ]
+        types: [ java ]
+
+  - repo: local
+    hooks:
+      - id: checkstyle
+        name: Checkstyle
+        language: system
+        entry: ./mvnw checkstyle:check -q
+        pass_filenames: false
+        types: [ java ]
+
+  - repo: local
+    hooks:
+      - id: maven-compile
+        name: Maven compile
+        language: system
+        entry: ./mvnw compile -q -Dquarkus.package.type=fast-jar
+        pass_filenames: false
+        stages: [ pre-push ]
+
+  - repo: local
+    hooks:
+      - id: maven-test
+        name: Maven unit tests
+        language: system
+        entry: ./mvnw test -q -Dquarkus.test.profile=test
+        pass_filenames: false
+        stages: [ pre-push ]
+
+  - repo: local
+    hooks:
+      - id: flyway-naming
+        name: Flyway migration naming convention
+        language: pygrep
+        entry: "^V\\d+__[a-z][a-z0-9_]*\\.sql$"
+        args: [ "--negate" ]
+        files: "src/main/resources/db/migration/.*\\.sql$"
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [ "-d", "{extends: relaxed, rules: {line-length: {max: 140}}}" ]
+        files: "src/main/resources/.*\\.yml$"
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [ commit-msg ]
+        args: [ feat, fix, docs, style, refactor, test, chore, build, ci, perf ]

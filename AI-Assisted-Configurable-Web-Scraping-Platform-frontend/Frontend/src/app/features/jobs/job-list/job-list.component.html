@@ -1,0 +1,893 @@
+<div class="jobs-page">
+  <div class="jobs-header">
+    <div class="jobs-header__left">
+      <div class="jobs-header__eyebrow">
+        <span class="jobs-header__dot"></span>
+        Scraping Platform
+      </div>
+      <h1 class="jobs-header__title">Jobs</h1>
+      <p class="jobs-header__desc">Manage and monitor your web scraping workflows</p>
+    </div>
+
+    <div class="jobs-header__right">
+      <div class="jobs-stats">
+        <div class="jobs-stat">
+          <span class="jobs-stat__value">{{ totalElements() }}</span>
+          <span class="jobs-stat__label">Total</span>
+        </div>
+        <div class="jobs-stat__sep"></div>
+        <div class="jobs-stat">
+          <span class="jobs-stat__value jobs-stat__value--running">{{ countByStatus('RUNNING') }}</span>
+          <span class="jobs-stat__label">Running</span>
+        </div>
+        <div class="jobs-stat__sep"></div>
+        <div class="jobs-stat">
+          <span class="jobs-stat__value jobs-stat__value--ok">{{ countByStatus('COMPLETED') }}</span>
+          <span class="jobs-stat__label">Done</span>
+        </div>
+        <div class="jobs-stat__sep"></div>
+        <div class="jobs-stat">
+          <span class="jobs-stat__value jobs-stat__value--failed">{{ countByStatus('FAILED') }}</span>
+          <span class="jobs-stat__label">Failed</span>
+        </div>
+      </div>
+      <div class="header-action-group">
+        <button class="header-action-btn" (click)="goToAgenda()" title="View job schedule">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Schedule
+        </button>
+        <button class="header-action-btn header-action-btn--primary" (click)="goToCreate()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New Job
+        </button>
+      </div>
+
+    </div>
+  </div>
+  <div class="jobs-toolbar">
+
+    <!-- Search -->
+    <div class="jobs-toolbar__search">
+      <svg class="jobs-toolbar__search-ico" width="15" height="15" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="jobs-toolbar__search-input" type="text"
+             placeholder="Search jobs by name, URL or creator…"
+             [ngModel]="searchQuery()"
+             (ngModelChange)="searchQuery.set($event)"/>
+      @if (searchQuery()) {
+        <button class="jobs-toolbar__search-clear" (click)="searchQuery.set('')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      }
+    </div>
+
+    <div class="jobs-toolbar__mid">
+      <div class="filter-dropdown" #filterDropdown>
+        <button
+          class="filter-toggle-btn"
+          [class.filter-toggle-btn--active]="activeFilterCount() > 0"
+          [class.filter-toggle-btn--open]="filterPanelOpen()"
+          (click)="toggleFilterPanel()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+          Filters
+          @if (activeFilterCount() > 0) {
+            <span class="filter-badge">{{ activeFilterCount() }}</span>
+          }
+          <svg class="filter-toggle-btn__chevron" width="11" height="11" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2.5"
+               [class.filter-toggle-btn__chevron--open]="filterPanelOpen()">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        @if (filterPanelOpen()) {
+          <div class="filter-panel" (click)="$event.stopPropagation()">
+            <div class="filter-panel__grid">
+
+              <div class="filter-field">
+                <label class="filter-field__label" for="filter-status">Status</label>
+                <select class="filter-field__select" [ngModel]="filterStatus()"
+                        (ngModelChange)="filterStatus.set($event)">
+                  <option value="ALL">All statuses</option>
+                  @for (s of statuses.slice(1); track s) {
+                    <option [value]="s">{{ s }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="filter-field">
+                <label class="filter-field__label" for="filter-priority">Priority</label>
+                <select class="filter-field__select" [ngModel]="filterPriority()"
+                        (ngModelChange)="filterPriority.set($event)">
+                  <option value="ALL">All priorities</option>
+                  @for (p of priorities.slice(1); track p) {
+                    <option [value]="p">{{ p }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="filter-field">
+                <label class="filter-field__label" for="filter-trigger">Trigger</label>
+                <select class="filter-field__select" [ngModel]="filterTrigger()"
+                        (ngModelChange)="filterTrigger.set($event)">
+                  <option value="ALL">All triggers</option>
+                  @for (t of triggers.slice(1); track t) {
+                    <option [value]="t">{{ t }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="filter-field">
+                <label class="filter-field__label" for="filter-job-type">Type</label>
+                <select class="filter-field__select" [ngModel]="filterJobType()"
+                        (ngModelChange)="filterJobType.set($event)">
+                  <option value="ALL">All types</option>
+                  @for (t of jobTypes.slice(1); track t) {
+                    <option [value]="t">{{ t }}</option>
+                  }
+                </select>
+              </div>
+
+            </div>
+
+            <div class="filter-panel__footer">
+              <button class="filter-panel__clear" (click)="clearFilters()">Clear all</button>
+              <button class="filter-panel__apply" (click)="filterPanelOpen.set(false)">
+                Done
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+      <app-date-range-picker (dateRangeChange)="onDateRangeChange($event)"></app-date-range-picker>
+      @if (activeFilterCount() > 0) {
+        <div class="filter-chips">
+          @if (filterStatus() !== 'ALL') {
+            <span class="filter-chip">
+              <span class="filter-chip__label">Status:</span> {{ filterStatus() }}
+              <button class="filter-chip__remove" (click)="filterStatus.set('ALL')">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </span>
+          }
+          @if (filterPriority() !== 'ALL') {
+            <span class="filter-chip">
+              <span class="filter-chip__label">Priority:</span> {{ filterPriority() }}
+              <button class="filter-chip__remove" (click)="filterPriority.set('ALL')">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </span>
+          }
+          @if (filterTrigger() !== 'ALL') {
+            <span class="filter-chip">
+              <span class="filter-chip__label">Trigger:</span> {{ filterTrigger() }}
+              <button class="filter-chip__remove" (click)="filterTrigger.set('ALL')">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </span>
+          }
+          @if (filterJobType() !== 'ALL') {
+            <span class="filter-chip">
+              <span class="filter-chip__label">Type:</span> {{ filterJobType() }}
+              <button class="filter-chip__remove" (click)="filterJobType.set('ALL')">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </span>
+          }
+        </div>
+      }
+
+    </div>
+
+    <div class="jobs-toolbar__right">
+      <span class="result-count">{{ filteredJobs().length }} result{{ filteredJobs().length !== 1 ? 's' : '' }}</span>
+      <div class="sort-field-toggle">
+        <button class="sort-field-btn"
+                [class.sort-field-btn--active]="sortField() === 'createdAt'"
+                (click)="onSortFieldClick('createdAt')">
+          Created
+          @if (sortField() === 'createdAt') {
+            <svg class="sort-field-btn__dir" width="11" height="11" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.5"
+                 [class.sort-field-btn__dir--up]="dateSortOrder() === 'asc'">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          }
+        </button>
+
+        <button class="sort-field-btn"
+                [class.sort-field-btn--active]="sortField() === 'updatedAt'"
+                (click)="onSortFieldClick('updatedAt')">
+          Last Run
+          @if (sortField() === 'updatedAt') {
+            <svg class="sort-field-btn__dir" width="11" height="11" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.5"
+                 [class.sort-field-btn__dir--up]="dateSortOrder() === 'asc'">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          }
+        </button>
+      </div>
+
+      <div class="view-toggle">
+        <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'list'"
+                (click)="viewMode.set('list')" title="List view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"/>
+            <line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+        </button>
+        <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'card'"
+                (click)="viewMode.set('card')" title="Card view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  @if (selectedCount() > 0) {
+    <div class="bulk-bar">
+      <div class="bulk-bar__left">
+        <div class="bulk-bar__check" (click)="clearSelection()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </div>
+        <span class="bulk-bar__count"><strong>{{ selectedCount() }}</strong> job{{ selectedCount() !== 1 ? 's' : '' }}
+          selected</span>
+      </div>
+      <div class="bulk-bar__actions">
+        <button class="bulk-action-btn bulk-action-btn--cancel" (click)="clearSelection()">Deselect all</button>
+        <button class="bulk-action-btn bulk-action-btn--delete" (click)="bulkDelete()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+          Delete {{ selectedCount() }} job{{ selectedCount() !== 1 ? 's' : '' }}
+        </button>
+      </div>
+    </div>
+  }
+  @if (loading()) {
+    <div class="jobs-loading">
+      <div class="jobs-loading__track">
+        <div class="jobs-loading__bar"></div>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && filteredJobs().length === 0) {
+    <div class="jobs-empty">
+      <div class="jobs-empty__visual">
+        @if (hasActiveFilters()) {
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        } @else {
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+        }
+      </div>
+      @if (hasActiveFilters()) {
+        <h3>No results</h3>
+        <p>No jobs match your current filters.</p>
+        <button class="filter-clear-btn filter-clear-btn--lg" (click)="clearFilters()">Clear filters</button>
+      } @else {
+        <h3>No jobs yet</h3>
+        <p>Create your first scraping job to start extracting structured data.</p>
+        <button class="btn-new" (click)="goToCreate()">
+          <span class="btn-new__icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </span>
+          Create your first job
+        </button>
+      }
+    </div>
+  }
+
+  @if (!loading() && filteredJobs().length > 0 && viewMode() === 'list') {
+    <div class="jobs-table-wrap">
+      <div class="jobs-table-wrap__scroll">
+        <table class="jobs-table">
+          <thead>
+          <tr>
+            <th class="col-check">
+              <label class="checkbox-wrap" (click)="$event.stopPropagation()">
+                <input type="checkbox" [checked]="isAllSelected()" [indeterminate]="isIndeterminate()"
+                       (change)="toggleSelectAll()" class="checkbox-native"/>
+                <span class="checkbox-custom"
+                      [class.checkbox-custom--checked]="isAllSelected()"
+                      [class.checkbox-custom--indeterminate]="isIndeterminate()">
+                  @if (isAllSelected()) {
+                    <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline
+                      points="2 6 5 9 10 3"/></svg>
+                  } @else if (isIndeterminate()) {
+                    <svg width="9" height="2" viewBox="0 0 9 2" fill="none" stroke="currentColor" stroke-width="2.5"><line
+                      x1="0" y1="1" x2="9" y2="1"/></svg>
+                  }
+                </span>
+              </label>
+            </th>
+            <th class="col-name">Job Name</th>
+            <th class="col-url">Target URL</th>
+            <th class="col-status">Status</th>
+            <th class="col-priority">Priority</th>
+            <th class="col-trigger">Trigger</th>
+            <th class="col-type">Type</th>
+            <th class="col-author">Created by</th>
+            <th class="col-date col-date--sortable sort-th" (click)="toggleDateSort()">
+              Created
+              <svg class="sort-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5">
+                @if (dateSortOrder() === 'desc') {
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <polyline points="19 12 12 19 5 12"/>
+                } @else {
+                  <line x1="12" y1="19" x2="12" y2="5"/>
+                  <polyline points="5 12 12 5 19 12"/>
+                }
+              </svg>
+            </th>
+            <th class="col-actions">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (job of paginatedJobs(); track job.id; let i = $index) {
+              <tr class="jobs-row"
+                  [class.jobs-row--selected]="isSelected(job.id)"
+                  [class.jobs-row--menu-open]="openMenuId() === job.id"
+                  (click)="goToDetail(job.id)"
+                  [style.animation-delay]="i * 30 + 'ms'">
+
+                <td class="col-check" (click)="toggleSelect(job.id, $event)">
+                  <label class="checkbox-wrap">
+                    <input type="checkbox" [checked]="isSelected(job.id)" class="checkbox-native"
+                           (change)="toggleSelect(job.id, $event)"/>
+                    <span class="checkbox-custom" [class.checkbox-custom--checked]="isSelected(job.id)">
+                      @if (isSelected(job.id)) {
+                        <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor"
+                             stroke-width="2.5"><polyline points="2 6 5 9 10 3"/></svg>
+                      }
+                    </span>
+                  </label>
+                </td>
+
+                <td class="col-name">
+                  <div class="job-name-cell">
+                    <div class="job-name-cell__icon" [attr.data-status]="job.status.toLowerCase()">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      </svg>
+                    </div>
+                    <span class="job-name-cell__text">{{ job.name }}</span>
+                  </div>
+                </td>
+
+                <td class="col-url">
+                  <a class="url-chip" [href]="job.targetUrl" target="_blank"
+                     (click)="$event.stopPropagation()" [title]="job.targetUrl">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                    {{ job.targetUrl | slice:0:38 }}{{ job.targetUrl.length > 38 ? '…' : '' }}
+                  </a>
+                </td>
+
+                <td class="col-status">
+                  <span class="status-pill status-pill--{{ job.status.toLowerCase() }}">
+                    <span class="status-pill__dot"></span>{{ job.status }}
+                  </span>
+                </td>
+
+                <td class="col-priority">
+                  <span class="priority-tag priority-tag--{{ job.priority.toLowerCase() }}">{{ job.priority }}</span>
+                </td>
+
+                <td class="col-trigger">
+                  <span class="trigger-tag">{{ job.triggerType }}</span>
+                </td>
+
+                <td class="col-type">
+                  <span class="type-tag type-tag--{{ job.jobType.toLowerCase() }}">{{ job.jobType }}</span>
+                </td>
+
+                <td class="col-author">
+                  <div class="author-chip">
+                      <span class="author-chip__avatar">
+                      @if (avatarFor(job); as avatar) {
+                                <img class="author-chip__avatar-img"
+                                 [src]="avatar"
+                                 [alt]="job.createdByUsername ?? ''"
+                                  (error)="onAvatarError($event)"/>
+                      } @else {
+                      {{ (job.createdByUsername ?? '?').charAt(0).toUpperCase() }}
+                        }
+                      </span>
+                    <span class="author-chip__name">{{ job.createdByUsername ?? '—' }}</span>
+                  </div>
+                </td>
+
+                <td class="col-date">
+                  <span class="date-text">{{ job.createdAt | date:'MMM d, yyyy' }}</span>
+                  <span class="time-text">{{ job.createdAt | date:'HH:mm' }}</span>
+                </td>
+                <td class="col-actions" (click)="$event.stopPropagation()">
+                  <div class="row-actions">
+
+                    @if (canLaunch(job)) {
+                      <button class="row-action row-action--launch" title="Launch"
+                              (click)="launchJob(job.id, $event)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                          <polygon points="5,3 19,12 5,21"/>
+                        </svg>
+                      </button>
+                    }
+
+                    @if (canPause(job)) {
+                      <button class="row-action row-action--pause" title="Pause"
+                              (click)="pauseJob(job.id, $event)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                          <rect x="6" y="4" width="4" height="16"/>
+                          <rect x="14" y="4" width="4" height="16"/>
+                        </svg>
+                      </button>
+                    }
+
+                    @if (job.status === 'WAITING_FOR_HUMAN') {
+                      <button class="row-action row-action--captcha" title="Resolve captcha"
+                              (click)="goToCaptcha(job.id, $event)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                          <path d="M9 12l2 2 4-4"/>
+                        </svg>
+                      </button>
+                    }
+
+                    <div class="row-menu">
+                      <button class="row-action row-action--more"
+                              [class.row-action--more-open]="openMenuId() === job.id"
+                              title="More actions"
+                              cdkOverlayOrigin #kebabTrigger="cdkOverlayOrigin"
+                              (click)="toggleMenu(job.id, $event)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                          <circle cx="12" cy="5" r="1.6"/>
+                          <circle cx="12" cy="12" r="1.6"/>
+                          <circle cx="12" cy="19" r="1.6"/>
+                        </svg>
+                      </button>
+
+                      <ng-template
+                        cdkConnectedOverlay
+                        [cdkConnectedOverlayOrigin]="kebabTrigger"
+                        [cdkConnectedOverlayOpen]="openMenuId() === job.id"
+                        [cdkConnectedOverlayHasBackdrop]="true"
+                        cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+                        [cdkConnectedOverlayPositions]="menuPositions"
+                        (backdropClick)="closeMenu()"
+                        (detach)="closeMenu()">
+
+                        <div class="row-menu__dropdown">
+                          <button class="row-menu__item"
+                                  [disabled]="!canEdit(job)"
+                                  (click)="goToEdit(job.id, $event); closeMenu()">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Edit
+                          </button>
+
+                          <button class="row-menu__item"
+                                  [disabled]="!canDuplicate(job)"
+                                  (click)="duplicateJob(job.id, $event); closeMenu()">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                              <rect x="9" y="9" width="13" height="13" rx="2"/>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            Duplicate
+                          </button>
+
+                          @if (canExport(job)) {
+                            <button class="row-menu__item row-menu__item--export"
+                                    [disabled]="exportingId() === job.id"
+                                    (click)="exportCsv(job.id, $event); closeMenu()">
+                              @if (exportingId() === job.id) {
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="spin">
+                                  <line x1="12" y1="2" x2="12" y2="6"/>
+                                  <line x1="12" y1="18" x2="12" y2="22"/>
+                                  <line x1="2" y1="12" x2="6" y2="12"/>
+                                  <line x1="18" y1="12" x2="22" y2="12"/>
+                                </svg>
+                              } @else {
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                  <polyline points="7 10 12 15 17 10"/>
+                                  <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                              }
+                              Export CSV
+                            </button>
+                          }
+
+                          @if (canDelete(job)) {
+                            <div class="row-menu__sep"></div>
+                            <button class="row-menu__item row-menu__item--danger"
+                                    (click)="confirmDelete(job.id, $event); closeMenu()">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6l-1 14H6L5 6"/>
+                                <path d="M10 11v6M14 11v6"/>
+                                <path d="M9 6V4h6v2"/>
+                              </svg>
+                              Delete
+                            </button>
+                          }
+                        </div>
+                      </ng-template>
+                    </div>
+
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="jobs-pagination">
+        <span class="jobs-pagination__info">
+          Showing {{ paginationFrom() }}–{{ paginationTo() }} of {{ filteredJobs().length }}
+          job{{ filteredJobs().length !== 1 ? 's' : '' }}
+          @if (hasActiveFilters()) {
+            <span class="jobs-pagination__filtered">(filtered from {{ totalElements() }})</span>
+          }
+        </span>
+        <div class="jobs-pagination__controls">
+          <button class="page-btn" [disabled]="currentPage() === 0" (click)="prevPage()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <span class="page-indicator">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
+          <button class="page-btn" [disabled]="currentPage() >= totalPages() - 1" (click)="nextPage()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && filteredJobs().length > 0 && viewMode() === 'card') {
+    <div class="jobs-cards-wrap">
+      <div class="jobs-cards">
+        @for (job of paginatedJobs(); track job.id; let i = $index) {
+          <div class="job-card"
+               [class.job-card--selected]="isSelected(job.id)"
+               (click)="goToDetail(job.id)"
+               [style.animation-delay]="i * 40 + 'ms'">
+            <div class="job-card__check" (click)="toggleSelect(job.id, $event)">
+              <label class="checkbox-wrap">
+                <input type="checkbox" [checked]="isSelected(job.id)" class="checkbox-native"
+                       (change)="toggleSelect(job.id, $event)"/>
+                <span class="checkbox-custom" [class.checkbox-custom--checked]="isSelected(job.id)">
+                  @if (isSelected(job.id)) {
+                    <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline
+                      points="2 6 5 9 10 3"/></svg>
+                  }
+                </span>
+              </label>
+            </div>
+            <div class="job-card__bar job-card__bar--{{ job.status.toLowerCase() }}"></div>
+            <div class="job-card__header">
+              <div class="job-card__icon" [attr.data-status]="job.status.toLowerCase()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </div>
+              <div class="job-card__name-wrap">
+                <span class="job-card__name">{{ job.name }}</span>
+                <span class="job-card__type type-tag type-tag--{{ job.jobType.toLowerCase() }}">{{ job.jobType }}</span>
+              </div>
+            </div>
+            <a class="job-card__url url-chip" [href]="job.targetUrl" target="_blank"
+               (click)="$event.stopPropagation()" [title]="job.targetUrl">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              {{ job.targetUrl | slice:0:42 }}{{ job.targetUrl.length > 42 ? '…' : '' }}
+            </a>
+            <div class="job-card__badges">
+              <span class="status-pill status-pill--{{ job.status.toLowerCase() }}">
+                <span class="status-pill__dot"></span>{{ job.status }}
+              </span>
+              <span class="priority-tag priority-tag--{{ job.priority.toLowerCase() }}">{{ job.priority }}</span>
+              <span class="trigger-tag">{{ job.triggerType }}</span>
+            </div>
+            <div class="job-card__footer">
+              <div class="author-chip">
+                <span class="author-chip__avatar">
+  @if (avatarFor(job); as avatar) {
+    <img class="author-chip__avatar-img"
+         [src]="avatar"
+         [alt]="job.createdByUsername ?? ''"
+         (error)="onAvatarError($event)"/>
+  } @else {
+    {{ (job.createdByUsername ?? '?').charAt(0).toUpperCase() }}
+  }
+</span>
+                <span class="author-chip__name">{{ job.createdByUsername ?? '—' }}</span>
+              </div>
+              <span class="date-text">{{ job.createdAt | date:'MMM d, yyyy' }}</span>
+            </div>
+            <div class="job-card__actions" (click)="$event.stopPropagation()">
+
+              @if (canLaunch(job)) {
+                <button class="row-action row-action--launch" title="Launch"
+                        (click)="launchJob(job.id, $event)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5,3 19,12 5,21"/>
+                  </svg>
+                </button>
+              }
+
+              @if (canPause(job)) {
+                <button class="row-action row-action--pause" title="Pause"
+                        (click)="pauseJob(job.id, $event)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16"/>
+                    <rect x="14" y="4" width="4" height="16"/>
+                  </svg>
+                </button>
+              }
+
+              @if (job.status === 'WAITING_FOR_HUMAN') {
+                <button class="row-action row-action--captcha" title="Resolve captcha"
+                        (click)="goToCaptcha(job.id, $event)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="M9 12l2 2 4-4"/>
+                  </svg>
+                </button>
+              }
+
+              @if (canExport(job)) {
+                <button class="row-action row-action--export" title="Export CSV"
+                        [disabled]="exportingId() === job.id"
+                        (click)="exportCsv(job.id, $event)">
+                  @if (exportingId() === job.id) {
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="spin">
+                      <line x1="12" y1="2" x2="12" y2="6"/>
+                      <line x1="12" y1="18" x2="12" y2="22"/>
+                      <line x1="2" y1="12" x2="6" y2="12"/>
+                      <line x1="18" y1="12" x2="22" y2="12"/>
+                    </svg>
+                  } @else {
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  }
+                </button>
+              }
+
+              <div class="row-menu row-menu--card">
+                <button class="row-action row-action--more"
+                        [class.row-action--more-open]="openMenuId() === job.id"
+                        title="More actions"
+                        (click)="toggleMenu(job.id, $event)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="1.6"/>
+                    <circle cx="12" cy="12" r="1.6"/>
+                    <circle cx="12" cy="19" r="1.6"/>
+                  </svg>
+                </button>
+
+                @if (openMenuId() === job.id) {
+                  <div class="row-menu__dropdown row-menu__dropdown--up" (click)="$event.stopPropagation()">
+                    <button class="row-menu__item"
+                            [disabled]="!canEdit(job)"
+                            (click)="goToEdit(job.id, $event); closeMenu()">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                      Edit
+                    </button>
+
+                    <button class="row-menu__item"
+                            [disabled]="!canDuplicate(job)"
+                            (click)="duplicateJob(job.id, $event); closeMenu()">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <rect x="9" y="9" width="13" height="13" rx="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                      </svg>
+                      Duplicate
+                    </button>
+
+                    @if (canDelete(job)) {
+                      <div class="row-menu__sep"></div>
+                      <button class="row-menu__item row-menu__item--danger"
+                              (click)="confirmDelete(job.id, $event); closeMenu()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6l-1 14H6L5 6"/>
+                          <path d="M10 11v6M14 11v6"/>
+                          <path d="M9 6V4h6v2"/>
+                        </svg>
+                        Delete
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
+            </div>
+          </div>
+        }
+      </div>
+      <div class="jobs-pagination jobs-pagination--card">
+        <span class="jobs-pagination__count-card">
+          {{ filteredJobs().length }} job{{ filteredJobs().length !== 1 ? 's' : '' }}
+          @if (hasActiveFilters()) {
+            <span class="jobs-pagination__filtered">(filtered from {{ totalElements() }})</span>
+          }
+        </span>
+        <div class="jobs-pagination__controls">
+          <button class="page-btn" [disabled]="currentPage() === 0" (click)="prevPage()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <span class="page-indicator">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
+          <button class="page-btn" [disabled]="currentPage() >= totalPages() - 1" (click)="nextPage()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+@if (confirmDeleteId()) {
+  <div class="modal-backdrop" (click)="cancelDelete()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-box__header">
+        <div class="modal-box__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+        </div>
+        <div><h3>Delete job?</h3>
+          <p>This action cannot be undone.</p></div>
+      </div>
+      <div class="modal-box__actions">
+        <button class="modal-btn modal-btn--cancel" (click)="cancelDelete()">Cancel</button>
+        <button class="modal-btn modal-btn--confirm" (click)="deleteJob()">Delete</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (confirmBulkDelete()) {
+  <div class="modal-backdrop" (click)="cancelBulkDelete()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-box__header">
+        <div class="modal-box__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Delete {{ selectedCount() }} jobs?</h3>
+          <p>This will permanently delete the selected jobs. This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="modal-box__actions">
+        <button class="modal-btn modal-btn--cancel" (click)="cancelBulkDelete()">Cancel</button>
+        <button class="modal-btn modal-btn--confirm" (click)="confirmBulkDeleteAction()">Delete {{ selectedCount() }}
+          jobs
+        </button>
+      </div>
+    </div>
+  </div>
+
+}
+@if (countByStatus('RUNNING') > 0) {
+  <div class="running-widget" [class.running-widget--open]="runningWidgetOpen()">
+
+    @if (runningWidgetOpen()) {
+      <div class="running-widget__drawer">
+        @for (job of runningJobs(); track job.id) {
+          <div class="running-widget__job" (click)="goToDetail(job.id)">
+            <span class="running-widget__job-dot"></span>
+            <span class="running-widget__job-name" [title]="job.name">{{ job.name }}</span>
+            <span class="running-widget__job-url">{{ job.targetUrl | slice:0:22 }}…</span>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="running-widget__pill" (click)="runningWidgetOpen.set(!runningWidgetOpen())">
+      <div class="running-widget__icon">
+        <span class="running-widget__ring"></span>
+        <span class="running-widget__icon-bg">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </span>
+      </div>
+      <div class="running-widget__info">
+        <span class="running-widget__label">In progress</span>
+        <span class="running-widget__count">
+          <strong>{{ countByStatus('RUNNING') }}</strong>
+          job{{ countByStatus('RUNNING') !== 1 ? 's' : '' }} running
+        </span>
+      </div>
+      <div class="running-widget__badge">{{ countByStatus('RUNNING') }}</div>
+      <svg class="running-widget__chevron"
+           [class.running-widget__chevron--open]="runningWidgetOpen()"
+           width="11" height="11" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+
+  </div>
+}

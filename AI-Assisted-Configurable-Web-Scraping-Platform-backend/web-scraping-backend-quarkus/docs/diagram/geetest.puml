@@ -1,0 +1,45 @@
+@startuml
+title GeetestSliderSolver : OpenCV puis repli LLM
+
+start
+:Pré-attente humaine (jitter);
+:triggerPuzzleIfNeeded();
+
+repeat
+  :screenshotPuzzle();
+  :imageAnalyzer.detectHolePosition(png);
+
+  note right
+    OpenCV :
+    - imdecode → Mat
+    - cvtColor (gris)
+    - Canny (contours)
+    - isole pièce (leftStrip + boundingRect)
+    - matchTemplate (TM_CCOEFF_NORMED)
+    - offset = holeX - pieceX
+  end note
+
+  if (OpenCV a trouvé une position ?) then (oui)
+    :performHumanlikeDrag(offset)\ncourbe de Bézier + jitter;
+    if (checkSuccess ?) then (oui)
+      stop
+    else (non)
+      :micro-corrections\nΔ = -3,+3,-6,+6 ... ±35;
+    endif
+  else (non — repli LLM)
+    :askLlmForDistance()\n→ pourcentage de largeur;
+    :scaledOffset = (largeur-50) * %;
+    :performHumanlikeDrag(scaledOffset);
+    if (checkSuccess ?) then (oui)
+      stop
+    else (non)
+      :performScan()\n9 positions;
+      :askLlmForBestFit()\nLLM choisit la meilleure;
+      :drag vers offset choisi;
+    endif
+  endif
+repeat while (tentatives < 3 ?) is (oui)
+->non;
+:Échec  rotation de proxy / humain;
+stop
+@enduml

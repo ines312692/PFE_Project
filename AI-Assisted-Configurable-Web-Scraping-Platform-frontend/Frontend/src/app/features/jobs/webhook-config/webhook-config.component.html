@@ -1,0 +1,279 @@
+<div class="wh">
+
+  @if (loading() && !info()) {
+    <div class="wh__loader">
+      <span class="spinner-lg"></span>
+      <span>Loading webhook configuration…</span>
+    </div>
+  }
+
+  @if (info(); as i) {
+    <header class="wh-header">
+      <div class="wh-header__left">
+        <div class="wh-header__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="wh-header__title">Webhook endpoint</h3>
+          <p class="wh-header__desc">Trigger this job from external systems via a signed HTTP request</p>
+        </div>
+      </div>
+      <span class="status-pill" [class.status-pill--active]="i.enabled">
+        <span class="status-pill__dot"></span>
+        {{ i.enabled ? 'Active' : 'Disabled' }}
+      </span>
+    </header>
+    @if (displayedSecret(); as secret) {
+      <div class="secret-hero">
+        <div class="secret-hero__glow"></div>
+
+        <div class="secret-hero__top">
+          <div class="secret-hero__badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            One-time secret
+          </div>
+          <span class="secret-hero__note">Won't be shown again</span>
+        </div>
+
+        <h4 class="secret-hero__title">Save this signing secret now</h4>
+        <p class="secret-hero__desc">
+          Store it in a password manager or environment variable.
+          You won't be able to retrieve it later only rotate to a new one.
+        </p>
+
+        <div class="secret-hero__value-row">
+          <code class="secret-hero__value" [class.secret-hero__value--masked]="!showSecret()">
+            {{ showSecret() ? secret : maskedSecret(secret) }}
+          </code>
+          <button type="button" class="btn btn--ghost" (click)="toggleSecretVisibility()">
+            @if (showSecret()) {
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+              Hide
+            } @else {
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              Reveal
+            }
+          </button>
+          <button type="button" class="btn btn--accent" (click)="copy(secret, 'Secret')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy secret
+          </button>
+        </div>
+      </div>
+    }
+    <div class="card">
+      <div class="card__header">
+        <div class="card__title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          Endpoint
+        </div>
+        <button type="button" class="card__action" (click)="copy(i.url, 'URL')">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy URL
+        </button>
+      </div>
+
+      <div class="endpoint">
+        <span class="endpoint__method">POST</span>
+        <code class="endpoint__url" (click)="copy(i.url, 'URL')">{{ i.url }}</code>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-grid__item">
+          <span class="meta-grid__label">Required headers</span>
+          <div class="meta-grid__chips">
+            <code class="chip">X-Webhook-Timestamp</code>
+            <code class="chip">X-Webhook-Signature</code>
+          </div>
+        </div>
+        <div class="meta-grid__item">
+          <span class="meta-grid__label">Algorithm</span>
+          <code class="chip chip--solid">HMAC-SHA256</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__header">
+        <div class="card__title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="4 17 10 11 4 5"/>
+            <line x1="12" y1="19" x2="20" y2="19"/>
+          </svg>
+          Trigger example
+        </div>
+        <div class="card__tabs">
+          <span class="card__tab card__tab--active">cURL</span>
+        </div>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal__bar">
+          <span class="terminal__dot terminal__dot--r"></span>
+          <span class="terminal__dot terminal__dot--y"></span>
+          <span class="terminal__dot terminal__dot--g"></span>
+          <span class="terminal__title">trigger.sh</span>
+          <button type="button" class="terminal__copy" (click)="copy(curlExample(), 'Example')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <pre class="terminal__body"><code>{{ curlExample() }}</code></pre>
+      </div>
+    </div>
+
+    <div class="card card--subtle">
+      <div class="card__header">
+        <div class="card__title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          Rotate signing secret
+        </div>
+      </div>
+      <p class="card__desc">
+        Generate a new signing secret. The current one will stop working immediately, so update any external system
+        using this webhook before rotating.
+      </p>
+      <button type="button" class="btn btn--danger-outline" (click)="rotateSecret()" [disabled]="rotating()">
+        @if (rotating()) {
+          <span class="spinner"></span> Rotating…
+        } @else {
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          Rotate secret
+        }
+      </button>
+    </div>
+  }
+  <div class="card card--deliveries">
+    <div class="card__header">
+      <div class="card__title">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Recent deliveries
+        @if (deliveries().length > 0) {
+          <div class="counters">
+            <span class="counter">{{ deliveryCount() }} total</span>
+            @if (successCount() > 0) {
+              <span class="counter counter--ok">{{ successCount() }} ok</span>
+            }
+            @if (failureCount() > 0) {
+              <span class="counter counter--err">{{ failureCount() }} failed</span>
+            }
+          </div>
+        }
+      </div>
+      <button type="button" class="card__action card__action--icon"
+              (click)="loadDeliveries()" [disabled]="loadingDeliveries()" title="Refresh">
+        <svg [class.spin]="loadingDeliveries()" width="12" height="12" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/>
+          <polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+    </div>
+
+    @if (loadingDeliveries() && deliveries().length === 0) {
+      <div class="deliveries-loader">
+        <span class="spinner-sm"></span>
+      </div>
+    } @else if (deliveries().length === 0) {
+      <div class="empty">
+        <div class="empty__icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+            <path
+              d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+          </svg>
+        </div>
+        <p class="empty__title">No deliveries yet</p>
+        <p class="empty__desc">
+          Trigger the webhook from your external system to see logs appear here in real-time.
+        </p>
+      </div>
+    } @else {
+      <ul class="feed">
+        @for (d of deliveries(); track d.id) {
+          <li class="feed__item feed__item--{{ statusLabels[d.status].level }}">
+            <div class="feed__rail">
+              <span class="feed__dot"></span>
+            </div>
+            <div class="feed__body">
+              <div class="feed__top">
+                <span class="badge badge--{{ statusLabels[d.status].level }}">
+                  {{ statusLabels[d.status].label }}
+                </span>
+                <code class="http-code http-code--{{ statusLabels[d.status].level }}">{{ d.httpStatus }}</code>
+                <time class="feed__time">{{ d.receivedAt | date:'MMM d, HH:mm:ss' }}</time>
+              </div>
+
+              @if (d.sourceIp || d.durationMs != null || d.errorMessage) {
+                <div class="feed__meta">
+                  @if (d.sourceIp) {
+                    <span class="feed__meta-item">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                        <path
+                          d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                      </svg>
+                      {{ d.sourceIp }}
+                    </span>
+                  }
+                  @if (d.durationMs != null) {
+                    <span class="feed__meta-item">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      {{ d.durationMs }} ms
+                    </span>
+                  }
+                </div>
+              }
+
+              @if (d.errorMessage) {
+                <p class="feed__error">{{ d.errorMessage }}</p>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+</div>

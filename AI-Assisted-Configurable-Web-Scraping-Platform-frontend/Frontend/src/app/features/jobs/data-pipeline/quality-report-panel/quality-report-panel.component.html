@@ -1,0 +1,116 @@
+<div class="qr-backdrop" (click)="close()">
+  <div class="qr-modal" (click)="$event.stopPropagation()">
+
+    <div class="qr-modal__header">
+      <div class="qr-modal__title-wrap">
+        <div class="qr-modal__title-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="qr-modal__title">Data quality report</h3>
+          <p class="qr-modal__sub">{{ report().totalRecords }} records validated</p>
+        </div>
+      </div>
+      <span class="qr__score qr__score--{{ overallClass() }}">
+        {{ pct(report().validityRate) }}% valid
+      </span>
+      <button class="qr-modal__close" (click)="close()" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="qr-modal__body">
+      <div class="qr__stats">
+        <div class="qr__stat">
+          <span class="qr__stat-val">{{ report().totalRecords }}</span>
+          <span class="qr__stat-lbl">Records</span>
+        </div>
+        <div class="qr__stat qr__stat--green">
+          <span class="qr__stat-val">{{ report().validRecords }}</span>
+          <span class="qr__stat-lbl">Valid</span>
+        </div>
+        <div class="qr__stat qr__stat--red">
+          <span class="qr__stat-val">{{ report().invalidRecords }}</span>
+          <span class="qr__stat-lbl">Invalid</span>
+        </div>
+        <div class="qr__stat">
+          <span class="qr__stat-val">{{ report().durationMs }}ms</span>
+          <span class="qr__stat-lbl">Duration</span>
+        </div>
+      </div>
+
+      @if (fields().length) {
+        <div class="qr__section-lbl">Per-field quality</div>
+        <table class="qr__tbl">
+          <thead>
+          <tr>
+            <th>Field</th>
+            <th>Completeness</th>
+            <th>Validity</th>
+            <th class="qr__num">Missing</th>
+            <th class="qr__num">Failed</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (f of fields(); track f.name) {
+              <tr class="qr__row qr__row--{{ completenessClass(f.completenessRate) }}">
+                <td class="qr__field">
+                  {{ f.name }}
+                  @if (completenessClass(f.completenessRate) === 'empty') {
+                    <span class="qr__tag qr__tag--empty">absent</span>
+                  } @else if (completenessClass(f.completenessRate) === 'partial') {
+                    <span class="qr__tag qr__tag--partial">{{ f.missing }} missing</span>
+                  }
+                </td>
+                <td>
+                  <div class="qr__bar">
+                    <div class="qr__bar-fill {{ completenessBar(f.completenessRate) }}"
+                         [style.width.%]="pct(f.completenessRate)"></div>
+                  </div>
+                  <span class="qr__bar-pct qr__bar-pct--{{ completenessClass(f.completenessRate) }}">
+                    {{ pct(f.completenessRate) }}%
+                  </span>
+                </td>
+                <td>
+                  <div class="qr__bar">
+                    <div class="qr__bar-fill {{ validityBar(f.validityRate) }}"
+                         [style.width.%]="pct(f.validityRate)"></div>
+                  </div>
+                  <span class="qr__bar-pct">{{ pct(f.validityRate) }}%</span>
+                </td>
+                <td class="qr__num" [class.qr__num--miss]="f.missing > 0">{{ f.missing }}</td>
+                <td class="qr__num" [class.qr__num--bad]="f.failed > 0">{{ f.failed }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
+      @if (report().topViolations.length) {
+        <div class="qr__section-lbl">
+          Top violations
+          <span class="qr__count">{{ report().topViolations.length }}</span>
+        </div>
+        <div class="qr__violations">
+          @for (v of report().topViolations; track $index) {
+            <div class="qr__viol">
+              <span class="qr__viol-row">#{{ v.recordIndex + 1 }}</span>
+              <span class="qr__viol-field">{{ v.field }}</span>
+              <span class="qr__viol-rule">{{ v.rule }}</span>
+              <span class="qr__viol-msg">{{ v.message }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

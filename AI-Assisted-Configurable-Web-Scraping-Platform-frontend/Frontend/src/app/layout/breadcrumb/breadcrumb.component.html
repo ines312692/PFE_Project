@@ -1,0 +1,45 @@
+@if (items().length > 0) {
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+
+    <a class="breadcrumb__home" routerLink="/dashboard" aria-label="Home">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </a>
+
+    <span class="breadcrumb__sep" aria-hidden="true">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </span>
+
+    <ol class="breadcrumb__list">
+      @for (item of items(); track item.label; let last = $last; let first = $first) {
+        <li class="breadcrumb__item" [class.breadcrumb__item--active]="last">
+
+          @if (item.route) {
+            <a class="breadcrumb__link" [routerLink]="item.route">
+              {{ item.label }}
+            </a>
+          } @else {
+            <span class="breadcrumb__current" aria-current="page">
+              {{ item.label }}
+            </span>
+          }
+
+          @if (!last) {
+            <span class="breadcrumb__sep" aria-hidden="true">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+          }
+        </li>
+      }
+    </ol>
+  </nav>
+}

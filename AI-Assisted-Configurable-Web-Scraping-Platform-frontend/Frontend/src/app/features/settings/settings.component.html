@@ -1,0 +1,241 @@
+<div class="page">
+  <div class="page-header">
+    <div class="page-header__left">
+      <div class="page-header__eyebrow">
+        <span class="page-header__dot"></span>
+        System
+      </div>
+      <h1 class="page-header__title">Settings</h1>
+      <p class="page-header__desc">Manage your application preferences and scraping defaults</p>
+    </div>
+    <div class="page-header__actions">
+      <button class="reset-btn" (click)="resetDefaults()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 .49-3.63"/>
+        </svg>
+        Reset
+      </button>
+      <button class="save-btn" (click)="saveSettings()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Save settings
+      </button>
+    </div>
+  </div>
+
+  @if (saveSuccess()) {
+    <div class="alert alert--success">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      {{ saveSuccess() }}
+    </div>
+  }
+  @if (saveError()) {
+    <div class="alert alert--error">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ saveError() }}
+    </div>
+  }
+
+  <div class="settings-grid">
+    <div class="settings-col">
+      <div class="card">
+        <div class="card__head">
+          <div class="card__head-icon card__head-icon--appearance">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
+                       M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Appearance</h3>
+            <p>Look and feel of the application</p>
+          </div>
+        </div>
+
+        <div class="setting-row setting-row--last">
+          <div class="setting-row__info">
+            <span class="setting-row__label">Dark mode</span>
+            <span class="setting-row__desc">Switch between light and dark theme</span>
+          </div>
+          <button class="toggle" [class.toggle--on]="theme.isDark()" (click)="toggleTheme()"
+                  aria-label="Toggle dark mode">
+            <span class="toggle__knob"></span>
+          </button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card__head">
+          <div class="card__head-icon card__head-icon--notif">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Notifications</h3>
+            <p>Events that trigger in-app alerts</p>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__info">
+            <div class="setting-row__label-wrap">
+              <span class="setting-row__dot setting-row__dot--green"></span>
+              <span class="setting-row__label">Job completed</span>
+            </div>
+            <span class="setting-row__desc">Notify when a scraping job finishes successfully</span>
+          </div>
+          <button class="toggle" [class.toggle--on]="notifications.onJobComplete"
+                  (click)="notifications.onJobComplete = !notifications.onJobComplete"
+                  aria-label="Toggle job completed notification">
+            <span class="toggle__knob"></span>
+          </button>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__info">
+            <div class="setting-row__label-wrap">
+              <span class="setting-row__dot setting-row__dot--red"></span>
+              <span class="setting-row__label">Job failed</span>
+            </div>
+            <span class="setting-row__desc">Notify when a job encounters an error</span>
+          </div>
+          <button class="toggle" [class.toggle--on]="notifications.onJobFailed"
+                  (click)="notifications.onJobFailed = !notifications.onJobFailed"
+                  aria-label="Toggle job failed notification">
+            <span class="toggle__knob"></span>
+          </button>
+        </div>
+
+        <div class="setting-row setting-row--last">
+          <div class="setting-row__info">
+            <div class="setting-row__label-wrap">
+              <span class="setting-row__dot setting-row__dot--blue"></span>
+              <span class="setting-row__label">Job started</span>
+            </div>
+            <span class="setting-row__desc">Notify when a scheduled job begins</span>
+          </div>
+          <button class="toggle" [class.toggle--on]="notifications.onJobStarted"
+                  (click)="notifications.onJobStarted = !notifications.onJobStarted"
+                  aria-label="Toggle job started notification">
+            <span class="toggle__knob"></span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="settings-col">
+      <div class="card">
+        <div class="card__head">
+          <div class="card__head-icon card__head-icon--scraping">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Scraping Defaults</h3>
+            <p>Pre-fill these values when creating new jobs</p>
+          </div>
+        </div>
+
+        <div class="fields-grid">
+
+          <div class="field">
+            <label class="field__label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Request delay (ms)
+            </label>
+            <input class="field__input" type="number" min="0" max="10000"
+                   [(ngModel)]="scraping.requestDelay" placeholder="500"/>
+            <span class="field__hint">Pause between consecutive HTTP requests</span>
+          </div>
+
+          <div class="field">
+            <label class="field__label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Timeout (s)
+            </label>
+            <input class="field__input" type="number" min="1" max="300"
+                   [(ngModel)]="scraping.timeout" placeholder="30"/>
+            <span class="field__hint">Maximum wait time per request</span>
+          </div>
+
+          <div class="field">
+            <label class="field__label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 .49-3.63"/>
+              </svg>
+              Max retries
+            </label>
+            <input class="field__input" type="number" min="0" max="10"
+                   [(ngModel)]="scraping.maxRetries" placeholder="3"/>
+            <span class="field__hint">Retries on failure before marking as error</span>
+          </div>
+
+          <div class="field">
+            <label class="field__label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="2" y="7" width="20" height="14" rx="2"/>
+                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+              </svg>
+              Concurrent jobs
+            </label>
+            <input class="field__input" type="number" min="1" max="20"
+                   [(ngModel)]="scraping.concurrentJobs" placeholder="2"/>
+            <span class="field__hint">Max jobs running in parallel</span>
+          </div>
+
+        </div>
+        <div class="export-section">
+          <div class="export-section__head">
+            <span class="export-section__label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path
+                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12"
+                                                                                                          y1="15"
+                                                                                                          x2="12"
+                                                                                                          y2="3"/></svg>
+              Default export format
+            </span>
+            <span class="export-section__hint">Used when downloading scraped data</span>
+          </div>
+          <div class="format-options">
+            @for (fmt of [
+              {id: 'json', label: 'JSON', desc: 'Structured & readable'},
+              {id: 'csv', label: 'CSV', desc: 'Spreadsheet-friendly'},
+              {id: 'xml', label: 'XML', desc: 'Interoperable markup'}
+            ]; track fmt.id) {
+              <button class="format-card"
+                      [class.format-card--active]="scraping.defaultFormat === fmt.id"
+                      (click)="scraping.defaultFormat = $any(fmt.id)">
+                <span class="format-card__label">{{ fmt.label }}</span>
+                <span class="format-card__desc">{{ fmt.desc }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

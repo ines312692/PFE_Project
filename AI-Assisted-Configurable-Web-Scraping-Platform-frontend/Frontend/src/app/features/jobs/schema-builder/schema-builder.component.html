@@ -1,0 +1,136 @@
+<app-mode-picker [mode]="mode" (modeSelect)="onModeSelect($event)"/>
+
+<div class="mode-divider"><span>Configuration</span></div>
+
+@if (isAuto()) {
+  <div class="schema-auto">
+    <div class="schema-auto__icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4l3 3"/>
+      </svg>
+    </div>
+    <div>
+      <p class="schema-auto__title">No schema configuration required</p>
+      <p class="schema-auto__desc">
+        The system will automatically detect and extract the most relevant content.
+      </p>
+    </div>
+  </div>
+}
+
+@if (needsVisual()) {
+  <app-visual-selector
+    [targetUrl]="targetUrl"
+    [fields]="schema.fields ?? []"
+    (fieldsChange)="onSchemaChange({ fields: $event })">
+  </app-visual-selector>
+}
+
+@if (needsFields()) {
+
+  <!-- ─── Setup method : Manual vs Template ─── -->
+  <div class="setup-method">
+    <button type="button"
+            class="setup-card"
+            [class.setup-card--active]="setupMethod === 'MANUAL'"
+            (click)="selectSetupMethod('MANUAL')">
+      <span class="setup-card__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+        </svg>
+      </span>
+      <span class="setup-card__text">
+        <span class="setup-card__title">Manual configuration</span>
+        <span class="setup-card__desc">Define each field and selector yourself</span>
+      </span>
+      <span class="setup-card__check">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </span>
+    </button>
+
+    <button type="button"
+            class="setup-card"
+            [class.setup-card--active]="setupMethod === 'TEMPLATE'"
+            (click)="selectSetupMethod('TEMPLATE')">
+      <span class="setup-card__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </span>
+      <span class="setup-card__text">
+        <span class="setup-card__title">Start from a template</span>
+        <span class="setup-card__desc">Pre-fill fields from a ready-made preset</span>
+      </span>
+      <span class="setup-card__check">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </span>
+    </button>
+  </div>
+
+  <!-- ─── TEMPLATE mode : inline preset picker, no modal ─── -->
+  @if (setupMethod === 'TEMPLATE') {
+    <div class="setup-panel">
+      <app-schema-preset
+        [activePresetId]="activePresetId"
+        (presetSelect)="onPresetSelect($event)"
+        (presetClear)="onPresetClear()">
+      </app-schema-preset>
+    </div>
+  }
+
+  <!-- ─── MANUAL mode : field editor ─── -->
+  @if (setupMethod === 'MANUAL') {
+    @if (activePresetId) {
+      <div class="preset-applied-bar">
+        <span class="preset-applied-bar__label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Template applied edit the fields as needed
+        </span>
+        <button type="button" class="preset-applied-bar__clear" (click)="onPresetClear()">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Clear template
+        </button>
+      </div>
+    }
+
+    <app-schema-fields
+      [mode]="mode"
+      [fields]="schema.fields ?? []"
+      [targetUrl]="targetUrl"
+      (fieldsChange)="onSchemaChange({ fields: $event })">
+    </app-schema-fields>
+  }
+
+}
+
+@if (needsLlm()) {
+  <app-schema-llm
+    [schema]="schema"
+    [targetUrl]="targetUrl"
+    [jobId]="jobId"
+    (schemaChange)="onSchemaChange($event)">
+  </app-schema-llm>
+}
+
+@if (needsRegex()) {
+  <app-schema-regex
+    [pattern]="schema.regexPattern ?? ''"
+    [group]="schema.regexGroup ?? ''"
+    (patternChange)="onSchemaChange({ regexPattern: $event })"
+    (groupChange)="onSchemaChange({ regexGroup: $event })">
+  </app-schema-regex>
+}

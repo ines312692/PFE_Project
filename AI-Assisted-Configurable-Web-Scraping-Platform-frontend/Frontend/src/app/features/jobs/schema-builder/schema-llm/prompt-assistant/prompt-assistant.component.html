@@ -1,0 +1,217 @@
+<button
+  type="button"
+  class="pa-trigger"
+  [class.pa-trigger--thinking]="isThinking()"
+  (click)="toggle()"
+  [attr.aria-label]="'Open prompt assistant'"
+  title="Prompt assistant"
+>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="1.7"
+       stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="2.5" x2="12" y2="5"/>
+    <circle cx="12" cy="2" r="1" fill="currentColor" stroke="none"/>
+    <rect x="3.5" y="5.5" width="17" height="13" rx="5"/>
+    <path d="M7.5 11.5 Q9 9.8 10.5 11.5"/>
+    <path d="M13.5 11.5 Q15 9.8 16.5 11.5"/>
+    <path d="M9 14 Q12 17 15 14"/>
+  </svg>
+</button>
+
+@if (isOpen()) {
+  <div class="pa-modal-backdrop" (click)="close()">
+    <div class="pa-modal" (click)="$event.stopPropagation()">
+
+      <div class="pa-modal__header">
+        <div class="pa-modal__header-left">
+          <div class="pa-modal__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="2.5" x2="12" y2="5"/>
+              <circle cx="12" cy="2" r="1" fill="currentColor" stroke="none"/>
+              <rect x="3.5" y="5.5" width="17" height="13" rx="5"/>
+              <path d="M7.5 11.5 Q9 9.8 10.5 11.5"/>
+              <path d="M13.5 11.5 Q15 9.8 16.5 11.5"/>
+              <path d="M9 14 Q12 17 15 14"/>
+            </svg>
+          </div>
+          <div class="pa-modal__header-text">
+            <span class="pa-modal__title">Prompt Assistant</span>
+            <span class="pa-modal__sub">Let the bot help you write better extraction prompts</span>
+          </div>
+        </div>
+        <button type="button" class="pa-modal__close" (click)="close()" title="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="pa-tabs">
+        @for (t of tabs; track t.id) {
+          <button
+            type="button"
+            class="pa-tab"
+            [class.pa-tab--active]="activeTab() === t.id"
+            (click)="selectTab(t.id)"
+            [title]="t.hint"
+          >
+            {{ t.label }}
+          </button>
+        }
+      </div>
+
+      <div class="pa-modal__body">
+
+        <p class="pa-hint">
+          @switch (activeTab()) {
+            @case ('GENERATE') {
+              Describe what you want to extract in plain words.
+            }
+            @case ('IMPROVE') {
+              I'll refine your current prompt for clarity and types.
+            }
+            @case ('SUGGEST_FORMAT') {
+              I'll generate a JSON example matching your prompt.
+            }
+            @case ('SUGGEST_FIELDS') {
+              I'll guess useful fields based on your target URL.
+            }
+          }
+        </p>
+
+        @if (activeTab() === 'GENERATE') {
+          <div class="pa-field">
+            <label class="pa-label" for="pa-desc">Your description</label>
+            <textarea
+              id="pa-desc"
+              class="pa-textarea"
+              rows="4"
+              [ngModel]="description()"
+              (ngModelChange)="description.set($event)"
+              [disabled]="isThinking()"
+              placeholder="e.g. I want all products with their name, price, rating and stock status">
+            </textarea>
+          </div>
+        }
+
+        @if (activeTab() === 'IMPROVE' || activeTab() === 'SUGGEST_FORMAT') {
+          <div class="pa-context">
+            <span class="pa-context__label">Your current prompt</span>
+            @if (currentPrompt) {
+              <code class="pa-context__value">{{ currentPrompt }}</code>
+            } @else {
+              <em class="pa-context__empty">Empty type something in the prompt field first.</em>
+            }
+          </div>
+        }
+
+        @if (activeTab() === 'SUGGEST_FIELDS') {
+          <div class="pa-context">
+            <span class="pa-context__label">Target URL</span>
+            @if (targetUrl) {
+              <code class="pa-context__value">{{ targetUrl }}</code>
+            } @else {
+              <em class="pa-context__empty">No URL yet set the target URL in step 1.</em>
+            }
+          </div>
+        }
+
+        @if (errorMsg()) {
+          <div class="pa-error">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ errorMsg() }}
+          </div>
+        }
+
+        @if (suggestion(); as s) {
+          <div class="pa-result">
+
+            @if (s.suggestedPrompt) {
+              <div class="pa-result__block">
+                <div class="pa-result__head">
+                  <span class="pa-result__head-label">Suggested prompt</span>
+                  <button type="button" class="pa-result__apply"
+                          (click)="applyOnlyPrompt()">Apply
+                  </button>
+                </div>
+                <pre class="pa-result__pre">{{ s.suggestedPrompt }}</pre>
+              </div>
+            }
+
+            @if (s.suggestedOutputFormat) {
+              <div class="pa-result__block">
+                <div class="pa-result__head">
+                  <span class="pa-result__head-label">Suggested output format</span>
+                  <button type="button" class="pa-result__apply"
+                          (click)="applyOnlyFormat()">Apply
+                  </button>
+                </div>
+                <pre class="pa-result__pre pa-result__pre--code">{{ s.suggestedOutputFormat }}</pre>
+              </div>
+            }
+
+            @if (s.reasoning) {
+              <p class="pa-reasoning">
+                <span>Bot says:</span> {{ s.reasoning }}
+              </p>
+            }
+          </div>
+        }
+
+      </div>
+
+      <!-- Footer -->
+      <div class="pa-modal__footer">
+        @if (suggestion()) {
+          <button type="button" class="pa-btn pa-btn--ghost" (click)="discard()">
+            Discard
+          </button>
+          <button type="button" class="pa-btn pa-btn--ghost"
+                  (click)="regenerate()" [disabled]="isThinking()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+            </svg>
+            Regenerate
+          </button>
+          <button type="button" class="pa-btn pa-btn--primary"
+                  (click)="applySuggestedPrompt()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Apply all
+          </button>
+        } @else {
+          <button type="button" class="pa-btn pa-btn--ghost" (click)="close()">
+            Cancel
+          </button>
+          <button type="button" class="pa-btn pa-btn--primary"
+                  [disabled]="!canSubmit()" (click)="run()">
+            @if (isThinking()) {
+              <span class="pa-spinner"></span> Thinking…
+            } @else {
+              Run
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            }
+          </button>
+        }
+      </div>
+
+    </div>
+  </div>
+}

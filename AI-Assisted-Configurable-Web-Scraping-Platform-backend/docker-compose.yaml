@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: scraping_postgres
+    environment:
+      POSTGRES_DB: scraping_db_keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_keycloak_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - scraping_network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    container_name: scraping_keycloak
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/scraping_db_keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_HTTP_PORT: 8180
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+    ports:
+      - "8180:8180"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ./keycloak/themes/elyadata:/opt/keycloak/themes/elyadata
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - scraping_network
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: scraping_mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - scraping_network
+
+networks:
+  scraping_network:
+    driver: bridge
+
+volumes:
+  postgres_keycloak_data:

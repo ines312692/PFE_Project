@@ -1,0 +1,314 @@
+:host { display: block; }
+
+.nf {
+  position: relative;
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% -10%, var(--color-bg-blue-soft) 0%, transparent 55%),
+    var(--color-bg-muted);
+
+  &__grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(var(--elyadata-blue-rgb), .05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(var(--elyadata-blue-rgb), .05) 1px, transparent 1px);
+    background-size: 34px 34px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 42%, #000 35%, transparent 78%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 42%, #000 35%, transparent 78%);
+    pointer-events: none;
+  }
+
+  &__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    animation: nfIn .5s cubic-bezier(.22, 1, .36, 1) both;
+  }
+}
+
+// ──────────────────────────────────────────────────────────
+// Signature — crawl graph
+// ──────────────────────────────────────────────────────────
+.nf__viz {
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: .25rem;
+}
+
+.crawl {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+
+  &__trail {
+    stroke: var(--elyadata-blue);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke-dasharray: 520;
+    stroke-dashoffset: 520;
+    animation: crawlDraw 1.5s cubic-bezier(.65, 0, .35, 1) .15s forwards;
+
+    &--broken {
+      stroke: var(--elyadata-pink);
+      stroke-width: 2;
+      stroke-dasharray: 5 7;
+      stroke-dashoffset: 0;
+      opacity: 0;
+      animation: brokenFade .5s ease 1.5s forwards;
+    }
+  }
+
+  &__node {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: nodePop .4s cubic-bezier(.34, 1.56, .64, 1) both;
+    animation-delay: calc(.4s + var(--d));
+
+    circle:first-child {
+      fill: var(--elyadata-white);
+      stroke: var(--elyadata-blue);
+      stroke-width: 2;
+    }
+  }
+
+  &__node-core { fill: var(--elyadata-blue); }
+
+  &__missing {
+    opacity: 0;
+    animation: missingIn .5s cubic-bezier(.34, 1.56, .64, 1) 1.7s both;
+
+    line {
+      stroke: var(--elyadata-pink);
+      stroke-width: 2.4;
+      stroke-linecap: round;
+    }
+  }
+
+  &__missing-ring {
+    fill: rgba(var(--color-danger-rgb), .06);
+    stroke: var(--elyadata-pink);
+    stroke-width: 2;
+    stroke-dasharray: 4 6;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ringSpin 14s linear infinite;
+  }
+
+  &__bot {
+    fill: var(--elyadata-blue);
+    filter: drop-shadow(0 0 5px rgba(var(--elyadata-blue-rgb), .7));
+    offset-path: path("M44 168 L150 78 L246 150 L338 86");
+    animation: botRun 1.5s cubic-bezier(.65, 0, .35, 1) .15s forwards;
+  }
+}
+
+// ──────────────────────────────────────────────────────────
+// 404 code + copy
+// ──────────────────────────────────────────────────────────
+.nf__code {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: .25rem 0 .35rem;
+
+  &-num {
+    font-size: 3.6rem;
+    font-weight: 800;
+    letter-spacing: -.05em;
+    line-height: 1;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &-pulse {
+    position: absolute;
+    right: -14px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--elyadata-pink);
+    box-shadow: 0 0 0 0 rgba(var(--elyadata-pink-rgb), .5);
+    animation: dotPulse 1.8s ease-in-out infinite;
+  }
+}
+
+.nf__title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: var(--color-text-primary);
+  margin: 0 0 .5rem;
+}
+
+.nf__desc {
+  font-size: .9rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin: 0 0 1.1rem;
+  max-width: 360px;
+}
+
+// requested route chip — monospace, dev-tool feel
+.nf__path {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  max-width: 100%;
+  padding: .45rem .8rem;
+  margin-bottom: 1.5rem;
+  background: var(--elyadata-white);
+  border: 1.5px solid var(--color-border-medium);
+  border-radius: 9px;
+
+  &-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--elyadata-pink);
+    flex-shrink: 0;
+  }
+
+  code {
+    font-family: 'SFMono-Regular', 'Consolas', monospace;
+    font-size: .78rem;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 320px;
+  }
+}
+
+// ──────────────────────────────────────────────────────────
+// Actions
+// ──────────────────────────────────────────────────────────
+.nf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+}
+
+.nf__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  height: 42px;
+  padding: 0 1.2rem;
+  border-radius: 11px;
+  font-size: .87rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s, border-color .15s, transform .1s, box-shadow .15s;
+
+  &:active { transform: scale(.97); }
+  &:focus-visible { outline: 2px solid var(--elyadata-blue); outline-offset: 2px; }
+
+  &--primary {
+    border: none;
+    background: var(--elyadata-blue);
+    color: var(--elyadata-white);
+    box-shadow: 0 2px 12px rgba(var(--elyadata-blue-rgb), .3);
+
+    &:hover { background: var(--elyadata-blue-hover); box-shadow: 0 4px 18px rgba(var(--elyadata-blue-rgb), .38); }
+  }
+
+  &--ghost {
+    background: var(--elyadata-white);
+    color: var(--color-text-secondary);
+    border: 1.5px solid var(--color-border-medium);
+
+    svg { color: var(--color-text-faint); transition: color .15s; }
+
+    &:hover {
+      border-color: var(--elyadata-blue);
+      color: var(--elyadata-blue);
+      background: var(--color-bg-blue-soft);
+      svg { color: var(--elyadata-blue); }
+    }
+  }
+}
+@media (max-width: 480px) {
+  .nf__viz { max-width: 280px; }
+  .nf__code-num { font-size: 3rem; }
+  .nf__actions { flex-direction: column; width: 100%; }
+  .nf__btn { width: 100%; justify-content: center; }
+  .nf__path code { max-width: 200px; }
+}
+
+@keyframes nfIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes crawlDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes botRun {
+  0%   { offset-distance: 0%;   opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 1; }
+}
+
+@keyframes nodePop {
+  from { opacity: 0; transform: scale(0); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes missingIn {
+  from { opacity: 0; transform: scale(.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ringSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes brokenFade {
+  to { opacity: .9; }
+}
+
+@keyframes dotPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(var(--color-danger-rgb), .5); }
+  70%  { box-shadow: 0 0 0 9px rgba(var(--color-danger-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--color-danger-rgb), 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf__inner,
+  .crawl__trail,
+  .crawl__trail--broken,
+  .crawl__node,
+  .crawl__missing,
+  .crawl__missing-ring,
+  .crawl__bot,
+  .nf__code-pulse {
+    animation: none !important;
+  }
+  .crawl__trail        { stroke-dashoffset: 0; }
+  .crawl__trail--broken{ opacity: .9; }
+  .crawl__node,
+  .crawl__missing      { opacity: 1; }
+  .crawl__bot          { offset-distance: 100%; opacity: 1; }
+}

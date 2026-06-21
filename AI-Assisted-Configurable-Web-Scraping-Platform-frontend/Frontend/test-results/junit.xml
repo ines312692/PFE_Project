@@ -1,0 +1,1083 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="354" failures="11" errors="0" time="8.379">
+  <testsuite name="src/tests/unit/core/services/auth.service.spec.ts" errors="0" failures="11" skipped="0" timestamp="2026-04-12T14:36:21" time="0.922" tests="11">
+    <testcase classname="AuthService › initial state" name="starts unauthenticated with no current user" time="0.005">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › initialize()" name="sets the user when the API reports authenticated" time="0.001">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › initialize()" name="leaves user as null when the API reports not authenticated" time="0.001">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › initialize()" name="leaves user as null when the API call fails" time="0.001">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › initialize()" name="defaults role to READER when the API omits it" time="0.001">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › initialize()" name="is idempotent — a concurrent call while already initializing is a no-op" time="0.001">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › login()" name="redirects to the Keycloak login URL" time="0">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › login()" name="defaults to the light theme when no cookie is set" time="0.001">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › register()" name="redirects to the Keycloak register URL" time="0.003">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › logout()" name="clears the current user and navigates home after a successful logout" time="0.001">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+    <testcase classname="AuthService › logout()" name="still clears the user even when the logout API call fails" time="0">
+      <failure>TypeError: Cannot redefine property: assign
+    at Function.defineProperty (&lt;anonymous&gt;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:21:10
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTestsForDescribeBlock (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:800:7)
+    at run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)</failure>
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;verify&apos;)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/src/tests/unit/core/services/auth.service.spec.ts:60:24
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:168)
+    at _ProxyZoneSpec.onInvoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:1079:43)
+    at _ZoneDelegate.invoke (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:409:56)
+    at _ZoneImpl.run (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone.umd.js:162:47)
+    at Object.wrappedFunc (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/zone.js/bundles/zone-testing.umd.js:407:38)
+    at Promise.finally.completed (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (/home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:949:5)
+    at /home/ines/Téléchargements/AI-Assisted-Configurable-Web-Scraping-Platform-frontend/Frontend/node_modules/jest-circus/build/jestAdapterInit.js:849:7</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/components/jobs/job-workspace.component.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:21" time="2.529" tests="29">
+    <testcase classname="JobWorkspaceComponent › initial state (no route params)" name="shows the type picker on first load" time="0.837">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › initial state (no route params)" name="starts with SCRAPER as default type" time="0.03">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › initial state (no route params)" name="starts with the default split percentage" time="0.026">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › initial state (no route params)" name="starts with the default history panel size" time="0.03">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › initial state (no route params)" name="does not load history when there is no job id" time="0.024">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › edit mode — route has a job id" name="hides the type picker" time="0.047">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › edit mode — route has a job id" name="sets activeJobId from the route param" time="0.048">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › edit mode — route has a job id" name="loads history for the existing job" time="0.044">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › edit mode — route has a job id" name="sets isEditMode to true" time="0.039">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › template route" name="hides the type picker when coming from a template" time="0.031">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › template route" name="sets the selected type from the query param" time="0.03">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › selectJobType()" name="sets the selectedType" time="0.022">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › selectJobType()" name="sets pickerLeaving to true during the animation" time="0.019">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › selectJobType()" name="hides the picker after the animation delay" time="0.024">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › reopenTypePicker()" name="shows the type picker again" time="0.019">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › onJobCreated()" name="sets activeJobId from the created job" time="0.012">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › onJobLaunched()" name="refreshes history when there is an active job" time="0.017">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › onJobLaunched()" name="does not call getHistory when no job is active" time="0.016">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › split panel getters" name="leftPct reflects the split percentage" time="0.023">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › split panel getters" name="rightPct is 100 - leftPct" time="0.014">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › split panel getters" name="leftStyle returns flex values based on splitPct" time="0.02">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › split panel getters" name="leftStyle returns empty object on narrow screens" time="0.017">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › split panel getters" name="rightStyle returns flex values for the right panel" time="0.019">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › expandLeft()" name="sets splitPct to MAX_PCT" time="0.018">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › expandRight()" name="sets splitPct to MIN_PCT" time="0.018">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › resetSplit()" name="resets splitPct to DEFAULT_SPLIT" time="0.014">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › resetHistSplit()" name="resets historySizePx to HISTORY_DEFAULT_PX" time="0.019">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › onResize()" name="sets isNarrow based on window.innerWidth" time="0.015">
+    </testcase>
+    <testcase classname="JobWorkspaceComponent › goBack()" name="navigates to /jobs" time="0.013">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/components/jobs/job-detail.component.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:22" time="2.43" tests="44">
+    <testcase classname="JobDetailComponent › ngOnInit()" name="loads the job and sets the job signal" time="0.499">
+    </testcase>
+    <testcase classname="JobDetailComponent › ngOnInit()" name="loads execution history on init" time="0.053">
+    </testcase>
+    <testcase classname="JobDetailComponent › ngOnInit()" name="loads results when the job is COMPLETED" time="0.081">
+    </testcase>
+    <testcase classname="JobDetailComponent › ngOnInit()" name="does not load results for non-COMPLETED jobs" time="0.074">
+    </testcase>
+    <testcase classname="JobDetailComponent › ngOnInit()" name="navigates to /jobs when getById fails" time="0.047">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="canLaunch is true for CREATED" time="0.043">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="canLaunch is true for PAUSED" time="0.038">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="canLaunch is true for FAILED" time="0.031">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="canLaunch is true for CANCELLED" time="0.036">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="canLaunch is true for COMPLETED" time="0.033">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="canLaunch is false for RUNNING" time="0.028">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="canPause is true only for RUNNING" time="0.027">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="canPause is false for PAUSED" time="0.043">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="isCompleted is true only for COMPLETED" time="0.028">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — canLaunch / canPause / isCompleted" name="isCompleted is false for RUNNING" time="0.037">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — isScraper / isCrawler" name="isScraper is true for SCRAPER jobs" time="0.035">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — isScraper / isCrawler" name="isCrawler is true for CRAWLER jobs" time="0.037">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — extraction schema helpers" name="hasFields is true when the schema has at least one field" time="0.027">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — extraction schema helpers" name="hasFields is false when fields is empty" time="0.033">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — extraction schema helpers" name="isLlm is true when extractionMode is LLM" time="0.02">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — extraction schema helpers" name="isRegex is true when extractionMode is REGEX" time="0.018">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — extraction schema helpers" name="llmModelLabel returns a human-readable label" time="0.017">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — extraction schema helpers" name="llmModelLabel falls back to the raw key for unknown models" time="0.022">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — hasSeedUrls" name="is true when scraperConfig has seed URLs" time="0.027">
+    </testcase>
+    <testcase classname="JobDetailComponent › computed — hasSeedUrls" name="is false when seedUrls is empty" time="0.034">
+    </testcase>
+    <testcase classname="JobDetailComponent › tableColumns / resultsJson" name="tableColumns derives column names from the first record" time="0.028">
+    </testcase>
+    <testcase classname="JobDetailComponent › tableColumns / resultsJson" name="tableColumns is empty when there are no records" time="0.029">
+    </testcase>
+    <testcase classname="JobDetailComponent › tableColumns / resultsJson" name="resultsJson is valid JSON" time="0.017">
+    </testcase>
+    <testcase classname="JobDetailComponent › tabs computed" name="does not include the Results tab for non-COMPLETED jobs" time="0.021">
+    </testcase>
+    <testcase classname="JobDetailComponent › tabs computed" name="includes the Results tab for COMPLETED jobs" time="0.024">
+    </testcase>
+    <testcase classname="JobDetailComponent › tabs computed" name="shows the execution count in the History tab label" time="0.022">
+    </testcase>
+    <testcase classname="JobDetailComponent › setTab()" name="updates the active tab" time="0.024">
+    </testcase>
+    <testcase classname="JobDetailComponent › selectExec()" name="selects an execution" time="0.025">
+    </testcase>
+    <testcase classname="JobDetailComponent › selectExec()" name="deselects when the same execution is clicked again" time="0.02">
+    </testcase>
+    <testcase classname="JobDetailComponent › statusLabel()" name="returns a human-readable label for known statuses" time="0.021">
+    </testcase>
+    <testcase classname="JobDetailComponent › statusLabel()" name="falls back to the raw status string for unknown statuses" time="0.019">
+    </testcase>
+    <testcase classname="JobDetailComponent › pause()" name="calls jobService.pause() and updates the job signal" time="0.022">
+    </testcase>
+    <testcase classname="JobDetailComponent › navigation" name="goBack() navigates to /jobs" time="0.026">
+    </testcase>
+    <testcase classname="JobDetailComponent › navigation" name="goToEdit() navigates to /jobs/:id/edit" time="0.026">
+    </testcase>
+    <testcase classname="JobDetailComponent › navigation" name="launch() navigates to /jobs/:id/run" time="0.022">
+    </testcase>
+    <testcase classname="JobDetailComponent › exportCsv()" name="does not throw when records exist" time="0.021">
+    </testcase>
+    <testcase classname="JobDetailComponent › exportCsv()" name="calls URL.createObjectURL when records exist" time="0.017">
+    </testcase>
+    <testcase classname="JobDetailComponent › exportCsv()" name="does nothing when there are no records" time="0.02">
+    </testcase>
+    <testcase classname="JobDetailComponent › exportCsv()" name="does nothing when scrapeResult is null" time="0.023">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/components/jobs/job-create.component.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:21" time="3.429" tests="38">
+    <testcase classname="JobCreateComponent › initial state" name="starts on step 1" time="0.678">
+    </testcase>
+    <testcase classname="JobCreateComponent › initial state" name="is not loading" time="0.055">
+    </testcase>
+    <testcase classname="JobCreateComponent › initial state" name="has no error" time="0.051">
+    </testcase>
+    <testcase classname="JobCreateComponent › initial state" name="isEditMode() is false when no job id in route" time="0.062">
+    </testcase>
+    <testcase classname="JobCreateComponent › isEditMode()" name="returns true when the route has a job id" time="0.121">
+    </testcase>
+    <testcase classname="JobCreateComponent › step navigation" name="goToStep(2) advances when step 1 is valid" time="0.035">
+    </testcase>
+    <testcase classname="JobCreateComponent › step navigation" name="goToStep(2) is blocked and sets an error when name is empty" time="0.051">
+    </testcase>
+    <testcase classname="JobCreateComponent › step navigation" name="goToStep(2) is blocked when targetUrl is empty" time="0.051">
+    </testcase>
+    <testcase classname="JobCreateComponent › step navigation" name="goToStep(2) is blocked when targetUrl is not a valid URL" time="0.062">
+    </testcase>
+    <testcase classname="JobCreateComponent › step navigation" name="goToStep() clears the error when moving to a previous step" time="0.052">
+    </testcase>
+    <testcase classname="JobCreateComponent › step navigation" name="prevStep() decrements the current step" time="0.055">
+    </testcase>
+    <testcase classname="JobCreateComponent › step navigation" name="prevStep() does nothing on step 1" time="0.06">
+    </testcase>
+    <testcase classname="JobCreateComponent › step 1 validation" name="requires a cron expression when triggerType is SCHEDULED" time="0.056">
+    </testcase>
+    <testcase classname="JobCreateComponent › step 1 validation" name="allows advancing when a cron expression is provided" time="0.044">
+    </testcase>
+    <testcase classname="JobCreateComponent › schema validation (step 4)" name="LLM mode requires a prompt" time="0.05">
+    </testcase>
+    <testcase classname="JobCreateComponent › schema validation (step 4)" name="REGEX mode requires a pattern" time="0.044">
+    </testcase>
+    <testcase classname="JobCreateComponent › schema validation (step 4)" name="CSS_SELECTOR mode requires at least one field" time="0.053">
+    </testcase>
+    <testcase classname="JobCreateComponent › schema validation (step 4)" name="CSS_SELECTOR blocks when a field is missing a selector" time="0.052">
+    </testcase>
+    <testcase classname="JobCreateComponent › seed URLs" name="addSeedUrl() appends a valid URL to scraperConfig.seedUrls" time="0.056">
+    </testcase>
+    <testcase classname="JobCreateComponent › seed URLs" name="addSeedUrl() sets an error for an invalid URL" time="0.053">
+    </testcase>
+    <testcase classname="JobCreateComponent › seed URLs" name="addSeedUrl() does nothing for an empty string" time="0.058">
+    </testcase>
+    <testcase classname="JobCreateComponent › seed URLs" name="removeSeedUrl() removes by index" time="0.036">
+    </testcase>
+    <testcase classname="JobCreateComponent › toggle methods" name="toggleJavascriptEnabled() flips javascriptEnabled" time="0.036">
+    </testcase>
+    <testcase classname="JobCreateComponent › toggle methods" name="toggleStealthMode() flips stealthMode" time="0.049">
+    </testcase>
+    <testcase classname="JobCreateComponent › toggle methods" name="toggleCircuitBreaker() flips circuitBreakerEnabled" time="0.048">
+    </testcase>
+    <testcase classname="JobCreateComponent › toggle methods" name="toggleSinglePageMode() flips singlePageMode" time="0.039">
+    </testcase>
+    <testcase classname="JobCreateComponent › toggle methods" name="toggleScrollToBottom() flips scrollToBottom" time="0.046">
+    </testcase>
+    <testcase classname="JobCreateComponent › toggle methods" name="toggleFollowRedirects() flips followRedirects" time="0.037">
+    </testcase>
+    <testcase classname="JobCreateComponent › cancel()" name="navigates to /jobs" time="0.036">
+    </testcase>
+    <testcase classname="JobCreateComponent › createAnother()" name="resets the form and goes back to step 1" time="0.041">
+    </testcase>
+    <testcase classname="JobCreateComponent › createAnother()" name="clears the created and error signals" time="0.031">
+    </testcase>
+    <testcase classname="JobCreateComponent › submit() — create" name="calls jobService.create() with a valid payload" time="0.038">
+    </testcase>
+    <testcase classname="JobCreateComponent › submit() — create" name="sets the created signal on success" time="0.036">
+    </testcase>
+    <testcase classname="JobCreateComponent › submit() — create" name="shows a success toast on creation" time="0.033">
+    </testcase>
+    <testcase classname="JobCreateComponent › submit() — create" name="sets an error signal and stops loading on failure" time="0.034">
+    </testcase>
+    <testcase classname="JobCreateComponent › submit() — create" name="does not call create when step 1 validation fails" time="0.049">
+    </testcase>
+    <testcase classname="JobCreateComponent › schema event handlers" name="onSchemaChange() updates the schema" time="0.051">
+    </testcase>
+    <testcase classname="JobCreateComponent › schema event handlers" name="onModeChange() updates extractionMode" time="0.051">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/components/jobs/job-list.component.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:21" time="3.952" tests="62">
+    <testcase classname="JobListComponent › ngOnInit()" name="calls getAll() on init" time="0.437">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — search" name="returns all jobs when query is empty" time="0.056">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — search" name="filters by job name (case-insensitive)" time="0.055">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — search" name="filters by target URL" time="0.045">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — search" name="filters by creator username" time="0.043">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — search" name="returns empty array when no job matches" time="0.069">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — dropdown filters" name="filters by status" time="0.046">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — dropdown filters" name="filters by priority" time="0.034">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — dropdown filters" name="filters by trigger type" time="0.066">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — dropdown filters" name="combines multiple filters" time="0.057">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — date sort" name="defaults to descending order (newest first)" time="0.034">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — date sort" name="toggleDateSort() switches to ascending (oldest first)" time="0.037">
+    </testcase>
+    <testcase classname="JobListComponent › filteredJobs() — date sort" name="toggleDateSort() switches back to descending on second call" time="0.032">
+    </testcase>
+    <testcase classname="JobListComponent › hasActiveFilters() / clearFilters()" name="is false by default" time="0.032">
+    </testcase>
+    <testcase classname="JobListComponent › hasActiveFilters() / clearFilters()" name="is true when searchQuery is set" time="0.042">
+    </testcase>
+    <testcase classname="JobListComponent › hasActiveFilters() / clearFilters()" name="is true when status filter is set" time="0.04">
+    </testcase>
+    <testcase classname="JobListComponent › hasActiveFilters() / clearFilters()" name="clearFilters() resets all filters" time="0.044">
+    </testcase>
+    <testcase classname="JobListComponent › countByStatus()" name="counts correctly for a given status" time="0.05">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canLaunch() returns true for CREATED" time="0.052">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canLaunch() returns true for PAUSED" time="0.042">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canLaunch() returns false for RUNNING" time="0.037">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canLaunch() returns false for QUEUED" time="0.048">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canLaunch() returns false for COMPLETED" time="0.036">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canLaunch() returns false for FAILED" time="0.053">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canPause() returns true only for RUNNING" time="0.037">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canDelete() returns false for RUNNING" time="0.04">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canDelete() returns false for QUEUED" time="0.049">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canDelete() returns true for CREATED" time="0.041">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canDelete() returns true for COMPLETED" time="0.039">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canDelete() returns true for FAILED" time="0.055">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canDelete() returns true for PAUSED" time="0.045">
+    </testcase>
+    <testcase classname="JobListComponent › row-level action guards" name="canDelete() returns true for CANCELLED" time="0.045">
+    </testcase>
+    <testcase classname="JobListComponent › selection" name="isSelected() returns false for unselected jobs" time="0.035">
+    </testcase>
+    <testcase classname="JobListComponent › selection" name="toggleSelect() adds a job to the selection" time="0.028">
+    </testcase>
+    <testcase classname="JobListComponent › selection" name="toggleSelect() removes a job that is already selected" time="0.039">
+    </testcase>
+    <testcase classname="JobListComponent › selection" name="selectedCount() reflects the number of selected jobs" time="0.032">
+    </testcase>
+    <testcase classname="JobListComponent › selection" name="isAllSelected() returns true when every filtered job is selected" time="0.038">
+    </testcase>
+    <testcase classname="JobListComponent › selection" name="isIndeterminate() returns true when only some jobs are selected" time="0.037">
+    </testcase>
+    <testcase classname="JobListComponent › selection" name="toggleSelectAll() selects all filtered jobs" time="0.038">
+    </testcase>
+    <testcase classname="JobListComponent › selection" name="toggleSelectAll() deselects all when all are already selected" time="0.043">
+    </testcase>
+    <testcase classname="JobListComponent › selection" name="clearSelection() empties the selection" time="0.041">
+    </testcase>
+    <testcase classname="JobListComponent › delete flow" name="confirmDelete() sets confirmDeleteId" time="0.04">
+    </testcase>
+    <testcase classname="JobListComponent › delete flow" name="cancelDelete() clears confirmDeleteId" time="0.039">
+    </testcase>
+    <testcase classname="JobListComponent › delete flow" name="deleteJob() calls jobService.delete() with the correct id" time="0.042">
+    </testcase>
+    <testcase classname="JobListComponent › delete flow" name="deleteJob() clears confirmDeleteId and shows a success toast on success" time="0.039">
+    </testcase>
+    <testcase classname="JobListComponent › delete flow" name="deleteJob() shows an error toast when the API call fails" time="0.043">
+    </testcase>
+    <testcase classname="JobListComponent › delete flow" name="deleteJob() does nothing when confirmDeleteId is null" time="0.037">
+    </testcase>
+    <testcase classname="JobListComponent › bulk delete flow" name="bulkDelete() sets confirmBulkDelete to true" time="0.044">
+    </testcase>
+    <testcase classname="JobListComponent › bulk delete flow" name="cancelBulkDelete() sets confirmBulkDelete to false" time="0.041">
+    </testcase>
+    <testcase classname="JobListComponent › bulk delete flow" name="confirmBulkDeleteAction() calls delete for each selected job" time="0.039">
+    </testcase>
+    <testcase classname="JobListComponent › bulk delete flow" name="confirmBulkDeleteAction() clears selection and shows toast on success" time="0.049">
+    </testcase>
+    <testcase classname="JobListComponent › row actions" name="pauseJob() calls jobService.pause() and shows warning toast" time="0.043">
+    </testcase>
+    <testcase classname="JobListComponent › row actions" name="pauseJob() shows error toast on failure" time="0.039">
+    </testcase>
+    <testcase classname="JobListComponent › row actions" name="duplicateJob() calls jobService.duplicate() and shows success toast" time="0.042">
+    </testcase>
+    <testcase classname="JobListComponent › navigation" name="goToCreate() navigates to /jobs/create" time="0.041">
+    </testcase>
+    <testcase classname="JobListComponent › navigation" name="goToDetail() navigates to /jobs/:id" time="0.038">
+    </testcase>
+    <testcase classname="JobListComponent › navigation" name="goToEdit() navigates to /jobs/:id/edit" time="0.054">
+    </testcase>
+    <testcase classname="JobListComponent › navigation" name="launchJob() navigates to /jobs/:id/run" time="0.033">
+    </testcase>
+    <testcase classname="JobListComponent › pagination" name="prevPage() decrements the page and reloads" time="0.026">
+    </testcase>
+    <testcase classname="JobListComponent › pagination" name="prevPage() does nothing when already on page 0" time="0.027">
+    </testcase>
+    <testcase classname="JobListComponent › pagination" name="nextPage() increments the page and reloads" time="0.028">
+    </testcase>
+    <testcase classname="JobListComponent › pagination" name="nextPage() does nothing when on the last page" time="0.043">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/components/jobs/job-history.component.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:25" time="0.846" tests="10">
+    <testcase classname="JobHistoryComponent › initial state" name="starts with no execution selected" time="0.166">
+    </testcase>
+    <testcase classname="JobHistoryComponent › initial state" name="selectedExec() returns null when nothing is selected" time="0.015">
+    </testcase>
+    <testcase classname="JobHistoryComponent › selectExec()" name="sets selectedExecId to the clicked execution id" time="0.014">
+    </testcase>
+    <testcase classname="JobHistoryComponent › selectExec()" name="deselects when the same id is clicked twice" time="0.017">
+    </testcase>
+    <testcase classname="JobHistoryComponent › selectExec()" name="switches selection when a different id is clicked" time="0.014">
+    </testcase>
+    <testcase classname="JobHistoryComponent › statusLabel()" name="returns &quot;completed&quot; for status &quot;Completed&quot;" time="0.011">
+    </testcase>
+    <testcase classname="JobHistoryComponent › statusLabel()" name="returns &quot;failed&quot; for status &quot;Failed&quot;" time="0.009">
+    </testcase>
+    <testcase classname="JobHistoryComponent › statusLabel()" name="returns &quot;warning&quot; for status &quot;With warnings&quot;" time="0.012">
+    </testcase>
+    <testcase classname="JobHistoryComponent › statusLabel()" name="returns &quot;running&quot; for status &quot;Running&quot;" time="0.017">
+    </testcase>
+    <testcase classname="JobHistoryComponent › statusLabel()" name="falls back to the raw status for unknown values" time="0.013">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/components/jobs/job-templates.component.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:24" time="2.178" tests="26">
+    <testcase classname="JobTemplatesComponent › ngOnInit()" name="loads templates and populates all()" time="0.33">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › ngOnInit()" name="sets loading to false after loading" time="0.066">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › ngOnInit()" name="sets error to true on API failure" time="0.073">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — category filter" name="returns all templates when activeFilter is ALL" time="0.048">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — category filter" name="filters to the selected category" time="0.047">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — category filter" name="returns an empty array when no template matches the category" time="0.072">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — search" name="filters by template name" time="0.063">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — search" name="filters by description" time="0.052">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — search" name="filters by tag" time="0.049">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — search" name="is case-insensitive" time="0.048">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — search" name="returns empty when nothing matches" time="0.051">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — combined filter + search" name="applies both category and search" time="0.057">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — combined filter + search" name="returns empty when search matches but category does not" time="0.044">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › visible() — popularity sort" name="sorts by popularity descending" time="0.037">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › categories()" name="always starts with ALL" time="0.048">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › categories()" name="contains each unique category from the loaded templates" time="0.044">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › categories()" name="does not contain duplicates" time="0.029">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › filterCount()" name="returns the total count for ALL" time="0.032">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › filterCount()" name="returns the count for a specific category" time="0.037">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › filterCount()" name="returns 0 for a category with no templates" time="0.032">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › filterLabel()" name="returns &quot;All&quot; for ALL" time="0.037">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › filterLabel()" name="returns the CATEGORY_META label for known categories" time="0.042">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › clearSearch()" name="resets the search signal to empty string" time="0.039">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › clearSearch()" name="restores all templates after clear" time="0.043">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › useTemplate()" name="navigates to /jobs/create with templateId and jobType query params" time="0.042">
+    </testcase>
+    <testcase classname="JobTemplatesComponent › goBack()" name="navigates to /jobs" time="0.047">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/core/services/notification.service.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:25" time="0.854" tests="12">
+    <testcase classname="NotificationService › computed signals" name="unreadCount reflects the number of unread notifications" time="0.02">
+    </testcase>
+    <testcase classname="NotificationService › computed signals" name="hasUnread is true when at least one notification is unread" time="0.007">
+    </testcase>
+    <testcase classname="NotificationService › computed signals" name="hasUnread is false when all notifications are read" time="0.007">
+    </testcase>
+    <testcase classname="NotificationService › loadNotifications()" name="sets the notifications signal from the API response" time="0.013">
+    </testcase>
+    <testcase classname="NotificationService › loadNotifications()" name="does not throw when the API call fails" time="0.086">
+    </testcase>
+    <testcase classname="NotificationService › connect()" name="opens an EventSource and loads initial notifications" time="0.007">
+    </testcase>
+    <testcase classname="NotificationService › connect()" name="does not open a second EventSource if already connected" time="0.006">
+    </testcase>
+    <testcase classname="NotificationService › connect()" name="prepends incoming SSE notifications to the list" time="0.013">
+    </testcase>
+    <testcase classname="NotificationService › connect()" name="does not crash when an SSE event contains malformed JSON" time="0.107">
+    </testcase>
+    <testcase classname="NotificationService › disconnect()" name="closes the EventSource" time="0.008">
+    </testcase>
+    <testcase classname="NotificationService › markAsRead()" name="marks the targeted notification as read" time="0.02">
+    </testcase>
+    <testcase classname="NotificationService › markAllAsRead()" name="marks every notification as read" time="0.01">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/guards/role.guard.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:26" time="0.768" tests="12">
+    <testcase classname="roleGuard › access granted" name="returns true when the user has the sole allowed role" time="0.026">
+    </testcase>
+    <testcase classname="roleGuard › access granted" name="returns true when the user role is one of several allowed roles" time="0.01">
+    </testcase>
+    <testcase classname="roleGuard › access granted" name="does not navigate when access is granted" time="0.008">
+    </testcase>
+    <testcase classname="roleGuard › access granted" name="grants READER access when READER is in the allowed list" time="0.008">
+    </testcase>
+    <testcase classname="roleGuard › access denied — insufficient role" name="returns false when the user role is not in the allowed list" time="0.038">
+    </testcase>
+    <testcase classname="roleGuard › access denied — insufficient role" name="navigates to /dashboard when the role is not allowed" time="0.008">
+    </testcase>
+    <testcase classname="roleGuard › access denied — insufficient role" name="returns false when OPERATOR tries to access an ADMIN-only route" time="0.013">
+    </testcase>
+    <testcase classname="roleGuard › access denied — unauthenticated user" name="returns false when currentUser is null" time="0.01">
+    </testcase>
+    <testcase classname="roleGuard › access denied — unauthenticated user" name="navigates to /dashboard when the user is not authenticated" time="0.011">
+    </testcase>
+    <testcase classname="roleGuard › access denied — unauthenticated user" name="navigates to /dashboard even for an open role list when unauthenticated" time="0.01">
+    </testcase>
+    <testcase classname="roleGuard › edge cases" name="returns false for an empty allowed roles list regardless of user role" time="0.009">
+    </testcase>
+    <testcase classname="roleGuard › edge cases" name="navigates to /dashboard for an empty allowed roles list" time="0.01">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/integration/jobs-crud-flow.integration.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:25" time="1.93" tests="17">
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › loading jobs on init" name="ngOnInit triggers getAll() — request is in flight" time="0.403">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › loading jobs on init" name="populates the jobs signal after a successful response" time="0.04">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › loading jobs on init" name="sets loading via the LoadingService (loading interceptor)" time="0.051">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › loading jobs on init" name="calls auth.logout() on a 401 from getAll()" time="0.055">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › loading jobs on init" name="resets loading after a 401 error" time="0.072">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › delete flow" name="DELETE request has withCredentials (auth interceptor)" time="0.053">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › delete flow" name="removes the job from the list after successful delete" time="0.053">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › delete flow" name="shows success toast after delete" time="0.051">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › delete flow" name="shows error toast when delete fails" time="0.054">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › delete flow" name="403 on delete navigates to /dashboard (error interceptor)" time="0.05">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › pause flow" name="PAUSE request has withCredentials" time="0.044">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › pause flow" name="updates the job status in the list after pause" time="0.043">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › duplicate flow" name="prepends the copy to the list and increments totalElements" time="0.042">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › client-side filtering after real HTTP load" name="filteredJobs reflects real data from the service signal" time="0.042">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › client-side filtering after real HTTP load" name="search filter works on real data" time="0.058">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › client-side filtering after real HTTP load" name="priority filter works on real data" time="0.042">
+    </testcase>
+    <testcase classname="Jobs CRUD flow (JobListComponent + real JobService + interceptors) › client-side filtering after real HTTP load" name="countByStatus reflects real data" time="0.038">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/interceptors/error.interceptor.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:26" time="0.678" tests="12">
+    <testcase classname="errorInterceptor › 401 Unauthorized" name="calls auth.logout()" time="0.023">
+    </testcase>
+    <testcase classname="errorInterceptor › 401 Unauthorized" name="does NOT navigate to /dashboard" time="0.007">
+    </testcase>
+    <testcase classname="errorInterceptor › 401 Unauthorized" name="rethrows the 401 error to the subscriber" time="0.008">
+    </testcase>
+    <testcase classname="errorInterceptor › 403 Forbidden" name="navigates to /dashboard" time="0.01">
+    </testcase>
+    <testcase classname="errorInterceptor › 403 Forbidden" name="does NOT call auth.logout()" time="0.011">
+    </testcase>
+    <testcase classname="errorInterceptor › 403 Forbidden" name="rethrows the 403 error to the subscriber" time="0.008">
+    </testcase>
+    <testcase classname="errorInterceptor › other HTTP errors" name="rethrows 404 without any side effects" time="0.008">
+    </testcase>
+    <testcase classname="errorInterceptor › other HTTP errors" name="rethrows 422 without any side effects" time="0.005">
+    </testcase>
+    <testcase classname="errorInterceptor › other HTTP errors" name="rethrows 500 without any side effects" time="0.007">
+    </testcase>
+    <testcase classname="errorInterceptor › other HTTP errors" name="rethrows 503 without any side effects" time="0.006">
+    </testcase>
+    <testcase classname="errorInterceptor › other HTTP errors" name="rethrows network errors without side effects" time="0.005">
+    </testcase>
+    <testcase classname="errorInterceptor › successful responses" name="passes 2xx responses through unchanged" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/integration/interceptors-chain.integration.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:26" time="0.738" tests="16">
+    <testcase classname="Interceptors chain (auth → loading → error) › successful request — all interceptors cooperate" name="attaches withCredentials: true (authInterceptor)" time="0.025">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › successful request — all interceptors cooperate" name="sets isLoading to true while the request is in flight (loadingInterceptor)" time="0.01">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › successful request — all interceptors cooperate" name="resets isLoading to false after completion (loadingInterceptor)" time="0.01">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › successful request — all interceptors cooperate" name="passes the response through unchanged to the subscriber" time="0.009">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › 401 Unauthorized" name="calls auth.logout() (errorInterceptor)" time="0.008">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › 401 Unauthorized" name="resets isLoading after the 401 (loadingInterceptor finalize)" time="0.009">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › 401 Unauthorized" name="still includes withCredentials on the request that returns 401" time="0.007">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › 401 Unauthorized" name="rethrows the error to the subscriber" time="0.009">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › 403 Forbidden" name="navigates to /dashboard (errorInterceptor)" time="0.01">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › 403 Forbidden" name="resets isLoading after the 403" time="0.008">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › 403 Forbidden" name="does NOT call logout on 403" time="0.007">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › network error" name="resets isLoading even on a network failure" time="0.008">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › network error" name="does not call logout on a network error" time="0.007">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › concurrent requests" name="all concurrent requests get withCredentials" time="0.006">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › concurrent requests" name="loading stays true until the last request completes" time="0.006">
+    </testcase>
+    <testcase classname="Interceptors chain (auth → loading → error) › concurrent requests" name="a 401 on one request does not block loading from resetting" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/core/services/job.service.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:27" time="0.58" tests="9">
+    <testcase classname="JobService › getAll()" name="populates the jobs signal and clears loading on success" time="0.03">
+    </testcase>
+    <testcase classname="JobService › getAll()" name="clears loading on HTTP error" time="0.008">
+    </testcase>
+    <testcase classname="JobService › getById()" name="sets the selectedJob signal with the returned job" time="0.006">
+    </testcase>
+    <testcase classname="JobService › create()" name="prepends the new job to the list and increments totalElements" time="0.017">
+    </testcase>
+    <testcase classname="JobService › update()" name="replaces the matching job in the list" time="0.009">
+    </testcase>
+    <testcase classname="JobService › delete()" name="removes the job from the list and decrements totalElements" time="0.007">
+    </testcase>
+    <testcase classname="JobService › launch()" name="updates the job status to the one returned by the API" time="0.007">
+    </testcase>
+    <testcase classname="JobService › pause()" name="updates the job status to the one returned by the API" time="0.008">
+    </testcase>
+    <testcase classname="JobService › duplicate()" name="prepends the duplicated job and increments totalElements" time="0.009">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/guards/auth.guard.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:27" time="0.553" tests="2">
+    <testcase classname="authGuard" name="always returns true — currently a pass-through guard" time="0.024">
+    </testcase>
+    <testcase classname="authGuard" name="returns true regardless of the route snapshot" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/core/services/loading.service.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:27" time="0.495" tests="6">
+    <testcase classname="LoadingService" name="starts with loading disabled" time="0.02">
+    </testcase>
+    <testcase classname="LoadingService" name="activates loading on show()" time="0.005">
+    </testcase>
+    <testcase classname="LoadingService" name="keeps loading active until all show() calls are balanced by hide()" time="0.007">
+    </testcase>
+    <testcase classname="LoadingService" name="deactivates loading on a single balanced hide()" time="0.004">
+    </testcase>
+    <testcase classname="LoadingService" name="extra hide() calls beyond the counter do not cause negative state" time="0.008">
+    </testcase>
+    <testcase classname="LoadingService" name="can be toggled on/off multiple times independently" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/interceptors/loading.interceptor.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:27" time="0.552" tests="10">
+    <testcase classname="loadingInterceptor › request start" name="calls loading.show() when a request is initiated" time="0.03">
+    </testcase>
+    <testcase classname="loadingInterceptor › request start" name="sets isLoading to true while the request is in flight" time="0.008">
+    </testcase>
+    <testcase classname="loadingInterceptor › request completion" name="calls loading.hide() after a successful response" time="0.007">
+    </testcase>
+    <testcase classname="loadingInterceptor › request completion" name="sets isLoading to false after completion" time="0.007">
+    </testcase>
+    <testcase classname="loadingInterceptor › request completion" name="calls loading.hide() even when the request fails" time="0.007">
+    </testcase>
+    <testcase classname="loadingInterceptor › request completion" name="sets isLoading to false after an HTTP error" time="0.006">
+    </testcase>
+    <testcase classname="loadingInterceptor › concurrent requests" name="keeps isLoading true while at least one request is pending" time="0.007">
+    </testcase>
+    <testcase classname="loadingInterceptor › concurrent requests" name="calls show() once per request" time="0.006">
+    </testcase>
+    <testcase classname="loadingInterceptor › concurrent requests" name="calls hide() once per request" time="0.007">
+    </testcase>
+    <testcase classname="loadingInterceptor › concurrent requests" name="handles a mix of success and error responses" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/core/services/toast.service.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:27" time="0.53" tests="10">
+    <testcase classname="ToastService" name="starts with an empty toast list" time="0.024">
+    </testcase>
+    <testcase classname="ToastService › show()" name="appends a toast with the given message and type" time="0.008">
+    </testcase>
+    <testcase classname="ToastService › show()" name="auto-dismisses after the specified duration" time="0.005">
+    </testcase>
+    <testcase classname="ToastService › show()" name="assigns unique incremental IDs" time="0.005">
+    </testcase>
+    <testcase classname="ToastService › dismiss()" name="removes only the targeted toast by ID" time="0.006">
+    </testcase>
+    <testcase classname="ToastService › dismiss()" name="is a no-op when the ID does not exist" time="0.005">
+    </testcase>
+    <testcase classname="ToastService › convenience methods" name="success() creates a success toast" time="0.005">
+    </testcase>
+    <testcase classname="ToastService › convenience methods" name="error() creates an error toast with a 5 s duration" time="0.005">
+    </testcase>
+    <testcase classname="ToastService › convenience methods" name="warning() creates a warning toast" time="0.004">
+    </testcase>
+    <testcase classname="ToastService › convenience methods" name="info() creates an info toast" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/interceptors/auth.interceptor.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:27" time="0.5" tests="6">
+    <testcase classname="authInterceptor" name="adds withCredentials: true to every outgoing request" time="0.026">
+    </testcase>
+    <testcase classname="authInterceptor" name="adds withCredentials even on POST requests" time="0.011">
+    </testcase>
+    <testcase classname="authInterceptor" name="does not mutate other request properties" time="0.013">
+    </testcase>
+    <testcase classname="authInterceptor" name="passes the response through to the subscriber unchanged" time="0.008">
+    </testcase>
+    <testcase classname="authInterceptor" name="rethrows HTTP errors without swallowing them" time="0.008">
+    </testcase>
+    <testcase classname="authInterceptor" name="rethrows 4xx errors to the subscriber" time="0.007">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/core/services/user.service.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:27" time="0.55" tests="8">
+    <testcase classname="UserService › initial state" name="starts with a null profile" time="0.016">
+    </testcase>
+    <testcase classname="UserService › initial state" name="starts not loading" time="0.007">
+    </testcase>
+    <testcase classname="UserService › getMyProfile()" name="sets loading to true while the request is in-flight" time="0.007">
+    </testcase>
+    <testcase classname="UserService › getMyProfile()" name="sets the profile signal and clears loading on success" time="0.005">
+    </testcase>
+    <testcase classname="UserService › getMyProfile()" name="clears loading on HTTP error" time="0.004">
+    </testcase>
+    <testcase classname="UserService › getMyProfile()" name="does not update profile on HTTP error" time="0.004">
+    </testcase>
+    <testcase classname="UserService › getMyProfile()" name="sends a GET request to the correct URL" time="0.005">
+    </testcase>
+    <testcase classname="UserService › getMyProfile()" name="overwrites a previously loaded profile on a second call" time="0.007">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/core/services/site-probe.service.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:27" time="0.556" tests="7">
+    <testcase classname="SiteProbeService › probe()" name="sends a POST to the probe endpoint with the target URL in the body" time="0.021">
+    </testcase>
+    <testcase classname="SiteProbeService › probe()" name="returns the full ApiResponse on success" time="0.007">
+    </testcase>
+    <testcase classname="SiteProbeService › probe()" name="returns null — does not throw — when the HTTP call fails" time="0.007">
+    </testcase>
+    <testcase classname="SiteProbeService › probe()" name="returns null — does not throw — on a 5xx server error" time="0.007">
+    </testcase>
+    <testcase classname="SiteProbeService › probe()" name="detects Cloudflare protection signal" time="0.007">
+    </testcase>
+    <testcase classname="SiteProbeService › probe()" name="handles an unreachable site that requires authentication" time="0.006">
+    </testcase>
+    <testcase classname="SiteProbeService › probe()" name="handles an empty signals array for a clean public site" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="src/tests/unit/core/services/cookie-storage.service.spec.ts" errors="0" failures="0" skipped="0" timestamp="2026-04-12T14:36:28" time="0.531" tests="7">
+    <testcase classname="CookieStorageService — browser environment" name="returns null when the cookie does not exist" time="0.02">
+    </testcase>
+    <testcase classname="CookieStorageService — browser environment" name="stores and retrieves a value" time="0.005">
+    </testcase>
+    <testcase classname="CookieStorageService — browser environment" name="overwrites an existing value" time="0.004">
+    </testcase>
+    <testcase classname="CookieStorageService — browser environment" name="removes a value via removeItem()" time="0.004">
+    </testcase>
+    <testcase classname="CookieStorageService — server (SSR) environment" name="stores values in the in-memory fallback store" time="0.004">
+    </testcase>
+    <testcase classname="CookieStorageService — server (SSR) environment" name="returns null for unknown keys" time="0.005">
+    </testcase>
+    <testcase classname="CookieStorageService — server (SSR) environment" name="removes values from the in-memory store" time="0.004">
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,54 @@
+<div class="schema-llm">
+
+  <div class="llm-model-row">
+    <p class="llm-label">AI Model</p>
+    <div class="llm-model-grid">
+      @for (m of llmModels; track m.value) {
+        <button type="button" class="model-chip"
+                [class.model-chip--active]="schema.llmModel === m.value"
+                (click)="schemaChange.emit({ llmModel: m.value })">
+          {{ m.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="llm-field">
+    <div class="llm-label-row">
+      <label class="llm-label" for="llm-prompt">
+        Extraction Prompt <span class="llm-required">*</span>
+      </label>
+
+      <app-prompt-assistant
+        [currentPrompt]="schema.llmPrompt ?? ''"
+        [currentOutputFormat]="schema.llmOutputFormat ?? ''"
+        [targetUrl]="targetUrl"
+        [jobId]="jobId"
+        (applyPrompt)="onApplyPrompt($event)"
+        (applyOutputFormat)="onApplyOutputFormat($event)">
+      </app-prompt-assistant>
+    </div>
+
+    <textarea id="llm-prompt" class="llm-textarea" rows="5"
+              [value]="schema.llmPrompt ?? ''"
+              (input)="schemaChange.emit({ llmPrompt: $any($event.target).value })"
+              placeholder="Describe exactly what data to extract from the page.
+
+Example: Extract all product listings with their name, price, rating, and availability.">
+    </textarea>
+    <span class="llm-hint">Be specific. The more precise your prompt, the better the extraction quality.</span>
+  </div>
+
+  <div class="llm-field">
+    <label class="llm-label" for="llm-output-format">
+      Output Format <span class="llm-optional">(optional)</span>
+    </label>
+    <textarea id="llm-output-format" class="llm-textarea llm-textarea--sm" rows="3"
+              [value]="schema.llmOutputFormat ?? ''"
+              (input)="schemaChange.emit({ llmOutputFormat: $any($event.target).value })"
+              placeholder='{ "products": [{ "name": "string", "price": "number" }] }'>
+    </textarea>
+    <span class="llm-hint">Provide a JSON schema or example to enforce output structure.</span>
+  </div>
+
+</div>

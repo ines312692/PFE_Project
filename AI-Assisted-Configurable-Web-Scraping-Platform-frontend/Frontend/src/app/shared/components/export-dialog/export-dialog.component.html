@@ -1,0 +1,259 @@
+<div class="modal-backdrop" (click)="close()">
+  <div class="export-modal" (click)="$event.stopPropagation()">
+
+    <div class="export-modal__header">
+      <div class="export-modal__title-wrap">
+        <div class="export-modal__title-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="export-modal__title">Export cleaned data</h3>
+          <p class="export-modal__sub">{{ recordCount() }} records ready</p>
+        </div>
+      </div>
+      <button class="export-modal__close" (click)="close()" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="export-modal__body">
+
+      <!-- Format -->
+      <section class="section">
+        <h4 class="section__title">Format</h4>
+
+        <div class="fmt-group">
+          <span class="fmt-group__label">Classic</span>
+          <div class="fmt-row">
+            @for (fmt of formats; track fmt) {
+              @if (!isLlmReady(fmt)) {
+                <button class="fmt-btn" [class.fmt-btn--active]="exportFormat()===fmt"
+                        (click)="selectFormat(fmt)" type="button"
+                        [title]="formatHints[fmt]">
+                  {{ formatLabels[fmt] }}
+                </button>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="fmt-group fmt-group--llm">
+    <span class="fmt-group__label">
+      LLM-ready
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 2L9 9l-7 1 5 4-1 7 6-3 6 3-1-7 5-4-7-1z"/>
+      </svg>
+    </span>
+          <div class="fmt-row">
+            @for (fmt of formats; track fmt) {
+              @if (isLlmReady(fmt)) {
+                <button class="fmt-btn fmt-btn--llm" [class.fmt-btn--active]="exportFormat()===fmt"
+                        (click)="selectFormat(fmt)" type="button"
+                        [title]="formatHints[fmt]">
+                  {{ formatLabels[fmt] }}
+                </button>
+              }
+            }
+          </div>
+        </div>
+
+        @if (isLlmReady(exportFormat())) {
+          <p class="fmt-hint">{{ formatHints[exportFormat()] }} · Optimized for RAG pipelines and LLM ingestion.</p>
+        }
+      </section>
+
+      <!-- Destination -->
+      <section class="section">
+        <h4 class="section__title">Destination</h4>
+        <div class="dest-grid">
+          @for (dest of destinations; track dest) {
+            <div class="dest-card" [class.dest-card--active]="exportDestination()===dest"
+                 (click)="selectDestination(dest)">
+              <div class="dest-card__icon">
+                @if (dest === 'FILE') {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                } @else if (dest === 'POSTGRESQL') {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                  </svg>
+                } @else {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2">
+                    <path d="M14 9l6-6M20 3h-6M20 3v6"/>
+                    <path d="M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/>
+                  </svg>
+                }
+              </div>
+              <span class="dest-card__name">
+                {{ dest === 'FILE' ? 'Download' : dest === 'POSTGRESQL' ? 'PostgreSQL' : 'Webhook' }}
+              </span>
+              <span class="dest-card__sub">
+                {{ dest === 'FILE' ? 'Local file' : dest === 'POSTGRESQL' ? 'DB insert' : 'POST endpoint' }}
+              </span>
+            </div>
+          }
+        </div>
+
+        <!-- PostgreSQL config -->
+        @if (exportDestination() === 'POSTGRESQL') {
+          <div class="dest-config">
+            <div class="dest-config__row">
+              <label class="dest-config__label" for="jdbc-url">JDBC URL *</label>
+              <input class="dest-config__input" type="text" id="jdbc-url"
+                     placeholder="jdbc:postgresql://host:5432/dbname"
+                     [value]="destConfig()['jdbcUrl'] ?? ''"
+                     (input)="patchDestConfig('jdbcUrl', $any($event.target).value)"/>
+            </div>
+            <div class="dest-config__row dest-config__row--2col">
+              <div>
+                <label class="dest-config__label" for="db-username">Username *</label>
+                <input class="dest-config__input" type="text" id="db-username"
+                       placeholder="postgres"
+                       [value]="destConfig()['username'] ?? ''"
+                       (input)="patchDestConfig('username', $any($event.target).value)"/>
+              </div>
+              <div>
+                <label class="dest-config__label" for="db-password">Password *</label>
+                <input class="dest-config__input" type="password" id="db-password"
+                       placeholder="••••••••"
+                       [value]="destConfig()['password'] ?? ''"
+                       (input)="patchDestConfig('password', $any($event.target).value)"/>
+              </div>
+            </div>
+            <div class="dest-config__row">
+              <label class="dest-config__label" for="db-table">
+                Table name
+                <span class="dest-config__opt">(default: scrape_export)</span>
+              </label>
+              <input class="dest-config__input" type="text" id="db-table"
+                     placeholder="scrape_export"
+                     [value]="destConfig()['table'] ?? ''"
+                     (input)="patchDestConfig('table', $any($event.target).value)"/>
+            </div>
+          </div>
+        }
+
+        <!-- Webhook config -->
+        @if (exportDestination() === 'WEBHOOK') {
+          <div class="dest-config">
+            <div class="dest-config__row">
+              <label class="dest-config__label" for="wh-url">Endpoint URL *</label>
+              <input class="dest-config__input" type="url" id="wh-url"
+                     placeholder="https://your-endpoint.com/ingest"
+                     [value]="destConfig()['url'] ?? ''"
+                     (input)="patchDestConfig('url', $any($event.target).value)"/>
+            </div>
+            <div class="dest-config__row">
+              <label class="dest-config__label" for="wh-auth">
+                Authorization header
+                <span class="dest-config__opt">(optional)</span>
+              </label>
+              <input class="dest-config__input" type="text" id="wh-auth"
+                     placeholder="Bearer eyJ..."
+                     [value]="destConfig()['authHeader'] ?? ''"
+                     (input)="patchDestConfig('authHeader', $any($event.target).value)"/>
+            </div>
+            <div class="dest-config__row">
+              <label class="dest-config__label" for="wh-batch">
+                Batch size
+                <span class="dest-config__opt">(default 500)</span>
+              </label>
+              <input class="dest-config__input dest-config__input--sm" type="number" id="wh-batch"
+                     min="1" max="5000" placeholder="500"
+                     [value]="destConfig()['batchSize'] ?? ''"
+                     (input)="patchDestConfig('batchSize', +$any($event.target).value || 500)"/>
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Pipeline summary (optional) -->
+      @if (summary(); as s) {
+        <section class="section">
+          <h4 class="section__title">Pipeline summary</h4>
+          <div class="prop-grid">
+            <div class="prop">
+              <span class="prop__label">Input</span>
+              <span class="prop__value">{{ s.rawCount }}</span>
+            </div>
+            <div class="prop prop--green">
+              <span class="prop__label">Clean</span>
+              <span class="prop__value">{{ s.cleanCount }}</span>
+            </div>
+            <div class="prop prop--red">
+              <span class="prop__label">Removed</span>
+              <span class="prop__value">{{ s.removedCount }}</span>
+            </div>
+            <div class="prop">
+              <span class="prop__label">Steps</span>
+              <span class="prop__value">{{ s.stepCount }}</span>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- Validation error -->
+      @if (errorMsg(); as err) {
+        <div class="export-error">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ err }}
+        </div>
+      }
+    </div>
+
+    <div class="export-modal__footer">
+      @if (progress() > 0) {
+        <div class="exp-progress">
+          <div class="exp-progress__track">
+            <div class="exp-progress__fill" [style.width.%]="progress()"></div>
+          </div>
+          <span class="exp-progress__label">Exporting · {{ progress() }}%</span>
+        </div>
+      } @else {
+        <span class="export-modal__footer-info">
+          <strong>{{ recordCount() }}</strong> records · {{ exportFormat() }}
+        </span>
+      }
+      <div class="export-modal__footer-actions">
+        <button class="act-btn act-btn--outline" (click)="close()" type="button"
+                [disabled]="exporting()">
+          Cancel
+        </button>
+        <button class="act-btn act-btn--primary" (click)="submit()" type="button"
+                [disabled]="exporting()">
+          @if (exporting()) {
+            <span class="loader loader--xs"></span> Exporting
+          } @else {
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export {{ exportFormat() }}
+          }
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

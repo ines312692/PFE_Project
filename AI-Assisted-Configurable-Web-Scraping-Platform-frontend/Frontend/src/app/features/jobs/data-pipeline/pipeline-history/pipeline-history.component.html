@@ -1,0 +1,183 @@
+<div class="page">
+  @if (loading()) {
+    <div class="loader-wrap"><span class="loader"></span></div>
+  } @else {
+
+    <div class="topbar">
+      <button class="back-btn" (click)="goBack()" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Back to pipeline
+      </button>
+    </div>
+
+    <div class="hero">
+      <div class="hero__accent"></div>
+      <div class="hero__body">
+        <div class="hero__badges">
+          <span class="pill pill--phase">VERSIONS</span>
+          <span class="pill pill--count">{{ versions().length }} total</span>
+        </div>
+        <h1 class="hero__title">Pipeline history</h1>
+        <p class="hero__sub">
+          Browse and roll back to any previous run of your ETL pipeline.
+        </p>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar__head">
+          <h3 class="sidebar__title">Versions</h3>
+          <span class="sidebar__count">{{ versions().length }}</span>
+        </div>
+
+        <div class="sidebar__list">
+          @for (v of versions(); track trackByVersion($index, v)) {
+            <div class="ver"
+                 [class.ver--selected]="selectedVersion()?.versionNumber === v.versionNumber"
+                 [class.ver--raw]="v.versionNumber === 0"
+                 (click)="selectVersion(v)">
+
+              <div class="ver__badge">
+                <span class="ver__num">v{{ v.versionNumber }}</span>
+              </div>
+
+              <div class="ver__body">
+                <span class="ver__label">
+                  {{ v.label ?? (v.versionNumber === 0 ? 'Raw data' : 'Run ' + v.versionNumber) }}
+                </span>
+                <span class="ver__meta">
+                  @if (v.versionNumber === 0) {
+                    {{ v.recordCount }} records · untouched
+                  } @else {
+                    {{ v.appliedSteps.length }}
+                    step{{ v.appliedSteps.length !== 1 ? 's' : '' }} ·
+                    {{ v.recordCount }} records
+                  }
+                </span>
+                <span class="ver__date">{{ v.createdAt | date: 'short' }}</span>
+              </div>
+              @if (v.versionNumber === 0) {
+                <button class="ver__preview" type="button"
+                        title="Preview raw data"
+                        (click)="$event.stopPropagation(); openRawPreview()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2.2">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </aside>
+
+      <main class="main">
+        @if (loadingVersion()) {
+          <div class="loader-wrap"><span class="loader"></span></div>
+        } @else if (selectedVersion(); as sv) {
+          <div class="main__head">
+            <div class="main__title-wrap">
+              <span class="main__cat">VERSION {{ sv.versionNumber }}</span>
+              <h2 class="main__title">
+                {{ sv.label ?? 'Pipeline run ' + sv.versionNumber }}
+              </h2>
+              <span class="main__sub">
+                {{ rawCount() }} → {{ sv.recordCount }} records ·
+                {{ sv.appliedSteps.length }}
+                step{{ sv.appliedSteps.length !== 1 ? 's' : '' }} applied
+              </span>
+            </div>
+
+            <div class="main__actions">
+              <button class="rb-btn" (click)="openPreview(sv)" type="button">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Preview data
+              </button>
+
+              <button class="rb-btn" (click)="openExport(sv)" type="button">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export v{{ sv.versionNumber }}
+              </button>
+
+              <button class="rb-btn" (click)="rollback(sv)" type="button"
+                      [disabled]="rollingBack()">
+                @if (rollingBack()) {
+                  <span class="loader loader--xs"></span> Rolling back
+                } @else {
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2.2">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                  </svg>
+                  Rollback to v{{ sv.versionNumber }}
+                }
+              </button>
+            </div>
+          </div>
+
+          <app-workflow-canvas
+            [version]="sv"
+            [rawCount]="rawCount()">
+          </app-workflow-canvas>
+
+        } @else {
+          <div class="empty">
+            <div class="empty__icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <p class="empty__title">
+              @if (hasVersions()) {
+                Select a version to view its workflow
+              } @else {
+                No pipeline runs yet
+              }
+            </p>
+            <p class="empty__hint">
+              @if (hasVersions()) {
+                Pick a version on the left to see the steps applied and the records produced.
+              } @else {
+                Apply a pipeline and save it to start building history.
+              }
+            </p>
+          </div>
+        }
+      </main>
+    </div>
+
+    @if (exportTarget(); as t) {
+      <app-export-dialog
+        [recordCount]="t.recordCount"
+        [summary]="null"
+        [exporting]="exporting()"
+        [progress]="exportProgress()"
+        (exportRequested)="runExport($event)"
+        (closed)="exportTarget.set(null)">
+      </app-export-dialog>
+    }
+    @if (previewVersion(); as pv) {
+      <app-data-preview-modal
+        [version]="pv"
+        (closed)="closePreview()">
+      </app-data-preview-modal>
+    }
+
+  }
+</div>

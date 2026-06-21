@@ -1,0 +1,275 @@
+Pour agrandir les boîtes de classes (et pas seulement le texte) tout en remplissant l'espace blanc sans que le diagramme ne soit découpé, le levier le plus efficace est d'augmenter la marge interne des boîtes (Padding) et l'espacement, plutôt que de monter encore le DPI ou la police (ce qui risque de dépasser la limite et de découper la page).
+
+Voici les réglages à utiliser dans l'en-tête, le reste du code ne change pas :
+plantuml
+
+@startuml classDiagramSprint5
+'=============================================================
+'  Diagramme de classes — Sprint 5
+'=============================================================
+
+skinparam dpi 150
+skinparam DefaultFontName "DejaVu Sans"
+skinparam DefaultFontSize 16
+skinparam ClassFontSize 18
+skinparam ClassFontStyle bold
+skinparam ClassAttributeFontSize 15
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam roundCorner 8
+skinparam nodesep 45
+skinparam ranksep 55
+
+skinparam class {
+    BackgroundColor #F8FBFF
+    BorderColor #2E75B6
+    BorderThickness 1.5
+    ArrowColor #2E75B6
+    FontColor #15406B
+}
+skinparam enum {
+    BackgroundColor #FFF6E9
+    BorderColor #C77F1A
+    FontColor #8A5A12
+    FontStyle bold
+    FontSize 15
+}
+hide circle
+
+' ====================== ENTITÉS : PROXY ======================
+class Proxy {
+    - idProxy : UUID
+    - host : String
+    - port : int
+    - protocol : ProxyProtocol
+    - anonymity : ProxyAnonymity
+    - country : String
+    - status : ProxyStatus
+    - source : ProxySource
+    - latencyMs : Long
+    - lastCheckedAt : Instant
+    - createdAt : Instant
+    --
+    + findById(id : UUID) : Proxy
+    + refreshPool() : int
+    + createManual(...) : Proxy
+    + blacklist(id : UUID) : void
+    + reactivate(id : UUID) : void
+    + acquire(...) : Optional<Proxy>
+    + release(...) : void
+}
+
+class ProxyConfig {
+    - idProxyConfig : UUID
+    - rotationStrategy : ProxyRotationStrategyType
+    - refreshIntervalMinutes : int
+    - autoSourcingEnabled : Boolean
+    - geoCountries : List<String>
+    - strictGeo : Boolean
+    - updatedAt : Instant
+}
+
+class ProxyHealthCheck {
+    - idProxyHealthCheck : UUID
+    - proxyId : UUID
+    - reachable : Boolean
+    - latencyMs : Long
+    - checkedAt : Instant
+    --
+    + check(proxy : Proxy) : ProxyHealthCheck
+    + checkFull(proxy : Proxy) : ProxyHealthCheck
+    + checkBatch(...) : int
+}
+
+class ProxyAntiBotStatus {
+    - idProxyAntiBotStatus : UUID
+    - proxyId : UUID
+    - provider : AntiBotProvider
+    - status : ProtectionStatus
+    - detectedAt : Instant
+    --
+    + checkAntiBot(...) : DetectionResult
+}
+
+' ====================== ENTITÉS : DISSIMULATION ======================
+class ConsistencyProfile {
+    - userAgent : String
+    - platform : String
+    - language : String
+    - timezone : String
+    - locale : String
+    - webglRenderer : String
+    - hardwareConcurrency : int
+    - deviceMemory : int
+    - screenWidth : int
+    - screenHeight : int
+    --
+    + buildFor(proxy : Proxy) : ConsistencyProfile
+}
+
+class StealthProfile {
+    - level : StealthLevel
+    - userAgent : String
+    - maskWebdriver : Boolean
+    - spoofWebgl : Boolean
+    - spoofCanvas : Boolean
+    - spoofAudio : Boolean
+    - spoofScreen : Boolean
+    --
+    + prepareContextOptions(...) : void
+    + applyInitScripts(...) : void
+}
+
+' ====================== ENTITÉS : DIAGNOSTIC DE SITE ======================
+class DifficultyScore {
+    - difficulty : ScrapingDifficulty
+    - score : int
+    - recommendation : String
+    - factors : List<DifficultyFactor>
+    --
+    + score(input : ScoringInput) : DifficultyScore
+}
+
+class DetectedProtection {
+    - provider : AntiBotProvider
+    - hasCaptcha : Boolean
+    - jsRendered : Boolean
+    - evidence : String
+    --
+    + fingerprint(...) : Optional<DetectedProtection>
+}
+
+class SiteDnsProbe {
+    - domain : String
+    - behindCdn : Boolean
+    - originIp : String
+    --
+    + resolve(host : String) : List<OriginIpCandidate>
+}
+
+' ====================== ENTITÉS : DÉFI DE VÉRIFICATION ======================
+class CaptchaChallenge {
+    - idCaptchaChallenge : UUID
+    - type : CaptchaType
+    - provider : CaptchaProvider
+    - pageUrl : String
+    - siteKey : String
+    --
+    + tryHandleIfPresent(...) : boolean
+}
+
+class CaptchaSolution {
+    - token : String
+    - success : Boolean
+    - solvedBy : CaptchaProvider
+    --
+    + supports(type : CaptchaType) : boolean
+    + isEnabled() : boolean
+    + solve(challenge) : CaptchaSolution
+}
+
+' ====================== ÉNUMÉRATIONS ======================
+enum ProxyProtocol {
+    HTTP
+    HTTPS
+    SOCKS4
+    SOCKS5
+}
+enum ProxyAnonymity {
+    TRANSPARENT
+    ANONYMOUS
+    ELITE
+}
+enum ProxyStatus {
+    ACTIVE
+    INACTIVE
+    BLACKLISTED
+}
+enum ProxyRotationStrategyType {
+    ROUND_ROBIN
+    RANDOM
+    FASTEST
+    LEAST_USED
+}
+enum ProxySource {
+    MANUAL
+    GEONODE
+    PROXYSCRAPE
+    FREE_PROXY_LIST
+}
+enum AntiBotProvider {
+    CLOUDFLARE
+    DATADOME
+    AKAMAI
+    PERIMETER_X
+    HCAPTCHA
+    RECAPTCHA
+}
+enum ProtectionStatus {
+    CLEAN
+    FLAGGED
+    UNREACHABLE
+}
+enum StealthLevel {
+    OFF
+    BASIC
+    FULL
+}
+enum ScrapingDifficulty {
+    EASY
+    MEDIUM
+    HARD
+    EXTREME
+}
+enum CaptchaType {
+    RECAPTCHA_V2
+    RECAPTCHA_V3
+    HCAPTCHA
+    TURNSTILE
+    FUNCAPTCHA
+    GEETEST
+    CLOUDFLARE_INTERSTITIAL
+}
+enum CaptchaProvider {
+    LLM_VISION
+    TWO_CAPTCHA
+    HUMAN
+}
+
+' ====================== ASSOCIATIONS ENTRE ENTITÉS ======================
+ProxyConfig "1" -- "0..*" Proxy
+Proxy "1" -- "0..*" ProxyHealthCheck
+Proxy "1" -- "0..*" ProxyAntiBotStatus
+StealthProfile "1" -- "1" ConsistencyProfile
+DifficultyScore "1" -- "0..*" DetectedProtection
+DifficultyScore "1" -- "0..1" SiteDnsProbe
+CaptchaChallenge "1" -- "0..1" CaptchaSolution
+
+' ====================== ÉNUMÉRATIONS : disposées en GRILLE ======================
+ProxyProtocol -[hidden]right-> ProxyAnonymity
+ProxyAnonymity -[hidden]right-> ProxyStatus
+ProxyProtocol -[hidden]down-> ProxyRotationStrategyType
+ProxyRotationStrategyType -[hidden]right-> ProxySource
+ProxyRotationStrategyType -[hidden]right-> AntiBotProvider
+ProxyRotationStrategyType -[hidden]down-> ProtectionStatus
+ProtectionStatus -[hidden]right-> StealthLevel
+ProtectionStatus -[hidden]right-> ScrapingDifficulty
+ProtectionStatus -[hidden]down-> CaptchaType
+CaptchaType -[hidden]right-> CaptchaProvider
+
+Proxy ..> ProxyProtocol
+Proxy ..> ProxyAnonymity
+Proxy ..> ProxyStatus
+Proxy ..> ProxySource
+ProxyConfig ..> ProxyRotationStrategyType
+ProxyAntiBotStatus ..> AntiBotProvider
+ProxyAntiBotStatus ..> ProtectionStatus
+StealthProfile ..> StealthLevel
+DifficultyScore ..> ScrapingDifficulty
+DetectedProtection ..> AntiBotProvider
+CaptchaChallenge ..> CaptchaType
+CaptchaChallenge ..> CaptchaProvider
+
+@enduml

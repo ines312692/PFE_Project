@@ -1,0 +1,33 @@
+<div class="mode-picker">
+  <span class="mode-picker__label">Extraction Method</span>
+  <div class="mode-picker__grid">
+    @for (m of modes; track m.value) {
+      <button type="button"
+              class="mode-card"
+              [class.mode-card--active]="mode === m.value"
+              [class.mode-card--blue]="m.color === 'blue'"
+              [class.mode-card--purple]="m.color === 'purple'"
+              [class.mode-card--pink]="m.color === 'pink'"
+              [class.mode-card--teal]="m.color === 'teal'"
+              [class.mode-card--grey]="m.color === 'grey'"
+              (click)="modeSelect.emit(m.value)">
+
+        <div class="mode-card__head">
+          <div class="mode-card__icon" [innerHTML]="m.safeIcon"></div>
+          <span class="mode-card__name">{{ m.label }}</span>
+        </div>
+
+        <span class="mode-card__desc">{{ m.desc }}</span>
+
+        @if (mode === m.value) {
+          <div class="mode-card__check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        }
+      </button>
+    }
+  </div>
+</div>

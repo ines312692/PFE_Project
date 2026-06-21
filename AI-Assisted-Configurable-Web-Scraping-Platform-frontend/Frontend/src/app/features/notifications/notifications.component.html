@@ -1,0 +1,397 @@
+<div class="notif-page">
+  <div class="notif-header">
+    <div class="notif-header__left">
+      <div class="notif-header__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="notif-header__title">Notifications</h1>
+        <p class="notif-header__sub">
+          {{ notifSvc.unreadCount() }} unread · {{ notifSvc.notifications().length }} total
+        </p>
+      </div>
+    </div>
+    <div class="notif-header__actions">
+      @if (notifSvc.hasUnread()) {
+        <button class="mark-all-btn" (click)="markAllRead()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Mark all as read
+        </button>
+      }
+      @if (notifSvc.notifications().length > 0) {
+        <button class="delete-all-btn" (click)="requestDeleteAll()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+          Clear all
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="notif-layout">
+    <aside class="notif-sidebar">
+      @for (f of filters; track f.value) {
+        <button class="filter-btn"
+                [class.filter-btn--active]="activeFilter() === f.value"
+                [class.filter-btn--completed]="f.value === 'JOB_COMPLETED'"
+                [class.filter-btn--failed]="f.value === 'JOB_FAILED'"
+                [class.filter-btn--invitation]="f.value === 'PROJECT_INVITATION'"
+                (click)="setFilter(f.value)">
+          <div class="filter-btn__icon">
+            @if (f.icon === 'inbox') {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+              </svg>
+            }
+            @if (f.icon === 'circle') {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="4"/>
+              </svg>
+            }
+            @if (f.icon === 'check') {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            }
+            @if (f.icon === 'x') {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            }
+            @if (f.icon === 'invitation') {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            }
+          </div>
+          <span class="filter-btn__label">{{ f.label }}</span>
+          <span class="filter-btn__count">{{ filterCount()[f.value] }}</span>
+        </button>
+      }
+    </aside>
+
+    <div class="notif-list">
+      @if (filtered().length === 0) {
+        <div class="notif-empty">
+          <div class="notif-empty__icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+          <p class="notif-empty__title">No notifications</p>
+          <p class="notif-empty__desc">
+            @if (activeFilter() === 'UNREAD')             { All caught up! No unread notifications. }
+            @else if (activeFilter() === 'JOB_COMPLETED') { No completed job notifications yet. }
+            @else if (activeFilter() === 'JOB_FAILED')    { No failed job notifications. }
+            @else if (activeFilter() === 'PROJECT_INVITATION') { No project invitations yet. }
+            @else { You'll be notified when your jobs complete or when you're invited to a project. }
+          </p>
+        </div>
+      } @else {
+        @for (n of filtered(); track n.id) {
+
+          <!-- ── Invitation row ── -->
+          @if (n.type === 'PROJECT_INVITATION') {
+            <div class="notif-row notif-row--invitation"
+                 [class.notif-row--unread]="!n.read"
+                 [class.notif-row--selected]="selectedNotif()?.id === n.id"
+                 (click)="selectNotif(n)">
+              <div class="notif-row__indicator">
+                @if (!n.read) { <span class="notif-row__dot notif-row__dot--inv"></span> }
+              </div>
+              <div class="notif-row__icon notif-row__icon--inv">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div class="notif-row__body">
+                <span class="notif-row__title">{{ n.title }}</span>
+                <span class="notif-row__msg">{{ n.message }}</span>
+                @if (n.referenceId) {
+                  <div class="inv-actions" (click)="$event.stopPropagation()">
+                    <button class="inv-btn inv-btn--accept"
+                            [disabled]="isResponding(n)"
+                            (click)="acceptInvitation(n, $event)">
+                      @if (isResponding(n)) {
+                        <span class="inv-btn__spinner"></span>
+                      } @else {
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      }
+                      Accept
+                    </button>
+                    <button class="inv-btn inv-btn--decline"
+                            [disabled]="isResponding(n)"
+                            (click)="declineInvitation(n, $event)">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                      Decline
+                    </button>
+                  </div>
+                }
+              </div>
+              <span class="notif-row__time">{{ timeAgo(n.createdAt) }}</span>
+              <button class="notif-row__delete" title="Delete" (click)="requestDelete(n.id, $event)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14H6L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4h6v2"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- ── Job rows ── -->
+          } @else {
+            <button class="notif-row"
+                    [class.notif-row--unread]="!n.read"
+                    [class.notif-row--selected]="selectedNotif()?.id === n.id"
+                    [class.notif-row--success]="n.type === 'JOB_COMPLETED'"
+                    [class.notif-row--error]="n.type === 'JOB_FAILED'"
+                    (click)="selectNotif(n)">
+              <div class="notif-row__indicator">
+                @if (!n.read) { <span class="notif-row__dot"></span> }
+              </div>
+              <div class="notif-row__icon">
+                @if (n.type === 'JOB_COMPLETED') {
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                } @else {
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
+                }
+              </div>
+              <div class="notif-row__body">
+                <span class="notif-row__title">{{ n.title }}</span>
+                <span class="notif-row__msg">{{ n.message }}</span>
+              </div>
+              <span class="notif-row__time">{{ timeAgo(n.createdAt) }}</span>
+              <button class="notif-row__delete" title="Delete" (click)="requestDelete(n.id, $event)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14H6L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4h6v2"/>
+                </svg>
+              </button>
+            </button>
+          }
+
+        }
+      }
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="notif-detail" [class.notif-detail--open]="selectedNotif()">
+      @if (selectedNotif(); as n) {
+        <div class="detail-card">
+          <button class="detail-close" (click)="closeDetail()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+
+          <!-- Hero invitation -->
+          @if (n.type === 'PROJECT_INVITATION') {
+            <div class="detail-hero detail-hero--invitation">
+              <div class="detail-hero__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <span class="detail-hero__type">Project Invitation</span>
+            </div>
+            <!-- Hero job -->
+          } @else {
+            <div class="detail-hero"
+                 [class.detail-hero--success]="n.type === 'JOB_COMPLETED'"
+                 [class.detail-hero--error]="n.type === 'JOB_FAILED'">
+              <div class="detail-hero__icon">
+                @if (n.type === 'JOB_COMPLETED') {
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                } @else {
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
+                }
+              </div>
+              <span class="detail-hero__type">{{ n.type === 'JOB_COMPLETED' ? 'Job Completed' : 'Job Failed' }}</span>
+            </div>
+          }
+
+          <div class="detail-body">
+            <h2 class="detail-body__title">{{ n.title }}</h2>
+            <p class="detail-body__msg">{{ n.message }}</p>
+
+            <div class="detail-meta">
+              <div class="detail-meta__row">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>{{ n.createdAt | date:'EEEE, MMM d, yyyy · HH:mm:ss' }}</span>
+              </div>
+              @if (n.jobId) {
+                <div class="detail-meta__row">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                  </svg>
+                  <span class="detail-meta__job-id">{{ n.jobId }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="detail-body__actions">
+
+              <!-- Actions invitation -->
+              @if (n.type === 'PROJECT_INVITATION' && n.referenceId) {
+                <button class="detail-action detail-action--accept"
+                        [disabled]="isResponding(n)"
+                        (click)="acceptInvitation(n, $event)">
+                  @if (isResponding(n)) {
+                    <span class="inv-btn__spinner"></span> Processing…
+                  } @else {
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Accept Invitation
+                  }
+                </button>
+                <button class="detail-action detail-action--decline"
+                        [disabled]="isResponding(n)"
+                        (click)="declineInvitation(n, $event)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                  Decline
+                </button>
+              }
+
+              <!-- Actions job -->
+              @if (n.jobId) {
+                <button class="detail-action" (click)="goToJob(n.jobId)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                  View Job Details
+                </button>
+              }
+
+              <button class="detail-action detail-action--delete"
+                      (click)="requestDelete(n.id, $event)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14H6L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4h6v2"/>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="detail-placeholder">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <p>Select a notification to view details</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Modal: confirm delete ONE -->
+@if (pendingDeleteId()) {
+  <div class="modal-backdrop" (click)="cancelDelete()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-box__header">
+        <div class="modal-box__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Delete notification?</h3>
+          <p>This notification will be permanently removed. This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="modal-box__actions">
+        <button class="modal-btn modal-btn--cancel"  (click)="cancelDelete()">Cancel</button>
+        <button class="modal-btn modal-btn--confirm" (click)="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (confirmDeleteAll()) {
+  <div class="modal-backdrop" (click)="cancelDeleteAll()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-box__header">
+        <div class="modal-box__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Clear all notifications?</h3>
+          <p>This will permanently delete all {{ notifSvc.notifications().length }} notifications. This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="modal-box__actions">
+        <button class="modal-btn modal-btn--cancel"  (click)="cancelDeleteAll()">Cancel</button>
+        <button class="modal-btn modal-btn--confirm" (click)="confirmDeleteAllAction()">Clear all</button>
+      </div>
+    </div>
+  </div>
+}

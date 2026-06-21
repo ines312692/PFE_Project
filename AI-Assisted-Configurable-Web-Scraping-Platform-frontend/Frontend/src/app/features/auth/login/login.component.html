@@ -1,0 +1,114 @@
+<div class="root">
+  <div class="left">
+
+    <svg class="left__bg" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <radialGradient id="login-rg1" cx="30%" cy="20%" r="65%">
+          <stop offset="0%"   stop-color="var(--color-auth-blob-1)" stop-opacity=".95"/>
+          <stop offset="100%" stop-color="var(--color-auth-bg)"     stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="login-rg2" cx="78%" cy="62%" r="55%">
+          <stop offset="0%"   stop-color="var(--color-auth-blob-2)" stop-opacity=".8"/>
+          <stop offset="100%" stop-color="var(--color-auth-bg)"     stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="login-rg3" cx="10%" cy="90%" r="45%">
+          <stop offset="0%"   stop-color="var(--color-auth-blob-3)" stop-opacity=".22"/>
+          <stop offset="100%" stop-color="var(--color-auth-bg)"     stop-opacity="0"/>
+        </radialGradient>
+        <filter id="login-gb"><feGaussianBlur stdDeviation="38"/></filter>
+      </defs>
+      <rect width="800" height="900" fill="var(--color-auth-bg)"/>
+      <ellipse cx="240" cy="180" rx="380" ry="300" fill="url(#login-rg1)" filter="url(#login-gb)"/>
+      <ellipse cx="620" cy="558" rx="320" ry="260" fill="url(#login-rg2)" filter="url(#login-gb)"/>
+      <ellipse cx="80"  cy="810" rx="260" ry="200" fill="url(#login-rg3)" filter="url(#login-gb)"/>
+    </svg>
+
+    <div class="left__grid"      aria-hidden="true"></div>
+    <div class="left__pink-blob" aria-hidden="true"></div>
+    <div class="left__pink-ring" aria-hidden="true"></div>
+
+    <div class="left__top">
+      <img class="left__logo" [src]="theme.isDark() ? 'assets/ElyadataLogoWhite.png' : 'assets/elyadata.png'"
+           alt="Elyadata" />
+    </div>
+
+    <div class="left__mid">
+      <h1 class="left__headline">
+        Your web data,<br/>
+        <span class="hl-blue">structured</span><br/>
+        and <span class="hl-pink">intelligent.</span>
+      </h1>
+      <p class="left__body">Extract, clean and enrich your data with artificial intelligence.</p>
+    </div>
+
+  </div>
+
+  <div class="right">
+
+    <div class="right__pink" aria-hidden="true"></div>
+
+    <div class="card">
+      <div class="card__logo">
+        <img [src]="theme.isDark() ? 'assets/ElyadataLogoWhite.png' : 'assets/elyadata.png'"
+             alt="Elyadata" />
+      </div>
+
+      <h2 class="card__title">Sign in</h2>
+      <p class="card__sub">Access your workspace</p>
+      <div class="card__divider" aria-hidden="true"></div>
+
+      @if (error()) {
+        <div class="alert">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8"  x2="12"    y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ error() }}
+        </div>
+      }
+
+      <!-- Info Keycloak -->
+      <div class="keycloak-info">
+        <div class="keycloak-info__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="keycloak-info__text">
+          <span class="keycloak-info__title">Secure authentication</span>
+          <span class="keycloak-info__sub">You will be redirected to the secure login page</span>
+        </div>
+      </div>
+
+      <!-- Bouton unique — redirige vers Keycloak -->
+      <button type="button" class="btn" (click)="onSignIn()" [disabled]="loading()">
+        @if (loading()) {
+          <span class="spinner"></span>
+          Redirecting...
+        } @else {
+          Sign in
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        }
+      </button>
+
+      <div class="card__signup">
+        <span class="card__signup-txt">Don't have an account?</span>
+        <a class="card__signup-btn" routerLink="/register">Create account</a>
+      </div>
+
+      <div class="card__footer">
+        <span>© {{ year }} Elyadata</span>
+        <span class="card__footer-dot"></span>
+        <span>AI Scraping Platform</span>
+      </div>
+    </div>
+
+  </div>
+</div>

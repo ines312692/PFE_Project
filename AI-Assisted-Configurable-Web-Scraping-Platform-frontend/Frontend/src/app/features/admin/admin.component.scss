@@ -1,0 +1,120 @@
+:host { display: block; height: 100%; }
+
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-bg-muted);
+}
+
+// ─── Side nav ─────────────────────────────────────────────
+.admin-nav {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--elyadata-white);
+  border-right: 1.5px solid var(--color-border-medium);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  gap: 1.5rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 0 .25rem;
+  }
+
+  &__badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(var(--elyadata-blue-rgb), .1);
+    color: var(--elyadata-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    display: block;
+    font-size: .88rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    letter-spacing: -.02em;
+    line-height: 1.2;
+  }
+
+  &__sub {
+    display: block;
+    font-size: .68rem;
+    font-weight: 500;
+    color: var(--color-text-faint);
+    letter-spacing: .03em;
+  }
+
+  &__links {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    height: 38px;
+    padding: 0 .85rem;
+    border-radius: 9px;
+    font-size: .84rem;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    text-decoration: none;
+    transition: background .15s, color .15s;
+
+    svg { flex-shrink: 0; opacity: .7; transition: opacity .15s; }
+
+    &:hover {
+      background: var(--color-bg-muted);
+      color: var(--color-text-primary);
+      svg { opacity: 1; }
+    }
+
+    &--active {
+      background: var(--color-bg-blue-soft);
+      color: var(--elyadata-blue);
+      svg { opacity: 1; color: var(--elyadata-blue); }
+    }
+  }
+}
+
+// ─── Content ──────────────────────────────────────────────
+.admin-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+// ─── Responsive ───────────────────────────────────────────
+@media (max-width: 768px) {
+  .admin-shell { flex-direction: column; }
+
+  .admin-nav {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    padding: .75rem 1rem;
+    gap: 1rem;
+    border-right: none;
+    border-bottom: 1.5px solid var(--color-border-medium);
+
+    &__header { flex: 1; }
+    &__links  { flex-direction: row; gap: .25rem; }
+    &__link   { white-space: nowrap; }
+  }
+}

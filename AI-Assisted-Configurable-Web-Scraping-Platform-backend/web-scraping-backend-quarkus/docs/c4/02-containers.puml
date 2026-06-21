@@ -1,0 +1,26 @@
+@startuml C4_L2_Containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+
+Person(user, "User", "")
+
+System_Boundary(platform, "Scraping Platform") {
+    Container(frontend, "Frontend SPA", "Angular, TypeScript", "Job configuration wizard, dashboard, runner, history")
+    Container(backend, "Backend API and Scraping Engine", "Quarkus", "REST API, BFF auth, orchestration, in-process scraping, extraction (CSS / XPath / LLM / regex)")
+    ContainerDb(db, "Database", "PostgreSQL ", "Jobs, extraction schemas, scrape results, users, projects, notifications")
+}
+
+System_Ext(keycloak, "Keycloak", "OIDC provider")
+
+System_Ext(targets, "Target Websites", "External HTTP endpoints")
+
+Rel(user, frontend, "Uses")
+Rel(frontend, backend, "Calls REST API", "JSON / HTTPS")
+
+Rel(backend, keycloak, "Validates tokens and exchanges codes", "OIDC")
+
+Rel(backend, db, "Reads from and writes to", "JDBC")
+Rel(backend, targets, "Scrapes", "HTTPS ")
+
+
+@enduml

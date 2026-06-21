@@ -1,0 +1,2574 @@
+<div class="page">
+
+  @if (readOnlyMode()) {
+
+    @if (!jobData()) {
+      <div class="loader-wrap">
+        <span class="loader"></span>
+      </div>
+
+    } @else if (jobData(); as d) {
+
+      <div class="jd-header">
+
+        <div class="jd-header__chips">
+          <span class="jd-type-chip jd-type-chip--{{ d.jobType | lowercase }}">
+            @if (d.jobType === 'SCRAPER') {
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            } @else {
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            }
+            {{ d.jobType }}
+          </span>
+
+          <span class="jd-status-chip jd-status-chip--{{ d.status | lowercase }}">
+            <span class="jd-status-chip__dot"></span>
+            {{ d.status }}
+          </span>
+
+          <span class="jd-mode-chip">{{ d.extractionMode }}</span>
+        </div>
+
+        <h2 class="jd-title">{{ d.name }}</h2>
+
+        <a class="jd-url" [href]="d.targetUrl" target="_blank" rel="noopener noreferrer">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+          {{ d.targetUrl }}
+        </a>
+
+        <div class="jd-meta-row">
+          <div class="jd-meta-item">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span class="jd-meta-item__label">Priority</span>
+            <span class="jd-priority-badge jd-priority-badge--{{ d.priority | lowercase }}">{{ d.priority }}</span>
+          </div>
+
+          <div class="jd-meta-item">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span class="jd-meta-item__label">Trigger</span>
+            <span class="jd-meta-item__value">{{ d.triggerType }}</span>
+          </div>
+
+          @if (d.cronExpression) {
+            <div class="jd-meta-item jd-meta-item--full">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span class="jd-meta-item__label">Cron</span>
+              <code class="jd-inline-code">{{ d.cronExpression }}</code>
+            </div>
+          }
+        </div>
+
+      </div>
+
+      @if (d.jobType === 'SCRAPER' && d.scraperConfig; as sc) {
+        <div class="jd-section">
+
+          <div class="jd-section__header">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Scraper Configuration
+          </div>
+
+          <div class="jd-grid">
+            <div class="jd-cell">
+              <span class="jd-cell__label">Page Mode</span>
+              <span class="jd-cell__value">{{ sc.singlePageMode ? 'Single Page' : 'Multi URL' }}</span>
+            </div>
+
+            <div class="jd-cell">
+              <span class="jd-cell__label">Scroll to Bottom</span>
+              <span class="jd-toggle" [class.jd-toggle--on]="sc.scrollToBottom">
+                <span class="jd-toggle__dot"></span>
+                {{ sc.scrollToBottom ? 'On' : 'Off' }}
+              </span>
+            </div>
+
+            <div class="jd-cell">
+              <span class="jd-cell__label">Seed URLs</span>
+              <span class="jd-cell__value">
+                {{ sc.seedUrls.length }}
+                <em>url{{ sc.seedUrls.length !== 1 ? 's' : '' }}</em>
+              </span>
+            </div>
+
+            <div class="jd-cell">
+              <span class="jd-cell__label">Total URLs</span>
+              <span class="jd-cell__value">
+                {{ sc.seedUrls.length + 1 }}
+                <em>incl. target</em>
+              </span>
+            </div>
+
+            <div class="jd-cell">
+              <span class="jd-cell__label">Pagination</span>
+              <span class="jd-cell__value">{{ sc.paginationType || 'None' }}</span>
+            </div>
+
+            @if (sc.paginationType && sc.paginationType !== 'NONE') {
+              <div class="jd-cell">
+                <span class="jd-cell__label">Max Pag. Pages</span>
+                <span class="jd-cell__value">{{ sc.maxPaginationPages }}</span>
+              </div>
+            }
+
+            @if (sc.waitForSelector) {
+              <div class="jd-cell jd-cell--full">
+                <span class="jd-cell__label">Wait For Selector</span>
+                <code class="jd-cell__code">{{ sc.waitForSelector }}</code>
+              </div>
+            }
+
+            @if (sc.clickBeforeExtract) {
+              <div class="jd-cell jd-cell--full">
+                <span class="jd-cell__label">Click Before Extract</span>
+                <code class="jd-cell__code">{{ sc.clickBeforeExtract }}</code>
+              </div>
+            }
+
+            @if (sc.paginationType && sc.paginationType !== 'NONE' && sc.paginationSelector) {
+              <div class="jd-cell jd-cell--full">
+                <span class="jd-cell__label">{{ paginationLabels[sc.paginationType].label }}</span>
+                <code class="jd-cell__code">{{ sc.paginationSelector }}</code>
+              </div>
+            }
+          </div>
+
+          @if (sc.seedUrls; as seedUrls) {
+            @if (seedUrls.length > 0) {
+              <div class="jd-url-block">
+                <span class="jd-url-block__label">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                  Seed URLs
+                </span>
+
+                @for (url of seedUrls; track url) {
+                  <a class="jd-url-chip" [href]="url" target="_blank" rel="noopener">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    {{ url }}
+                  </a>
+                }
+              </div>
+            }
+          }
+
+        </div>
+      }
+
+      @if (d.jobType === 'CRAWLER' && d.crawlerConfig; as cc) {
+        <div class="jd-section">
+
+          <div class="jd-section__header">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <path d="M11 8v6"/>
+              <path d="M8 11h6"/>
+            </svg>
+            Crawler Configuration
+          </div>
+
+          <div class="jd-grid">
+            <div class="jd-cell">
+              <span class="jd-cell__label">Max Pages</span>
+              <span class="jd-cell__value">{{ cc.maxPages }}</span>
+            </div>
+
+            <div class="jd-cell">
+              <span class="jd-cell__label">Max Depth</span>
+              <span class="jd-cell__value">{{ cc.maxDepth }}</span>
+            </div>
+
+            <div class="jd-cell">
+              <span class="jd-cell__label">Follow Redirects</span>
+              <span class="jd-toggle" [class.jd-toggle--on]="cc.followRedirects">
+                <span class="jd-toggle__dot"></span>
+                {{ cc.followRedirects ? 'On' : 'Off' }}
+              </span>
+            </div>
+
+            <div class="jd-cell">
+              <span class="jd-cell__label">Respect robots.txt</span>
+              <span class="jd-toggle" [class.jd-toggle--on]="cc.respectRobotsTxt">
+                <span class="jd-toggle__dot"></span>
+                {{ cc.respectRobotsTxt ? 'On' : 'Off' }}
+              </span>
+            </div>
+
+            @if (cc.urlIncludePatterns) {
+              <div class="jd-cell jd-cell--full">
+                <span class="jd-cell__label">URL Include Patterns</span>
+                <code class="jd-cell__code">{{ cc.urlIncludePatterns }}</code>
+              </div>
+            }
+
+            @if (cc.urlExcludePatterns) {
+              <div class="jd-cell jd-cell--full">
+                <span class="jd-cell__label">URL Exclude Patterns</span>
+                <code class="jd-cell__code">{{ cc.urlExcludePatterns }}</code>
+              </div>
+            }
+
+            @if (cc.sitemapUrl) {
+              <div class="jd-cell jd-cell--full">
+                <span class="jd-cell__label">Sitemap URL</span>
+                <a class="jd-cell__link" [href]="cc.sitemapUrl" target="_blank" rel="noopener">
+                  {{ cc.sitemapUrl }}
+                </a>
+              </div>
+            }
+          </div>
+
+        </div>
+      }
+
+      @if (d.jobType !== 'CRAWLER' && d.extractionMode !== 'AUTO') {
+        <div class="jd-section">
+
+          <div class="jd-section__header">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+            Extraction Schema
+            <span class="jd-section__badge">{{ d.extractionMode }}</span>
+          </div>
+
+          @if (d.extractionSchema; as schema) {
+            @if (schema.fields; as fields) {
+              @if (fields.length > 0) {
+                <div class="jd-schema-fields">
+                  @for (field of fields; track field.name) {
+                    <div class="jd-schema-field">
+                      <div class="jd-schema-field__name">{{ field.name }}</div>
+                      <div class="jd-schema-field__selector">
+                        <code>{{ field.selector }}</code>
+                      </div>
+                      @if (field.type) {
+                        <span class="jd-schema-field__type">{{ field.type }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            @if (schema.llmPrompt) {
+              <div class="jd-schema-prompt">
+                <div class="jd-schema-prompt__label">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  LLM Prompt
+                </div>
+                <p class="jd-schema-prompt__text">{{ schema.llmPrompt }}</p>
+              </div>
+            }
+
+            @if (schema.regexPattern) {
+              <div class="jd-schema-regex">
+                <div class="jd-schema-regex__label">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="9" x2="20" y2="9"/>
+                    <line x1="4" y1="15" x2="20" y2="15"/>
+                    <line x1="10" y1="3" x2="8" y2="21"/>
+                    <line x1="16" y1="3" x2="14" y2="21"/>
+                  </svg>
+                  Regex Pattern
+                </div>
+                <code class="jd-schema-regex__code">{{ schema.regexPattern }}</code>
+              </div>
+            }
+          }
+
+        </div>
+      }
+
+      @if (d.jobType !== 'CRAWLER' && d.extractionMode === 'AUTO') {
+        <div class="jd-section jd-section--muted">
+
+          <div class="jd-section__header">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+            Extraction Schema
+            <span class="jd-section__badge jd-section__badge--auto">AUTO</span>
+          </div>
+
+          <div class="jd-auto-note">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.5 9.5a2.5 2.5 0 0 1 4.6 1.3c0 1.7-2.6 2.5-2.6 2.5"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Schema auto-detected by AI no manual selectors defined.
+          </div>
+
+        </div>
+      }
+
+      @if (d.proxyConfig?.enabled) {
+        <div class="jd-section">
+
+          <div class="jd-section__header">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Proxy Rotation
+            <span class="jd-section__badge">{{ d.proxyConfig?.rotationStrategy }}</span>
+          </div>
+
+          <div class="jd-grid">
+            <div class="jd-cell">
+              <span class="jd-cell__label">Strategy</span>
+              <span class="jd-cell__value">{{ d.proxyConfig?.rotationStrategy }}</span>
+            </div>
+
+            @if (d.proxyConfig?.maxLatencyMs) {
+              <div class="jd-cell">
+                <span class="jd-cell__label">Max Latency</span>
+                <span class="jd-cell__value">{{ d.proxyConfig?.maxLatencyMs }}<em>ms</em></span>
+              </div>
+            }
+
+            @if (d.proxyConfig?.minSuccessRate !== null && d.proxyConfig?.minSuccessRate !== undefined) {
+              <div class="jd-cell">
+                <span class="jd-cell__label">Min Success Rate</span>
+                <span class="jd-cell__value">{{ d.proxyConfig?.minSuccessRate }}</span>
+              </div>
+            }
+          </div>
+          @if (d.proxyConfig?.countries && d.proxyConfig!.countries!.length > 0) {
+            <div class="jd-url-block">
+                    <span class="jd-url-block__label">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                           <circle cx="12" cy="12" r="10"/>
+                           <line x1="2" y1="12" x2="22" y2="12"/>
+                           <path
+                             d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                          </svg>
+                           Target Countries
+                    </span>
+
+              <div class="jd-geo-chips">
+                @for (code of d.proxyConfig!.countries!; track code) {
+                  <span class="jd-geo-chip">
+                             {{ flagEmoji(code) }} {{ countryLabel(code) }}
+                    <code class="jd-geo-chip__code">{{ code }}</code>
+                         </span>
+                }
+              </div>
+
+              @if (d.proxyConfig?.strictGeo) {
+                <div class="jd-strict-geo-badge">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                  Strict Geo fail-fast if no proxy matches
+                </div>
+              }
+            </div>
+          }
+
+        </div>
+      }
+
+      <div class="jd-section">
+
+        <div class="jd-section__header">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          Browser &amp; Network
+        </div>
+
+        <div class="jd-grid">
+          <div class="jd-cell jd-cell--toggle">
+            <span class="jd-cell__label">JavaScript</span>
+            <span class="jd-toggle" [class.jd-toggle--on]="d.browserConfig.javascriptEnabled">
+              <span class="jd-toggle__dot"></span>
+              {{ d.browserConfig.javascriptEnabled ? 'Enabled' : 'Disabled' }}
+            </span>
+          </div>
+
+          <div class="jd-cell jd-cell--toggle">
+            <span class="jd-cell__label">Stealth Mode</span>
+            <span class="jd-toggle" [class.jd-toggle--on]="d.browserConfig.stealthMode">
+              <span class="jd-toggle__dot"></span>
+              {{ d.browserConfig.stealthMode ? 'Enabled' : 'Disabled' }}
+            </span>
+          </div>
+
+          <div class="jd-cell">
+            <span class="jd-cell__label">Delay Margin</span>
+            <span class="jd-cell__value">{{ d.browserConfig.requestDelayMs }}<em>ms</em></span>
+          </div>
+
+          <div class="jd-cell">
+            <span class="jd-cell__label">Page Timeout</span>
+            <span class="jd-cell__value">{{ d.browserConfig.timeoutMs }}<em>ms</em></span>
+          </div>
+        </div>
+
+        <div class="jd-delay-info">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Actual delay randomised between 500ms and {{ 500 + d.browserConfig.requestDelayMs }}ms per request.
+        </div>
+
+      </div>
+
+      <div class="jd-section">
+
+        <div class="jd-section__header">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+          </svg>
+          Retry Policy
+        </div>
+
+        <div class="jd-grid">
+          <div class="jd-cell">
+            <span class="jd-cell__label">Max Retries</span>
+            <span class="jd-cell__value">{{ d.retryPolicy.maxRetries }}</span>
+          </div>
+
+          <div class="jd-cell">
+            <span class="jd-cell__label">Initial Delay</span>
+            <span class="jd-cell__value">{{ d.retryPolicy.retryInitialDelayMs }}<em>ms</em></span>
+          </div>
+
+          <div class="jd-cell">
+            <span class="jd-cell__label">Backoff ×</span>
+            <span class="jd-cell__value">{{ d.retryPolicy.retryBackoffMultiplier }}</span>
+          </div>
+
+          <div class="jd-cell">
+            <span class="jd-cell__label">CB Reset</span>
+            <span class="jd-cell__value">{{ d.retryPolicy.circuitBreakerResetSeconds }}<em>s</em></span>
+          </div>
+
+          <div class="jd-cell jd-cell--full jd-cell--toggle">
+            <span class="jd-cell__label">Circuit Breaker</span>
+            <span class="jd-toggle" [class.jd-toggle--on]="d.retryPolicy.circuitBreakerEnabled">
+              <span class="jd-toggle__dot"></span>
+              {{ d.retryPolicy.circuitBreakerEnabled ? 'Enabled pauses on high error rate' : 'Disabled' }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="jd-footer">
+        <button class="readonly-edit-btn" (click)="cancel()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Back to jobs
+        </button>
+      </div>
+
+    }
+
+  } @else {
+
+    <div class="form-header">
+      <div class="form-header__top">
+        <div>
+          <h2 class="form-title">
+            {{ isEditMode() ? 'Edit Job' : 'New ' + jobType().charAt(0) + jobType().slice(1).toLowerCase() + ' Job' }}
+          </h2>
+          <p class="form-subtitle">
+            {{ isEditMode() ? 'Update configuration' : 'Fill in General info, then fine-tune Advanced settings' }}
+          </p>
+        </div>
+
+        @if (showChangeType() && !isEditMode()) {
+          <button class="change-type-btn" (click)="requestChangeType()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+            </svg>
+            Change type
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (created(); as c) {
+      <div class="success-card">
+        <div class="success-card__icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+
+        <div class="success-card__body">
+          <p class="success-card__title">Job created successfully!</p>
+          <p class="success-card__name">{{ c.name }}</p>
+          <p class="success-card__type">{{ c.jobType }}</p>
+
+          @if (c.triggerType === 'WEBHOOK' && c.webhookToken && c.webhookSecret) {
+            <app-webhook-config
+              [jobId]="c.id"
+              [freshCredentials]="{
+            url: webhookUrlFor(c.webhookToken),
+            token: c.webhookToken,
+            secret: c.webhookSecret,
+            enabled: c.webhookEnabled ?? true
+          }"
+            />
+          } @else {
+            <p class="success-card__hint">
+              Click <strong>Run Job</strong> on the right to launch it.
+            </p>
+          }
+        </div>
+
+        <button class="success-card__btn" (click)="createAnother()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New job
+        </button>
+      </div>
+    } @else {
+
+      <div class="tab-bar">
+        <button
+          class="tab-btn"
+          [class.tab-btn--active]="activeTab() === 'general'"
+          (click)="setTab('general')"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          </svg>
+          General
+          <span class="tab-btn__count">{{ generalSteps().length }}</span>
+        </button>
+
+        <button
+          class="tab-btn"
+          [class.tab-btn--active]="activeTab() === 'advanced'"
+          (click)="setTab('advanced')"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            <path d="M4.93 4.93a10 10 0 0 0 0 14.14"/>
+          </svg>
+          Advanced Configuration
+          <span class="tab-btn__count">{{ advancedSteps().length }}</span>
+        </button>
+
+        <div class="tab-bar__progress">
+          <div
+            class="tab-bar__progress-fill"
+            [style.width.%]="activeTab() === 'advanced' ? 100 : (currentTabStepIndex() / generalSteps().length) * 100"
+          ></div>
+        </div>
+      </div>
+
+      <div class="phase-indicator">
+        <span class="phase-indicator__step">Phase {{ activeTab() === 'general' ? 1 : 2 }} / 2</span>
+        <span class="phase-indicator__name">
+    {{ activeTab() === 'general' ? 'General' : 'Advanced Configuration' }}
+  </span>
+      </div>
+
+      <div class="step-nav">
+
+        @if (activeTab() === 'general') {
+          @for (step of generalSteps(); track step; let idx = $index, isLast = $last) {
+            <button
+              type="button"
+              class="step-nav__item"
+              [class.step-nav__item--active]="currentStep() === step"
+              [class.step-nav__item--done]="idx < currentTabStepIndex()"
+              [class.step-nav__item--clickable]="idx < currentTabStepIndex()"
+              [disabled]="idx > currentTabStepIndex()"
+              (click)="goToStep(step)"
+            >
+              <div class="step-nav__circle">
+                @if (idx < currentTabStepIndex()) {
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                } @else {
+                  {{ idx + 1 }}
+                }
+              </div>
+              <span class="step-nav__label">{{ generalStepLabels()[idx] }}</span>
+            </button>
+
+            @if (!isLast) {
+              <div class="step-nav__line" [class.step-nav__line--done]="idx < currentTabStepIndex()"></div>
+            }
+          }
+
+        } @else {
+          @for (step of advancedSteps(); track step; let idx = $index, isLast = $last) {
+            <button
+              type="button"
+              class="step-nav__item"
+              [class.step-nav__item--active]="currentStep() === step"
+              [class.step-nav__item--done]="idx < currentTabStepIndex()"
+              [class.step-nav__item--clickable]="idx < currentTabStepIndex()"
+              [disabled]="idx > currentTabStepIndex()"
+              (click)="goToStep(step)"
+            >
+              <div class="step-nav__circle">
+                @if (idx < currentTabStepIndex()) {
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                } @else {
+                  {{ idx + 1 }}
+                }
+              </div>
+              <span class="step-nav__label">{{ advancedStepLabels()[idx] }}</span>
+            </button>
+
+            @if (!isLast) {
+              <div class="step-nav__line" [class.step-nav__line--done]="idx < currentTabStepIndex()"></div>
+            }
+          }
+        }
+
+      </div>
+
+      @if (error()) {
+        <div class="alert">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ error() }}
+        </div>
+      }
+
+      <div class="workspace workspace--single">
+        <div class="workspace__form" #formScroll>
+          <form (ngSubmit)="submit()">
+
+            @if (currentStep() === 1) {
+              <div class="form-card" style="animation-delay:.05s">
+
+                <div class="form-card__header">
+                  <div class="form-card__icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="7" width="20" height="14" rx="2"/>
+                      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="form-card__title">General Information</p>
+                    <p class="form-card__desc">Basic details about this {{ jobType() | lowercase }} job</p>
+                  </div>
+                  <span class="form-card__type-badge form-card__type-badge--{{ jobType() | lowercase }}">
+                    {{ jobType() }}
+                  </span>
+                </div>
+
+                <div class="form-card__body">
+                  <div class="form-grid">
+
+                    <div class="field field--full">
+                      <label for="name">
+                        Job Name <span class="req">*</span>
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            A clear, descriptive name to identify this job in the dashboard.
+                            E.g. "Amazon TV Prices - Electronics"
+                          </span>
+                        </span>
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        [(ngModel)]="form.name"
+                        (ngModelChange)="revalidate()"
+                        name="name"
+                        placeholder="e.g. E-commerce Price Monitor"
+                        required
+                      />
+                      <span class="field__hint">Give your job an explicit name</span>
+                    </div>
+
+                    <div class="field field--full">
+                      <label for="targetUrl">
+                        Target URL <span class="req">*</span>
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            Starting URL for the scraping or crawling job.
+                            The system automatically probes the site to detect anti-bot protections.
+                          </span>
+                        </span>
+                      </label>
+
+                      <div class="input-prefix">
+                        <span class="input-prefix__icon">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                          </svg>
+                        </span>
+                        <input
+                          id="targetUrl"
+                          type="url"
+                          [(ngModel)]="form.targetUrl"
+                          (ngModelChange)="onUrlChange($event)"
+                          name="targetUrl"
+                          placeholder="https://example.com"
+                          required
+                          class="has-prefix"
+                        />
+                      </div>
+
+                      @if (probeLoading()) {
+                        <div class="probe-loading">
+                          <span class="probe-spinner"></span>
+                          <span>Analysing site…</span>
+                        </div>
+                      }
+
+                      @if (!probeLoading() && probeResult(); as pr) {
+                        @if (pr.difficulty; as diff) {
+                          <button
+                            type="button"
+                            class="probe-bar probe-bar--{{ diff.level | lowercase }}"
+                            (click)="openReport()"
+                            [attr.aria-label]="'View full scraping report. Difficulty: ' + diff.level + ', score ' + diff.score + ' out of 100'"
+                          >
+                            <div class="probe-bar__track">
+                              <div class="probe-bar__fill" [style.width.%]="diff.score"></div>
+                            </div>
+                            <span class="probe-bar__score">{{ diff.score }}</span>
+                            <span class="probe-bar__level">{{ diff.level }}</span>
+                            <span class="probe-bar__summary">{{ probeSummary(pr) }}</span>
+                            <svg class="probe-bar__arrow" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2.5">
+                              <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                          </button>
+                        } @else if (pr.signals.length > 0) {
+                          <div class="probe-signals">
+                            @for (sig of pr.signals; track sig) {
+                              <span class="probe-badge probe-badge--{{ signalConfig[sig].level }}">
+                                      {{ signalConfig[sig].label }}
+                              </span>
+                            }
+                          </div>
+                        }
+                      }
+
+                      @if (!probeLoading() && !isCrawler() && probeResult()?.detectedPagination; as dp) {
+
+                        @if (dp.deferredDetection) {
+                          <div class="probe-pagination-hint probe-pagination-hint--deferred">
+                            <div class="probe-pagination-hint__body">
+                              Choose <strong>Auto-detect</strong> below pagination will be analysed
+                              automatically when the job runs (using a stealth browser that can bypass
+                              the protection). The detected type will appear in the job logs.
+                            </div>
+                            <button
+                              type="button"
+                              class="probe-pagination-hint__apply"
+                              (click)="applyAutoMode()"
+                            >
+                              Use Auto
+                            </button>
+                          </div>
+
+                        } @else if (dp.type !== 'NONE') {
+                          <div
+                            class="probe-pagination-hint"
+                            [class.probe-pagination-hint--high]="dp.confidenceLevel === 'high'"
+                            [class.probe-pagination-hint--medium]="dp.confidenceLevel === 'medium'"
+                            [class.probe-pagination-hint--low]="dp.confidenceLevel === 'low'"
+                          >
+                            <svg
+                              class="probe-pagination-hint__icon"
+                              width="14" height="14"
+                              viewBox="0 0 24 24"
+                              fill="none" stroke="currentColor" stroke-width="2"
+                            >
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                              <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+
+                            <div class="probe-pagination-hint__body">
+                              <p class="probe-pagination-hint__title">
+                                Pagination detected: <strong>{{ detectedTypeLabel(dp.type) }}</strong>
+                                <span class="confidence-badge confidence-badge--{{ dp.confidenceLevel }}">
+                                  {{ (dp.confidence * 100) | number:'1.0-0' }}% confidence
+                                </span>
+                              </p>
+                              <p class="probe-pagination-hint__reason">{{ dp.reason }}</p>
+
+                              @if (dp.allCandidates.length > 1) {
+                                <details class="probe-pagination-hint__details">
+                                  <summary>{{ dp.allCandidates.length }} candidate(s) considered</summary>
+                                  <ul>
+                                    @for (c of dp.allCandidates; track c.type) {
+                                      <li>
+                                        <code>{{ c.type }}</code>
+                                        <span>{{ (c.confidence * 100) | number:'1.0-0' }}%</span>
+                                        <em>{{ c.reason }}</em>
+                                      </li>
+                                    }
+                                  </ul>
+                                </details>
+                              }
+                            </div>
+
+                            <button
+                              type="button"
+                              class="probe-pagination-hint__apply"
+                              (click)="applyDetectedPagination(dp)"
+                            >
+                              Use this
+                            </button>
+                          </div>
+                        }
+
+                      }
+                    </div>
+
+                    <div class="field">
+                      <label for="priority">
+                        Priority
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            Determines execution order when multiple jobs are queued.
+                            CRITICAL always runs before everything else.
+                          </span>
+                        </span>
+                      </label>
+                      <select id="priority" [(ngModel)]="form.priority" name="priority">
+                        <option value="LOW">Low</option>
+                        <option value="NORMAL">Normal</option>
+                        <option value="HIGH">High</option>
+                        <option value="CRITICAL">Critical</option>
+                      </select>
+                    </div>
+
+                    <div class="field">
+                      <label for="triggerType">
+                        Trigger Type
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            Manual: run on demand. Scheduled: runs automatically on a cron schedule.
+                            Webhook: triggered by an external HTTP call.
+                          </span>
+                        </span>
+                      </label>
+                      <select id="triggerType" [(ngModel)]="form.triggerType" (ngModelChange)="revalidate()" name="triggerType">
+                        <option value="MANUAL">Manual</option>
+                        <option value="SCHEDULED">Scheduled (Cron)</option>
+                        <option value="WEBHOOK">Webhook</option>
+                      </select>
+                    </div>
+
+                    @if (form.triggerType === 'SCHEDULED') {
+                      <div class="field field--full">
+                        <label for="cron">
+                          Cron Expression
+                          <span class="info-tip info-tip--inline">
+                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                      stroke-width="2">
+                                  <circle cx="12" cy="12" r="10"/>
+                                   <line x1="12" y1="8" x2="12" y2="12"/>
+                                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                  </svg>
+                            <span class="info-tip__bubble">
+                                Standard cron format: minute hour day month weekday.
+                                E.g. "0 */6 * * *" = every 6 h, "0 9 * * 1-5" = weekdays at 9 AM.
+                            </span>
+                          </span>
+                        </label>
+                        <input
+                          id="cron"
+                          type="text"
+                          [ngModel]="form.cronExpression"
+                          (ngModelChange)="onCronChange($event)"
+                          name="cronExpression"
+                          placeholder="0 */6 * * *"
+                        />
+                        <span class="field__hint">e.g. <code>0 */6 * * *</code> = every 6 hours</span>
+
+                        @if (cronPreviewLoading()) {
+                          <div class="cron-preview cron-preview--loading">
+                            <span class="probe-spinner"></span>
+                            <span>Computing next runs…</span>
+                          </div>
+                        } @else if (cronPreviewError()) {
+                          <div class="cron-preview cron-preview--error">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            Invalid cron expression
+                          </div>
+                        } @else if (cronPreview().length > 0) {
+                          <div class="cron-preview">
+                            <div class="cron-preview__header">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                   stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                              </svg>
+                              Next 5 runs
+                            </div>
+                            <ul class="cron-preview__list">
+                              @for (t of cronPreview(); track t) {
+                                <li class="cron-preview__item">
+                                  <span class="cron-preview__dot"></span>
+                                  {{ t | date:'EEE, MMM d — HH:mm' }}
+                                </li>
+                              }
+                            </ul>
+                          </div>
+                        }
+                      </div>
+                    }
+                    @if (form.triggerType === 'WEBHOOK') {
+                      <div class="field field--full">
+                        @if (isEditMode() && editingJobId(); as jobId) {
+                          <app-webhook-config [jobId]="jobId"/>
+                        } @else {
+
+                        }
+                      </div>
+                    }
+
+
+                  </div>
+
+                  @if (isCrawler()) {
+                    <div class="crawler-info-banner">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                      <div>
+                        <strong>Automatic extraction</strong>
+                        <span>
+                          A crawler only discovers and imports links from the target site.
+                          No custom extraction schema is needed.
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <div class="form-card__footer">
+                  <button type="button" class="btn btn--secondary" (click)="cancel()">Cancel</button>
+                  <button type="button" class="btn btn--primary" (click)="goToStep(2)">
+                    Next {{ isCrawler() ? 'Crawler' : 'Scraper' }} Config
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+                </div>
+
+              </div>
+            }
+
+            <!-- ─── STEP 2 — Scraper / Crawler Configuration ─── -->
+            @if (currentStep() === 2) {
+              <div class="form-card" style="animation-delay:.05s">
+
+                <div class="form-card__header">
+                  <div class="form-card__icon" [class.form-card__icon--crawler]="jobType() === 'CRAWLER'">
+                    @if (jobType() === 'SCRAPER') {
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                    } @else {
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      </svg>
+                    }
+                  </div>
+                  <div>
+                    <p class="form-card__title">
+                      {{ jobType() === 'SCRAPER' ? 'Scraper Configuration' : 'Crawler Configuration' }}
+                    </p>
+                    <p class="form-card__desc">
+                      {{
+                        jobType() === 'SCRAPER'
+                          ? 'Configure URLs, pagination and page interaction'
+                          : 'Configure exploration depth and URL filters'
+                      }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="form-card__body">
+
+                  @if (jobType() === 'SCRAPER') {
+
+                    <!-- ─── 1. Single Page Mode : la décision, en premier ─── -->
+                    <div class="section-divider"><span>Page Mode</span></div>
+
+                    <div class="toggle-group">
+                      <button
+                        type="button"
+                        class="toggle-item"
+                        [class.toggle-item--on]="form.scraperConfig.singlePageMode"
+                        (click)="toggleSinglePageMode()"
+                      >
+                        <div class="toggle-item__info">
+                          <span class="toggle-item__name">
+                            Single Page Mode
+                            <span class="info-tip info-tip--inline">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                   stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                              </svg>
+                              <span class="info-tip__bubble">
+                                Only scrapes the target URL pagination and discovered links are ignored.
+                              </span>
+                            </span>
+                          </span>
+                          <span class="toggle-item__sub">Only scrape the target URL, no pagination</span>
+                        </div>
+                        <div class="toggle-switch" [class.toggle-switch--on]="form.scraperConfig.singlePageMode"></div>
+                      </button>
+                    </div>
+
+                    <!-- ─── 2. Pagination : visible uniquement si Single Page OFF ─── -->
+                    @if (!form.scraperConfig.singlePageMode) {
+                      <div class="pagination-block">
+                        <div class="section-divider"><span>Pagination</span></div>
+
+                        <div class="form-grid">
+                          <div class="field">
+                            <label for="scraperPaginationType">
+                              Pagination Type
+                              <span class="info-tip info-tip--inline">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                  <circle cx="12" cy="12" r="10"/>
+                                  <line x1="12" y1="8" x2="12" y2="12"/>
+                                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                                <span class="info-tip__bubble">
+                                  Strategy to navigate paginated content. URL Param is best for SPA sites.
+                                </span>
+                              </span>
+                            </label>
+                            <select
+                              id="scraperPaginationType"
+                              [(ngModel)]="form.scraperConfig.paginationType"
+                              name="scraperPaginationType"
+                            >
+                              <option value="NONE">None</option>
+                              <option value="AUTO">Auto-detect (recommended)</option>
+                              <option value="NUMBERED">Numbered</option>
+                              <option value="INFINITE_SCROLL">Infinite Scroll</option>
+                              <option value="LOAD_MORE">Load More</option>
+                              <option value="NEXT_BUTTON">Next Button</option>
+                              <option value="URL_PARAM">URL Param (?p=1, ?page=2…)</option>
+                            </select>
+                          </div>
+
+                          @if (form.scraperConfig.paginationType !== 'NONE') {
+                            <div class="field">
+                              <label for="scraperMaxPaginationPages">
+                                Max Pagination Pages
+                                <span class="info-tip info-tip--inline">
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                       stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="8" x2="12" y2="12"/>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                  </svg>
+                                  <span class="info-tip__bubble">Maximum number of pagination pages to follow per URL.</span>
+                                </span>
+                              </label>
+                              <input
+                                id="scraperMaxPaginationPages"
+                                type="number"
+                                [(ngModel)]="form.scraperConfig.maxPaginationPages"
+                                name="scraperMaxPaginationPages"
+                                min="1"
+                                placeholder="10"
+                              />
+                            </div>
+
+                            <div class="field field--full">
+                              <label for="scraperPaginationSelector">
+                                {{ paginationLabels[form.scraperConfig.paginationType].label }}
+                                <span class="info-tip info-tip--inline">
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                       stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="8" x2="12" y2="12"/>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                  </svg>
+                                  <span class="info-tip__bubble">
+                                    For URL_PARAM: query param name (e.g. "p" for ?p=1).
+                                    For other types: CSS selector.
+                                  </span>
+                                </span>
+                              </label>
+                              <input
+                                id="scraperPaginationSelector"
+                                type="text"
+                                [(ngModel)]="form.scraperConfig.paginationSelector"
+                                name="scraperPaginationSelector"
+                                [placeholder]="paginationLabels[form.scraperConfig.paginationType].placeholder"
+                              />
+                              <span class="field__hint">
+                                {{ paginationLabels[form.scraperConfig.paginationType].hint }}
+                              </span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    <!-- ─── 3. URLs & Selectors ─── -->
+                    <div class="section-divider"><span>URLs &amp; Selectors</span></div>
+
+                    <div class="form-grid">
+
+                      <div class="field field--full">
+                        <label for="additional-links">
+                          Additional links
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Extra URLs to scrape alongside the target URL, using the same extraction schema.
+                              Useful for scraping multiple product pages from the same site.
+                            </span>
+                          </span>
+                        </label>
+                        <div class="seed-url-input">
+                          <input
+                            type="url"
+                            [(ngModel)]="newSeedUrl"
+                            name="newSeedUrl"
+                            placeholder="https://example.com/page-2"
+                            class="has-prefix"
+                            (keydown.enter)="$event.preventDefault(); addSeedUrl()"
+                          />
+                          <button type="button" class="btn btn--sm" (click)="addSeedUrl()">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <line x1="12" y1="5" x2="12" y2="19"/>
+                              <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Add
+                          </button>
+                        </div>
+
+                        @if (form.scraperConfig.seedUrls.length > 0) {
+                          <div class="seed-url-list">
+                            @for (url of form.scraperConfig.seedUrls; track url; let i = $index) {
+                              <div class="seed-url-chip">
+                                <code>{{ url }}</code>
+                                <button
+                                  type="button"
+                                  class="seed-url-chip__remove"
+                                  (click)="removeSeedUrl(i)"
+                                >
+                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                       stroke-width="2.5">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        <span class="field__hint">
+                          {{ form.scraperConfig.seedUrls.length }} seed URL(s) + target URL
+                        </span>
+                      </div>
+
+                      <div class="field field--full">
+                        <label for="waitForSelector">
+                          Wait For Selector
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              CSS selector to wait for before extracting.
+                              Required for JS-rendered sites. E.g. ".product-grid", "#results"
+                            </span>
+                          </span>
+                        </label>
+                        <input
+                          id="waitForSelector"
+                          type="text"
+                          [(ngModel)]="form.scraperConfig.waitForSelector"
+                          name="waitForSelector"
+                          placeholder="e.g. .product-list, #main-content"
+                        />
+                      </div>
+
+                      <div class="field field--full">
+                        <label for="clickBeforeExtract">
+                          Click Before Extract
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              CSS selector of an element to click before extraction.
+                              Useful for dismissing cookie banners. E.g. "button.accept-cookies"
+                            </span>
+                          </span>
+                        </label>
+                        <input
+                          id="clickBeforeExtract"
+                          type="text"
+                          [(ngModel)]="form.scraperConfig.clickBeforeExtract"
+                          name="clickBeforeExtract"
+                          placeholder="e.g. button.accept-cookies"
+                        />
+                      </div>
+
+                    </div>
+
+                    <!-- ─── 4. Page Interaction (Scroll To Bottom seul) ─── -->
+                    <div class="section-divider"><span>Page Interaction</span></div>
+
+                    <div class="toggle-group">
+                      <button
+                        type="button"
+                        class="toggle-item"
+                        [class.toggle-item--on]="form.scraperConfig.scrollToBottom"
+                        (click)="toggleScrollToBottom()"
+                      >
+                        <div class="toggle-item__info">
+                          <span class="toggle-item__name">
+                            Scroll To Bottom
+                            <span class="info-tip info-tip--inline">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                   stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                              </svg>
+                              <span class="info-tip__bubble">
+                                Scrolls to the bottom of the page before extracting.
+                                Required for infinite-scroll pages.
+                              </span>
+                            </span>
+                          </span>
+                          <span class="toggle-item__sub">Auto-scroll to load lazy-loaded content</span>
+                        </div>
+                        <div class="toggle-switch" [class.toggle-switch--on]="form.scraperConfig.scrollToBottom"></div>
+                      </button>
+
+                    </div>
+                    <div class="section-divider"><span>Pre-Extract Actions</span></div>
+
+                    <!-- ─── NLP assistant (non-technical) — fills the manual editor below ─── -->
+                    <div class="nlp-planner">
+                      <div class="nlp-planner__head">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M12 2a7 7 0 0 0-7 7c0 2.4 1.2 4.5 3 5.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3c1.8-1.2 3-3.3 3-5.7a7 7 0 0 0-7-7z"/>
+                          <line x1="9" y1="21" x2="15" y2="21"/>
+                        </svg>
+                        <div>
+                          <strong>Describe the steps in plain words</strong>
+                          <span>e.g. "click 'Afficher le prix', type postal code 59000, pick the first store, wait for the price"</span>
+                        </div>
+                      </div>
+
+                      <div class="nlp-planner__input">
+    <textarea
+      rows="2"
+      [ngModel]="nlpInstruction()"
+      (ngModelChange)="nlpInstruction.set($event)"
+      name="nlpInstruction"
+      placeholder="Tell us what to do on the page before extracting…"
+    ></textarea>
+                        <button
+                          type="button"
+                          class="btn btn--primary btn--sm"
+                          [disabled]="nlpLoading()"
+                          (click)="generateActionsFromNlp()"
+                        >
+                          @if (nlpLoading()) {
+                            <span class="spinner"></span> Generating…
+                          } @else {
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                            </svg>
+                            Generate steps
+                          }
+                        </button>
+                      </div>
+
+                      @if (nlpError()) {
+                        <div class="nlp-planner__error">{{ nlpError() }}</div>
+                      }
+
+                      @if (nlpPreview(); as preview) {
+                        <div class="nlp-preview">
+                          <div class="nlp-preview__head">
+        <span class="nlp-preview__title">
+          {{ preview.length }} step(s) suggested
+          @if (nlpGrounded()) {
+            <span class="nlp-preview__badge nlp-preview__badge--ok">analysed the live page</span>
+          } @else {
+            <span class="nlp-preview__badge">from description only — review selectors</span>
+          }
+        </span>
+                            @if (nlpReasoning()) {
+                              <span class="nlp-preview__reason">{{ nlpReasoning() }}</span>
+                            }
+                          </div>
+
+                          <ol class="nlp-preview__list">
+                            @for (a of preview; track $index; let i = $index) {
+                              <li class="nlp-preview__item">
+                                <span class="nlp-preview__idx">{{ i + 1 }}</span>
+                                <span class="nlp-preview__type">{{ pageActionMeta[a.type].label }}</span>
+                                <span class="nlp-preview__detail">
+              {{ a.label || a.selector || a.value || '—' }}
+                                  @if (a.optional) { <em>(optional)</em> }
+            </span>
+                              </li>
+                            }
+                          </ol>
+
+                          <div class="nlp-preview__actions">
+                            <button type="button" class="btn btn--secondary btn--sm" (click)="discardGeneratedActions()">
+                              Discard
+                            </button>
+                            @if (form.scraperConfig.preExtractActions.length > 0) {
+                              <button type="button" class="action-clear-btn" (click)="replaceWithGeneratedActions()">
+                                Replace existing
+                              </button>
+                            }
+                            <button type="button" class="btn btn--primary btn--sm" (click)="insertGeneratedActions()">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                              Add to steps
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                    <div class="actions-block">
+
+                      @if (form.scraperConfig.preExtractActions.length > 0) {
+                        <ol class="action-list">
+                          @for (action of form.scraperConfig.preExtractActions; track trackByIndex($index); let i = $index, isFirst = $first, isLast = $last) {
+                            <li class="action-item">
+
+                              <div class="action-item__order">
+                                <button type="button" class="action-item__move" [disabled]="isFirst" (click)="movePageAction(i, -1)" aria-label="Move up">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="18 15 12 9 6 15"/>
+                                  </svg>
+                                </button>
+                                <span class="action-item__index">{{ i + 1 }}</span>
+                                <button type="button" class="action-item__move" [disabled]="isLast" (click)="movePageAction(i, 1)" aria-label="Move down">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                  </svg>
+                                </button>
+                              </div>
+
+                              <div class="action-item__body">
+                                <div class="action-item__row">
+                                  <select
+                                    class="action-item__type"
+                                    [ngModel]="action.type"
+                                    [name]="'actionType_' + i"
+                                    (ngModelChange)="onActionTypeChange(i, $event)"
+                                  >
+                                    @for (t of pageActionTypes; track t) {
+                                      <option [value]="t">{{ pageActionMeta[t].label }}</option>
+                                    }
+                                  </select>
+
+                                  @if (pageActionMeta[action.type].needsSelector) {
+                                    <input
+                                      type="text"
+                                      class="action-item__selector"
+                                      [(ngModel)]="action.selector"
+                                      [name]="'actionSelector_' + i"
+                                      [placeholder]="pageActionMeta[action.type].selectorPlaceholder || 'CSS selector'"
+                                    />
+                                  }
+
+                                  @if (pageActionMeta[action.type].needsValue) {
+                                    <input
+                                      [type]="action.type === 'WAIT_MS' ? 'number' : 'text'"
+                                      class="action-item__value"
+                                      [(ngModel)]="action.value"
+                                      [name]="'actionValue_' + i"
+                                      [placeholder]="pageActionMeta[action.type].valuePlaceholder || ''"
+                                    />
+                                  }
+
+                                  <button type="button" class="action-item__remove" (click)="removePageAction(i)" aria-label="Remove action">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                      <line x1="18" y1="6" x2="6" y2="18"/>
+                                      <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                  </button>
+                                </div>
+
+                                <div class="action-item__meta">
+                                  <span class="action-item__hint">{{ pageActionMeta[action.type].hint }}</span>
+
+                                  @if (action.type === 'WAIT_FOR_SELECTOR') {
+                                    <label class="action-item__inline-field">
+                                      timeout
+                                      <input
+                                        type="number"
+                                        [(ngModel)]="action.timeoutMs"
+                                        [name]="'actionTimeout_' + i"
+                                        min="1000"
+                                        placeholder="15000"
+                                      />
+                                      ms
+                                    </label>
+                                  }
+
+                                  <label class="action-item__optional">
+                                    <input type="checkbox" [(ngModel)]="action.optional" [name]="'actionOptional_' + i"/>
+                                    Optional (skip on failure)
+                                  </label>
+                                </div>
+                              </div>
+                            </li>
+                          }
+                        </ol>
+                      } @else {
+                        <div class="action-empty">No actions yet add steps below or insert a ready-made template.</div>
+                      }
+
+                      <div class="action-toolbar">
+                        <div class="action-toolbar__add">
+                          <select [ngModel]="newActionType()" (ngModelChange)="newActionType.set($event)" name="newActionType">
+                            @for (t of pageActionTypes; track t) {
+                              <option [value]="t">{{ pageActionMeta[t].label }}</option>
+                            }
+                          </select>
+                          <button type="button" class="btn btn--sm" (click)="addPageAction()">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <line x1="12" y1="5" x2="12" y2="19"/>
+                              <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Add step
+                          </button>
+                        </div>
+
+                        <div class="action-toolbar__presets">
+                          <button type="button" class="action-preset-btn" (click)="insertAuchanTemplate()">
+                            Insert Auchan price template
+                          </button>
+                          @if (form.scraperConfig.preExtractActions.length > 0) {
+                            <button type="button" class="action-clear-btn" (click)="clearPageActions()">Clear all</button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+
+                  @if (jobType() === 'CRAWLER') {
+                    <div class="form-grid">
+
+                      <div class="field">
+                        <label for="maxPages">
+                          Max Pages
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">Maximum total number of pages the crawler will visit.</span>
+                          </span>
+                        </label>
+                        <input
+                          id="maxPages"
+                          type="number"
+                          [(ngModel)]="form.crawlerConfig.maxPages"
+                          name="maxPages"
+                          min="1"
+                          placeholder="100"
+                        />
+                      </div>
+
+                      <div class="field">
+                        <label for="maxDepth">
+                          Max Depth
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Maximum link depth from the starting URL.
+                              0 = target only, 1 = direct links, 2 = links of links.
+                            </span>
+                          </span>
+                        </label>
+                        <input
+                          id="maxDepth"
+                          type="number"
+                          [(ngModel)]="form.crawlerConfig.maxDepth"
+                          name="maxDepth"
+                          min="0"
+                          max="20"
+                          placeholder="2"
+                        />
+                      </div>
+
+                      <div class="field field--full">
+                        <label for="urlInclude">
+                          URL Include Patterns
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Comma-separated regex patterns.
+                              Only URLs matching at least one pattern will be crawled.
+                            </span>
+                          </span>
+                        </label>
+                        <input
+                          id="urlInclude"
+                          type="text"
+                          [(ngModel)]="form.crawlerConfig.urlIncludePatterns"
+                          name="urlIncludePatterns"
+                          placeholder="e.g. /products/.*, /category/.*"
+                        />
+                      </div>
+
+                      <div class="field field--full">
+                        <label for="urlExclude">
+                          URL Exclude Patterns
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Comma-separated regex patterns. Matching URLs will be skipped entirely.
+                            </span>
+                          </span>
+                        </label>
+                        <input
+                          id="urlExclude"
+                          type="text"
+                          [(ngModel)]="form.crawlerConfig.urlExcludePatterns"
+                          name="urlExcludePatterns"
+                          placeholder="e.g. /login, /admin/.*"
+                        />
+                      </div>
+
+                      <div class="field field--full">
+                        <label for="sitemapUrl">
+                          Sitemap URL
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Optional XML sitemap URL. Enables much faster URL discovery.
+                              Usually at /sitemap.xml.
+                            </span>
+                          </span>
+                        </label>
+                        <input
+                          id="sitemapUrl"
+                          type="url"
+                          [(ngModel)]="form.crawlerConfig.sitemapUrl"
+                          name="sitemapUrl"
+                          placeholder="https://example.com/sitemap.xml"
+                        />
+                        <span class="field__hint">Optional use sitemap for faster URL discovery</span>
+                      </div>
+
+                    </div>
+
+                    <div class="section-divider"><span>Crawl Behavior</span></div>
+
+                    <div class="toggle-group">
+                      <button
+                        type="button"
+                        class="toggle-item"
+                        [class.toggle-item--on]="form.crawlerConfig.followRedirects"
+                        (click)="toggleFollowRedirects()"
+                      >
+                        <div class="toggle-item__info">
+                          <span class="toggle-item__name">
+                            Follow Redirects
+                            <span class="info-tip info-tip--inline">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                   stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                              </svg>
+                              <span class="info-tip__bubble">
+                                Automatically follows HTTP 301/302 redirects. Recommended in most cases.
+                              </span>
+                            </span>
+                          </span>
+                          <span class="toggle-item__sub">Automatically follow HTTP 301/302 redirects</span>
+                        </div>
+                        <div class="toggle-switch" [class.toggle-switch--on]="form.crawlerConfig.followRedirects"></div>
+                      </button>
+
+                      <button
+                        type="button"
+                        class="toggle-item"
+                        [class.toggle-item--on]="form.crawlerConfig.respectRobotsTxt"
+                        (click)="toggleRespectRobotsTxt()"
+                      >
+                        <div class="toggle-item__info">
+                          <span class="toggle-item__name">
+                            Respect robots.txt
+                            <span class="info-tip info-tip--inline">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                   stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                              </svg>
+                              <span class="info-tip__bubble">
+                                Honors the crawling rules defined by the site. Recommended for ethical usage.
+                              </span>
+                            </span>
+                          </span>
+                          <span class="toggle-item__sub">Obey the website's crawling rules</span>
+                        </div>
+                        <div class="toggle-switch"
+                             [class.toggle-switch--on]="form.crawlerConfig.respectRobotsTxt"></div>
+                      </button>
+                    </div>
+                  }
+
+                </div>
+
+                <div class="form-card__footer">
+                  <button type="button" class="btn btn--secondary" (click)="prevStep()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--primary"
+                    [class.btn--tab-transition]="isCrawler()"
+                    (click)="nextStep()"
+                  >
+                    @if (isCrawler()) {
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                        <path d="M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                      </svg>
+                    }
+                    {{ isCrawler() ? 'Advanced Configuration' : 'Next Schema' }}
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+                </div>
+
+              </div>
+            }
+
+            <!-- ─── STEP 3 — Browser & Network ─── -->
+            @if (currentStep() === 3) {
+              <div class="form-card" style="animation-delay:.05s">
+
+                <div class="form-card__header">
+                  <div class="form-card__icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="3" width="20" height="14" rx="2"/>
+                      <line x1="8" y1="21" x2="16" y2="21"/>
+                      <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="form-card__title">Browser &amp; Network</p>
+                    <p class="form-card__desc">Request timing and anti-bot protection</p>
+                  </div>
+                </div>
+
+                <div class="form-card__body">
+                  <div class="form-grid">
+
+                    <div class="field">
+                      <label for="requestDelayMs">
+                        Delay Margin (ms)
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            Maximum extra delay added between requests. Actual delay is randomized between
+                            500 ms and 500 ms + this value. E.g. 2000 ms → between 500 ms and 2 500 ms.
+                          </span>
+                        </span>
+                      </label>
+                      <input
+                        id="requestDelayMs"
+                        type="number"
+                        [(ngModel)]="form.browserConfig.requestDelayMs"
+                        name="requestDelayMs"
+                        min="0"
+                        placeholder="2000"
+                      />
+                      <span class="field__hint">e.g. 2000ms → actual delay between 500ms and 2500ms</span>
+                    </div>
+
+                    <div class="field">
+                      <label for="timeoutMs">
+                        Page Timeout (ms)
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            Maximum time to wait for a page to fully load before marking it as failed.
+                            Recommended: 30 000 ms.
+                          </span>
+                        </span>
+                      </label>
+                      <input
+                        id="timeoutMs"
+                        type="number"
+                        [(ngModel)]="form.browserConfig.timeoutMs"
+                        name="timeoutMs"
+                        min="1000"
+                        placeholder="30000"
+                      />
+                    </div>
+
+                  </div>
+
+                  <div class="section-divider"><span>Anti-Bot Protection</span></div>
+
+                  <div class="toggle-group">
+                    <button
+                      type="button"
+                      class="toggle-item"
+                      [class.toggle-item--on]="form.browserConfig.javascriptEnabled"
+                      (click)="toggleJavascriptEnabled()"
+                    >
+                      <div class="toggle-item__info">
+                        <span class="toggle-item__name">
+                          JavaScript Rendering
+                          <span class="info-tip info-tip--inline">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Uses a headless browser (Chromium) to execute JavaScript.
+                              Required for dynamic sites (React, Angular, Vue).
+                            </span>
+                          </span>
+                        </span>
+                        <span class="toggle-item__sub">Execute JS via headless browser</span>
+                      </div>
+                      <div class="toggle-switch" [class.toggle-switch--on]="form.browserConfig.javascriptEnabled"></div>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="toggle-item"
+                      [class.toggle-item--on]="form.browserConfig.stealthMode"
+                      (click)="toggleStealthMode()"
+                    >
+                      <div class="toggle-item__info">
+                        <span class="toggle-item__name">
+                          Stealth Mode
+                          <span class="info-tip info-tip--inline">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Hides browser automation signals.
+                              Recommended for Cloudflare, DataDome, or similar anti-bot systems.
+                            </span>
+                          </span>
+                        </span>
+                        <span class="toggle-item__sub">Mask navigator.webdriver and randomize fingerprint</span>
+                      </div>
+                      <div class="toggle-switch" [class.toggle-switch--on]="form.browserConfig.stealthMode"></div>
+                    </button>
+                  </div>
+
+                  <div class="section-divider"><span>Authenticated Session</span></div>
+
+                  <div class="toggle-group">
+                    <button
+                      type="button"
+                      class="toggle-item"
+                      [class.toggle-item--on]="form.browserConfig.session?.enabled"
+                      (click)="toggleSessionEnabled()"
+                    >
+                      <div class="toggle-item__info">
+                         <span class="toggle-item__name">
+                             Login Session
+                                    <span class="info-tip info-tip--inline">
+                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                      <circle cx="12" cy="12" r="10"/>
+                                      <line x1="12" y1="8" x2="12" y2="12"/>
+                                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                     </svg>
+                            <span class="info-tip__bubble">
+                            Maintain an authenticated session for sites that require login.
+                            The session is captured after a successful run and reused on the next ones.
+                              </span>
+                         </span>
+                      </span>
+                        <span class="toggle-item__sub">Scrape pages that require a logged-in user</span>
+                      </div>
+                      <div class="toggle-switch" [class.toggle-switch--on]="form.browserConfig.session?.enabled"></div>
+                    </button>
+                  </div>
+
+                  @if (form.browserConfig.session?.enabled) {
+
+                    <div class="form-grid session-grid">
+
+                      <div class="field field--full">
+                        <label for="sessionMode">Login Method</label>
+                        <select id="sessionMode" [(ngModel)]="form.browserConfig.session!.mode" name="sessionMode">
+                          <option value="FORM">Form login (username / password)</option>
+                          <option value="COOKIE_IMPORT">Import cookies (storageState JSON)</option>
+                        </select>
+                      </div>
+
+                      @if (form.browserConfig.session?.mode === 'FORM') {
+
+                        <div class="field field--full">
+                          <label for="sessionLoginUrl">Login Page URL <span class="req">*</span></label>
+                          <input id="sessionLoginUrl" type="url" name="sessionLoginUrl"
+                                 [(ngModel)]="form.browserConfig.session!.loginUrl"
+                                 placeholder="https://example.com/login"/>
+                        </div>
+
+                        <div class="field">
+                          <label for="sessionUsername">Username / Email <span class="req">*</span></label>
+                          <input id="sessionUsername" type="text" name="sessionUsername" autocomplete="off"
+                                 [(ngModel)]="form.browserConfig.session!.username"
+                                 placeholder="user@example.com"/>
+                          <span class="field__hint">Stored encrypted, never returned by the API</span>
+                        </div>
+
+                        <div class="field">
+                          <label for="sessionPassword">Password <span class="req">*</span></label>
+                          <input id="sessionPassword" type="password" name="sessionPassword" autocomplete="new-password"
+                                 [(ngModel)]="form.browserConfig.session!.password"
+                                 placeholder="••••••••"/>
+                          <span class="field__hint">Encrypted at rest (AES-256-GCM)</span>
+                        </div>
+
+                        <div class="field">
+                          <label for="sessionUserSel">Username Field Selector <span class="req">*</span></label>
+                          <input id="sessionUserSel" type="text" name="sessionUserSel"
+                                 [(ngModel)]="form.browserConfig.session!.usernameSelector"
+                                 placeholder="#email, input[name=login]"/>
+                        </div>
+
+                        <div class="field">
+                          <label for="sessionPassSel">Password Field Selector <span class="req">*</span></label>
+                          <input id="sessionPassSel" type="text" name="sessionPassSel"
+                                 [(ngModel)]="form.browserConfig.session!.passwordSelector"
+                                 placeholder="#password, input[type=password]"/>
+                        </div>
+
+                        <div class="field">
+                          <label for="sessionSubmitSel">Submit Button Selector <span class="req">*</span></label>
+                          <input id="sessionSubmitSel" type="text" name="sessionSubmitSel"
+                                 [(ngModel)]="form.browserConfig.session!.submitSelector"
+                                 placeholder="button[type=submit]"/>
+                        </div>
+
+                        <div class="field">
+                          <label for="sessionSuccessSel">
+                            Success Selector
+                            <span class="info-tip info-tip--inline">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                 <circle cx="12" cy="12" r="10"/>
+                                  <line x1="12" y1="8" x2="12" y2="12"/>
+                                 <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                            <span class="info-tip__bubble">
+                                A selector that only appears once logged in (e.g. an avatar or logout link).
+                                 Used to confirm the login succeeded. Optional but recommended.
+                            </span>
+                          </span>
+                          </label>
+                          <input id="sessionSuccessSel" type="text" name="sessionSuccessSel"
+                                 [(ngModel)]="form.browserConfig.session!.successSelector"
+                                 placeholder=".user-avatar, a[href*=logout]"/>
+                        </div>
+
+                      }
+
+                      @if (form.browserConfig.session?.mode === 'COOKIE_IMPORT') {
+                        <div class="field field--full">
+                          <label for="sessionStorageState">
+                            storageState JSON <span class="req">*</span>
+                            <span class="info-tip info-tip--inline">
+                                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                   <circle cx="12" cy="12" r="10"/>
+                                   <line x1="12" y1="8" x2="12" y2="12"/>
+                                   <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                   </svg>
+                            <span class="info-tip__bubble">
+                                Paste a Playwright storageState export (cookies + localStorage) from a
+                                browser already logged into the target site.
+                            </span>
+                           </span>
+                          </label>
+                          <textarea id="sessionStorageState" name="sessionStorageState" rows="6"
+                                    [(ngModel)]="form.browserConfig.session!.importedStorageState"
+                                    placeholder='{ "cookies": [...], "origins": [...] }'></textarea>
+                          <span class="field__hint">
+                                @if (isEditMode()) {
+                                  Leave blank to keep the saved password
+                                } @else {
+                                  Encrypted at rest (AES-256-GCM)
+                                }
+                          </span>
+                        </div>
+                      }
+
+                    </div>
+                  }
+                </div>
+
+                <div class="form-card__footer">
+                  <!-- Step 3 → step 2 crosses back to general tab -->
+                  <button type="button" class="btn btn--secondary btn--tab-back" (click)="prevStep()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    General
+                  </button>
+                  <button type="button" class="btn btn--primary" (click)="nextStep()">
+                    Next Proxy
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+                </div>
+
+              </div>
+            }
+
+            <!-- ─── STEP 4 — Extraction Schema (Scraper only) ─── -->
+            @if (currentStep() === 4 && !isCrawler()) {
+              <div class="form-card" style="animation-delay:.05s">
+
+                <div class="form-card__header">
+                  <div class="form-card__icon form-card__icon--pink">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="16 18 22 12 16 6"/>
+                      <polyline points="8 6 2 12 8 18"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="form-card__title">{{ schemaStepTitle() }}</p>
+                    <p class="form-card__desc">Define what data to extract from the target pages</p>
+                  </div>
+                </div>
+
+                <div class="form-card__body" id="schemaBuilderAnchor">
+                  <app-schema-builder
+                    [mode]="form.extractionMode"
+                    [schema]="form.extractionSchema"
+                    [targetUrl]="form.targetUrl"
+                    [jobId]="editingJobId()"
+                    (schemaChange)="onSchemaChange($event)"
+                    (modeChange)="onModeChange($event)"
+                  ></app-schema-builder>
+                </div>
+
+                <div class="form-card__footer">
+                  <button type="button" class="btn btn--secondary" (click)="prevStep()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    Previous
+                  </button>
+                  <button type="button" class="btn btn--primary btn--tab-transition" (click)="nextStep()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                      <path d="M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                    </svg>
+                    Advanced Configuration
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+                </div>
+
+              </div>
+            }
+
+            <!-- ─── STEP 6 — Proxy Rotation ─── -->
+            @if (currentStep() === 6) {
+              <div class="form-card" style="animation-delay:.05s">
+
+                <div class="form-card__header">
+                  <div class="form-card__icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="form-card__title">Proxy Rotation</p>
+                    <p class="form-card__desc">Rotate through anonymous IPs to bypass rate limits</p>
+                  </div>
+                </div>
+
+                <div class="form-card__body">
+                  <div class="toggle-group">
+                    <button
+                      type="button"
+                      class="toggle-item"
+                      [class.toggle-item--on]="form.proxyConfig.enabled"
+                      (click)="toggleProxyEnabled()"
+                    >
+                      <div class="toggle-item__info">
+                        <span class="toggle-item__name">
+                          Use Proxy Pool
+                          <span class="info-tip info-tip--inline">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Routes requests through rotating proxies from the global pool.
+                              The pool is refreshed automatically every 30 minutes.
+                            </span>
+                          </span>
+                        </span>
+                        <span class="toggle-item__sub">Route requests through rotating proxies</span>
+                      </div>
+                      <div class="toggle-switch" [class.toggle-switch--on]="form.proxyConfig.enabled"></div>
+                    </button>
+                  </div>
+
+                  @if (form.proxyConfig.enabled) {
+                    <div class="section-divider"><span>Selection Criteria</span></div>
+
+                    <div class="form-grid">
+
+                      <div class="field field--full">
+                        <label for="rotationStrategy">
+                          Rotation Strategy
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              How to choose the next proxy. Random / Round Robin / Least Used / Fastest.
+                              Independent from country filtering.
+                            </span>
+                          </span>
+                        </label>
+                        <select
+                          id="rotationStrategy"
+                          [(ngModel)]="form.proxyConfig.rotationStrategy"
+                          name="rotationStrategy"
+                        >
+                          <option value="RANDOM">Random</option>
+                          <option value="ROUND_ROBIN">Round Robin</option>
+                          <option value="LEAST_USED">Least Used</option>
+                          <option value="FASTEST">Fastest</option>
+                        </select>
+                        <span class="field__hint">
+                          {{ rotationStrategyLabels[form.proxyConfig.rotationStrategy].hint }}
+                        </span>
+                      </div>
+
+                      <!-- ─── NEW : Target Countries multiselect ─── -->
+                      <div class="field field--full">
+                        <label for="countryAdd">
+                          Target Countries
+                          <span class="info-tip info-tip--inline">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Restrict the rotation to proxies from these countries (geo-restricted content).
+                              Leave empty to use any country.
+                            </span>
+                          </span>
+                        </label>
+
+                        @if (form.proxyConfig.countries && form.proxyConfig.countries.length > 0) {
+                          <div class="seed-url-list">
+                            @for (code of form.proxyConfig.countries; track code) {
+                              <div class="seed-url-chip">
+                                <code>{{ flagEmoji(code) }} {{ countryLabel(code) }} ({{ code }})</code>
+                                <button type="button" class="seed-url-chip__remove" (click)="removeCountry(code)">
+                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                       stroke-width="2.5">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        <select
+                          id="countryAdd"
+                          (change)="onCountrySelectChange($event)"
+                          [value]="''"
+                        >
+                          <option value="" disabled selected>+ Add a country…</option>
+                          @for (c of availableCountries(); track c.code) {
+                            @if (!isCountrySelected(c.code)) {
+                              <option [value]="c.code">
+                                {{ flagEmoji(c.code) }} {{ countryLabel(c.code) }} — {{ c.count }} active
+                              </option>
+                            }
+                          }
+                        </select>
+
+                        <span class="field__hint">
+                          @if (!form.proxyConfig.countries || form.proxyConfig.countries.length === 0) {
+                            No filter proxies from any country can be used
+                          } @else {
+                            {{ form.proxyConfig.countries.length }} {{ form.proxyConfig.countries.length === 1 ? 'country' : 'countries' }} selected
+                          }
+                        </span>
+                      </div>
+
+                      <!-- ─── NEW : Strict Geo toggle (visible only when at least one country selected) ─── -->
+                      @if (form.proxyConfig.countries && form.proxyConfig.countries.length > 0) {
+                        <div class="field field--full">
+                          <button
+                            type="button"
+                            class="toggle-item"
+                            [class.toggle-item--on]="form.proxyConfig.strictGeo"
+                            (click)="toggleStrictGeo()"
+                          >
+                            <div class="toggle-item__info">
+                              <span class="toggle-item__name">
+                                Strict Geo
+                                <span class="info-tip info-tip--inline">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                       stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="8" x2="12" y2="12"/>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                  </svg>
+                                  <span class="info-tip__bubble">
+                                    ON: fail the request if no proxy matches the selected countries.
+                                    OFF: fall back to any country (will be logged).
+                                  </span>
+                                </span>
+                              </span>
+                              <span class="toggle-item__sub">
+                                {{
+                                  form.proxyConfig.strictGeo
+                                    ? 'Fail-fast no proxy from listed countries means no acquire'
+                                    : 'Best-effort fall back to any country if none match'
+                                }}
+                              </span>
+                            </div>
+                            <div class="toggle-switch" [class.toggle-switch--on]="form.proxyConfig.strictGeo"></div>
+                          </button>
+                        </div>
+                      }
+
+                      <div class="field">
+                        <label for="maxLatencyMs">
+                          Max Latency (ms)
+                          <!-- … existing block unchanged … -->
+                        </label>
+                        <input
+                          id="maxLatencyMs"
+                          type="number"
+                          [ngModel]="form.proxyConfig.maxLatencyMs"
+                          (ngModelChange)="form.proxyConfig.maxLatencyMs = $event || null"
+                          name="maxLatencyMs"
+                          min="0"
+                          placeholder="e.g. 2000"
+                        />
+                      </div>
+
+                      <div class="field">
+                        <label for="minSuccessRate">
+                          Min Success Rate
+                          <!-- … existing block unchanged … -->
+                        </label>
+                        <input
+                          id="minSuccessRate"
+                          type="number"
+                          [ngModel]="form.proxyConfig.minSuccessRate"
+                          (ngModelChange)="form.proxyConfig.minSuccessRate = $event || null"
+                          name="minSuccessRate"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          placeholder="e.g. 0.7"
+                        />
+                      </div>
+
+                    </div>
+                  }
+                </div>
+
+                <div class="form-card__footer">
+                  <button type="button" class="btn btn--secondary" (click)="prevStep()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    Previous
+                  </button>
+                  <button type="button" class="btn btn--primary" (click)="nextStep()">
+                    Next Retry Policy
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+                </div>
+
+              </div>
+            }
+
+            <!-- ─── STEP 5 — Retry Policy ─── -->
+            @if (currentStep() === 5) {
+              <div class="form-card" style="animation-delay:.05s">
+
+                <div class="form-card__header">
+                  <div class="form-card__icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="1 4 1 10 7 10"/>
+                      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="form-card__title">Retry Policy</p>
+                    <p class="form-card__desc">Configure retry behavior and circuit breaker</p>
+                  </div>
+                </div>
+
+                <div class="form-card__body">
+                  <div class="form-grid">
+
+                    <div class="field">
+                      <label for="maxRetries">
+                        Max Retries
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            Number of additional attempts after a request fails.
+                            0 disables retries. Recommended: 3.
+                          </span>
+                        </span>
+                      </label>
+                      <input
+                        id="maxRetries"
+                        type="number"
+                        [(ngModel)]="form.retryPolicy.maxRetries"
+                        name="maxRetries"
+                        min="0"
+                        placeholder="3"
+                      />
+                    </div>
+
+                    <div class="field">
+                      <label for="retryInitialDelayMs">
+                        Initial Delay (ms)
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            Wait time before the first retry attempt.
+                            Subsequent retries multiply this by the Backoff Multiplier.
+                          </span>
+                        </span>
+                      </label>
+                      <input
+                        id="retryInitialDelayMs"
+                        type="number"
+                        [(ngModel)]="form.retryPolicy.retryInitialDelayMs"
+                        name="retryInitialDelayMs"
+                        min="0"
+                        placeholder="1000"
+                      />
+                    </div>
+
+                    <div class="field">
+                      <label for="retryBackoffMultiplier">
+                        Backoff Multiplier
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            Multiplier applied to the delay between each retry (exponential backoff).
+                            2.0 = delay doubles each attempt.
+                          </span>
+                        </span>
+                      </label>
+                      <input
+                        id="retryBackoffMultiplier"
+                        type="number"
+                        [(ngModel)]="form.retryPolicy.retryBackoffMultiplier"
+                        name="retryBackoffMultiplier"
+                        min="1"
+                        max="5"
+                        step="0.1"
+                        placeholder="2.0"
+                      />
+                    </div>
+
+                    <div class="field">
+                      <label for="cbReset">
+                        CB Reset (seconds)
+                        <span class="info-tip info-tip--inline">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                          </svg>
+                          <span class="info-tip__bubble">
+                            Time before the Circuit Breaker resets.
+                            During this window the domain is paused to let it recover.
+                          </span>
+                        </span>
+                      </label>
+                      <input
+                        id="cbReset"
+                        type="number"
+                        [(ngModel)]="form.retryPolicy.circuitBreakerResetSeconds"
+                        name="circuitBreakerResetSeconds"
+                        min="1"
+                        placeholder="60"
+                      />
+                    </div>
+
+                  </div>
+
+                  <div class="toggle-group toggle-group--spaced">
+                    <button
+                      type="button"
+                      class="toggle-item"
+                      [class.toggle-item--on]="form.retryPolicy.circuitBreakerEnabled"
+                      (click)="toggleCircuitBreaker()"
+                    >
+                      <div class="toggle-item__info">
+                        <span class="toggle-item__name">
+                          Circuit Breaker
+                          <span class="info-tip info-tip--inline">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="8" x2="12" y2="12"/>
+                              <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span class="info-tip__bubble">
+                              Automatically halts requests to a domain when the error rate exceeds a threshold.
+                              Recommended for production.
+                            </span>
+                          </span>
+                        </span>
+                        <span class="toggle-item__sub">Temporarily stop when error rate is too high</span>
+                      </div>
+                      <div class="toggle-switch"
+                           [class.toggle-switch--on]="form.retryPolicy.circuitBreakerEnabled"></div>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-card__footer">
+                  <button type="button" class="btn btn--secondary" (click)="prevStep()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    Previous
+                  </button>
+                  <button type="submit" class="btn btn--primary" [disabled]="loading()">
+                    @if (loading()) {
+                      <span class="spinner"></span> Saving…
+                    } @else {
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      {{ isEditMode() ? 'Update Job' : 'Create Job' }}
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+          </form>
+        </div>
+      </div>
+    }
+  }
+
+</div>

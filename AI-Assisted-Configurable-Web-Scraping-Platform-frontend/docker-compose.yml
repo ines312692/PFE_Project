@@ -1,0 +1,121 @@
+x-frontend-common: &frontend-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      BUILDKIT_INLINE_CACHE: "1"
+  networks:
+    - scraping-network
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+  labels:
+    project: "scraping-platform"
+    component: "frontend"
+
+
+services:
+  frontend-dev:
+    <<: *frontend-common
+    profiles: [dev]
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev               # ← Stage "dev" du Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: "1"
+
+    image: scraping/frontend:dev
+    container_name: scraping_frontend_dev
+
+    ports:
+      - "4200:4200"             # Angular Dev Server
+
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "300"
+    volumes:
+      - type: bind
+        source: ./Frontend/src
+        target: /app/src
+        read_only: true
+      - type: bind
+        source: ./Frontend/angular.json
+        target: /app/angular.json
+        read_only: true
+      - type: bind
+        source: ./Frontend/proxy.conf.json
+        target: /app/proxy.conf.json
+        read_only: true
+      - type: bind
+        source: ./Frontend/proxy.conf.docker.json
+        target: /app/proxy.conf.docker.json
+        read_only: true
+      - node-modules-cache:/app/node_modules
+
+    restart: "no"
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4200"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  frontend:
+    <<: *frontend-common
+    profiles: [prod]
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        BUILDKIT_INLINE_CACHE: "1"
+
+    image: scraping/frontend:latest
+    container_name: scraping_frontend
+
+    ports:
+      - "4200:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 128M
+        reservations:
+          cpus: "0.10"
+          memory: 64M
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+
+volumes:
+  node-modules-cache:
+    name: scraping-node-modules
+
+networks:
+  scraping-network:
+    external: true
+    name: scraping-network

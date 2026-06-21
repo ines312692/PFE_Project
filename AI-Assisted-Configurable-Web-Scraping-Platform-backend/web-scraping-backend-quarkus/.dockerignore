@@ -1,0 +1,29 @@
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+*.swp
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+Jenkinsfile
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Logs
+*.log
+
+# Makefile
+Makefile

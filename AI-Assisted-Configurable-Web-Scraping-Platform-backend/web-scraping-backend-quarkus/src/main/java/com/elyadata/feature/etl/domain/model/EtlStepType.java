@@ -1,0 +1,19 @@
+package com.elyadata.feature.etl.domain.model;
+
+public enum EtlStepType {
+    STRIP_HTML,
+    TRIM_WHITESPACE,
+    MISSING_VALUE_HANDLER,
+    DEDUPLICATE,
+    VALIDATE_FIELDS,
+
+    NORMALIZE_DATE,
+    NORMALIZE_PRICE,
+    CAPITALIZE,
+    NORMALIZE_ENUM,
+    ANONYMIZE_PII,
+    AI_NER,
+    AI_CLASSIFY,
+    AI_SUMMARIZE,
+    PARSE_HTML, AI_DETECT_ANOMALIES
+}

@@ -1,0 +1,113 @@
+@startuml SequenceInvitationMembre
+title Diagramme de séquence  Cas d'utilisation « Inviter un membre dans un projet »
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequenceArrowThickness 1
+skinparam roundcorner 0
+skinparam ParticipantPadding 16
+skinparam BoxPadding 10
+skinparam sequence {
+    ArrowColor Black
+    LifeLineBorderColor Black
+    LifeLineBackgroundColor #FFFFFF
+    ParticipantBorderColor Black
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontColor Black
+    ActorBorderColor Black
+    ActorBackgroundColor #FFFFFF
+    ActorFontColor Black
+}
+
+actor "Administrateur\ndu projet" as Admin
+actor "Membre invité" as Invited
+
+box "Client Angular"
+participant "ProjectDetail\nComponent" as PDC
+participant "ProjectInvitation\nService" as InvNg
+participant "Notifications\nComponent" as NotifNg
+end box
+
+box "Backend Spring Boot"
+participant "ProjectInvitation\nController" as Ctrl
+participant "ProjectInvitation\nServiceImpl" as InvSvc
+participant "NotificationService" as NotifSvc
+participant "Notification\nBroadcaster (SSE)" as SSE
+end box
+
+database "PostgreSQL" as DB
+
+== Accès à la gestion des membres ==
+Admin -> PDC : Ouvre l'onglet "Membres"
+activate PDC
+PDC --> Admin : Affiche la liste des membres
+
+== Saisie de l'invitation ==
+Admin -> PDC : Saisit email + sélectionne rôle
+PDC -> InvNg : sendInvitation(projectId, email, role)
+activate InvNg
+InvNg -> Ctrl : POST /v1/projects/{id}/invitations\n{userId, role}
+activate Ctrl
+
+== Vérifications métier ==
+Ctrl -> InvSvc : send(projectId, invitedBy, invitedUser, role)
+activate InvSvc
+
+InvSvc -> DB : isMember(projectId, invitedUser)
+activate DB
+DB --> InvSvc : false
+deactivate DB
+
+InvSvc -> DB : existsPending(projectId, invitedUser)
+activate DB
+DB --> InvSvc : false
+deactivate DB
+
+InvSvc -> DB : findById(projectId)
+activate DB
+DB --> InvSvc : Project
+deactivate DB
+
+== Création de l'invitation ==
+InvSvc -> DB : save(ProjectInvitation\n[status=PENDING, expiresAt=+7j])
+activate DB
+DB --> InvSvc : Invitation persistée
+deactivate DB
+
+== Notification temps réel ==
+InvSvc -> NotifSvc : create(invitedUser,\nPROJECT_INVITATION, message)
+activate NotifSvc
+NotifSvc -> DB : save(Notification)
+activate DB
+DB --> NotifSvc : OK
+deactivate DB
+NotifSvc -> SSE : broadcast(invitedUser, notification)
+activate SSE
+SSE -->> NotifNg : event: notification\ndata: {...}
+deactivate SSE
+NotifSvc --> InvSvc : OK
+deactivate NotifSvc
+
+InvSvc --> Ctrl : InvitationResponse
+deactivate InvSvc
+Ctrl --> InvNg : 201 Created
+deactivate Ctrl
+InvNg --> PDC : Invitation envoyée
+deactivate InvNg
+PDC --> Admin : Affiche badge "PENDING"
+deactivate PDC
+
+NotifNg --> Invited : Affiche notification\n[Accepter / Refuser]
+
+== Scénario alternatif : conflit ==
+alt Utilisateur déjà membre OU invitation déjà PENDING
+    InvSvc --> Ctrl : DomainException(CONFLICT)
+    Ctrl --> InvNg : 409 Conflict\n{message}
+    InvNg --> PDC : Erreur métier
+    PDC --> Admin : "Cet utilisateur est déjà membre\nou a déjà une invitation en attente"
+end
+
+@enduml

@@ -1,0 +1,85 @@
+@startuml seqJobExecution
+!pragma teoz true
+
+skinparam dpi 100
+skinparam DefaultFontName "DejaVu Sans"
+skinparam DefaultFontSize 15
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 200
+skinparam ParticipantPadding 40
+skinparam BoxPadding 20
+
+skinparam sequence {
+    ParticipantBackgroundColor #2E75B6
+    ParticipantBorderColor #15406B
+    ParticipantFontColor white
+    ParticipantFontStyle bold
+    ParticipantFontSize 15
+
+    ActorBackgroundColor #2E75B6
+    ActorBorderColor #15406B
+    ActorFontColor black
+    ActorFontStyle bold
+    ActorFontSize 15
+
+    LifeLineBorderColor #2E75B6
+    LifeLineBackgroundColor #D6E4FF
+
+    ArrowColor #15406B
+    ArrowFontColor black
+    ArrowFontSize 13
+
+    GroupBorderColor #15406B
+    GroupBackgroundColor #EAF2FB
+    GroupHeaderFontColor black
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 14
+    GroupFontColor black
+}
+
+actor "Utilisateur" as U
+participant "JobController" as JC
+participant "JobServiceImpl" as JS
+participant "ScrapeEngine" as SE
+participant "CrawlPipeline" as CP
+participant "RetryExecutor\n(CircuitBreaker)" as RE
+participant "ExtractorRegistry\n(CSS / XPath / Regex)" as ER
+participant "ScrapeResultAdapter\n(PostgreSQL)" as RA
+participant "NotificationBroadcaster\n(SSE)" as NB
+
+U -> JC : 1 : lance l'execution du job
+JC -> JS : 2 : runJob(jobId)
+JS -> JS : 3 : charge le job + configurations
+JS -> JS : 4 : statut = RUNNING
+JS -> NB : 5 : notifie (job demarre)
+NB --> U : 6 : evenement temps reel
+
+JS -> SE : 7 : execute le pipeline
+SE -> CP : 8 : crawl (URLs initiales)
+
+loop pour chaque page (pagination geree)
+    CP -> RE : 9 : recupere la page
+    alt requete reussie
+        RE --> CP : 10 : contenu HTML
+    else echec transitoire
+        RE -> RE : 11 : nouvelle tentative (delai croissant)
+    else seuil d'erreurs atteint
+        RE -> CP : 12 : circuit ouvert (abandon)
+    end
+
+    CP -> ER : 13 : applique le schema d'extraction
+    ER --> CP : 14 : donnees structurees (JSON)
+    CP -> RA : 15 : enregistre le resultat
+end
+
+CP --> SE : 16 : resultats agreges
+SE --> JS : 17 : metriques d'execution
+JS -> JS : 18 : statut = COMPLETED
+JS -> NB : 19 : notifie (job termine)
+NB --> U : 20 : evenement temps reel
+JS --> JC : 21 : reponse du job
+JC --> U : 22 : confirmation
+
+@enduml

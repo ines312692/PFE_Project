@@ -1,0 +1,182 @@
+@startuml classDiagramSprint2
+'=============================================================
+'  Diagramme de classes — Sprint 2
+'=============================================================
+
+skinparam dpi 150
+skinparam DefaultFontName "DejaVu Sans"
+skinparam DefaultFontSize 15
+skinparam ClassFontSize 17
+skinparam ClassFontStyle bold
+skinparam ClassAttributeFontSize 14
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam roundCorner 8
+
+skinparam class {
+    BackgroundColor #F8FBFF
+    BorderColor #2E75B6
+    BorderThickness 1.5
+    ArrowColor #2E75B6
+    FontColor #15406B
+}
+skinparam enum {
+    BackgroundColor #FFF6E9
+    BorderColor #C77F1A
+    FontColor #8A5A12
+    FontStyle bold
+}
+hide circle
+
+' ====================== ENTITÉ CENTRALE ======================
+class Job {
+    - idJob : UUID
+    - name : String
+    - targetUrl : String
+    - status : JobStatus
+    - priority : JobPriority
+    - triggerType : JobTriggerType
+    - extractionMode : ExtractionMode
+    - jobType : JobType
+    - projectId : UUID
+    - createdAt : Instant
+    --
+    + createJob(...) : Job
+    + search(...) : Page<Job>
+    + getStats(...) : JobStats
+    + getJobById(id) : Job
+    + updateJob(...) : Job
+    + deleteJob(id) : void
+    + duplicateJob(...) : Job
+    + launchJob(id) : Job
+    + pauseJob(id) : Job
+    + getJobsByProjectId(...) : List<Job>
+    + rotateWebhookSecret(...) : WebhookCredentials
+    + disableWebhook(...) : void
+}
+
+' ====================== CONFIGURATIONS ======================
+class CrawlerConfig {
+    - maxPages : Integer
+    - maxDepth : Integer
+    - urlIncludePatterns : String
+    - urlExcludePatterns : String
+    - followRedirects : Boolean
+    - respectRobotsTxt : Boolean
+    - sitemapUrl : String
+}
+
+class BrowserConfig {
+    - javascriptEnabled : Boolean
+    - requestDelayMs : Integer
+    - timeoutMs : Integer
+    - userAgent : String
+}
+
+class ScraperConfig {
+    - seedUrls : List<String>
+    - singlePageMode : Boolean
+    - waitForSelector : String
+    - scrollToBottom : Boolean
+    - paginationType : PaginationType
+    - paginationSelector : String
+    - maxPaginationPages : Integer
+}
+
+class RetryPolicy {
+    - maxRetries : Integer
+    - retryInitialDelayMs : Integer
+    - retryBackoffMultiplier : Double
+    - retryMaxDelayMs : Integer
+    - circuitBreakerEnabled : Boolean
+    - circuitBreakerThreshold : Double
+    - circuitBreakerResetSeconds : Integer
+}
+
+' ====================== RÉSULTAT ======================
+class ScrapeResult {
+    - idScrapeResult : UUID
+    - jobId : UUID
+    - status : String
+    - records : List<Map>
+    - errors : List<String>
+    - logs : List<String>
+    - pagesCrawled : int
+    - durationMs : long
+    - engineUsed : String
+    - scrapedAt : Instant
+    --
+    + save(...) : ScrapeResult
+    + findByJobId(...) : Optional<ScrapeResult>
+    + findAllByJobId(...) : List<ScrapeResult>
+    + findById(id) : Optional<ScrapeResult>
+}
+
+' ====================== ÉNUMÉRATIONS ======================
+enum JobStatus {
+    CREATED
+    QUEUED
+    RUNNING
+    PAUSED
+    COMPLETED
+    FAILED
+    CANCELLED
+}
+enum JobTriggerType {
+    MANUAL
+    SCHEDULED
+    WEBHOOK
+}
+enum ExtractionMode {
+    CSS_SELECTOR
+    XPATH
+    REGEX
+}
+enum JobPriority {
+    LOW
+    NORMAL
+    HIGH
+    CRITICAL
+}
+enum JobType {
+    SCRAPER
+    CRAWLER
+}
+enum PaginationType {
+    NONE
+    NUMBERED
+    INFINITE_SCROLL
+    LOAD_MORE
+    NEXT_BUTTON
+    URL_PARAM
+    AUTO
+}
+
+' ====================== COMPOSITIONS : configs à GAUCHE de Job ======================
+CrawlerConfig "1" --* Job
+BrowserConfig "1" --* Job
+ScraperConfig "1" --* Job
+RetryPolicy   "1" --* Job
+
+' ====================== ASSOCIATION : résultat à DROITE de Job ======================
+Job "1" -- "0..*" ScrapeResult
+
+' ====================== ÉNUMÉRATIONS : forcées EN BAS de Job ======================
+Job -[hidden]down- JobStatus
+JobStatus -[hidden]right- JobTriggerType
+JobTriggerType -[hidden]right- ExtractionMode
+ExtractionMode -[hidden]right- JobPriority
+JobPriority -[hidden]right- JobType
+
+Job ..> JobStatus
+Job ..> JobTriggerType
+Job ..> ExtractionMode
+Job ..> JobPriority
+Job ..> JobType
+ScraperConfig ..> PaginationType
+
+@enduml

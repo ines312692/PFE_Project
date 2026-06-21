@@ -1,0 +1,301 @@
+<div class="dash" [class.dash--loading]="loading()">
+
+  <!-- ════════════ Header ════════════ -->
+  <div class="dash__head">
+    <div class="tpl__header-left">
+      <div class="tpl__eyebrow">
+        <span class="tpl__eyebrow-dot"></span>
+        Scraping Platform
+      </div>
+      <h1 class="tpl__title">Control Center</h1>
+      <p class="jobs-header__desc">Monitor and optimize your scraping operations in real-time</p>
+    </div>
+    <div class="dash__head-right">
+      <div class="dash__clock">{{ now() | date:'HH:mm' }}<span>{{ now() | date:' · EEE d MMM' }}</span></div>
+      <button class="dash__cta" (click)="goToCreate()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Job
+      </button>
+    </div>
+  </div>
+
+  <!-- ════════════ Stats grid (compact) ════════════ -->
+  <div class="stats-grid">
+
+    <!-- Total Jobs -->
+    <div class="stat stat">
+      <div class="stat__head">
+        <span class="stat__label">Total Jobs</span>
+        <svg class="stat__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/>
+        </svg>
+      </div>
+      <span class="stat__value">{{ totalJobs() }}</span>
+      <div class="stat__delta">
+        <span class="stat__chip stat__chip--blue">{{ scraperCount() }} scrapers</span>
+        <span class="stat__chip stat__chip--mauve">{{ crawlerCount() }} crawlers</span>
+      </div>
+    </div>
+
+    <!-- Success Rate (gauge) -->
+    <div class="stat stat--gauge">
+      <div class="stat__head">
+        <span class="stat__label">Success Rate</span>
+      </div>
+      <div class="gauge">
+        <svg viewBox="0 0 120 120" class="gauge__svg">
+          <circle cx="60" cy="60" r="48" fill="none" class="gauge__track" stroke-width="9"/>
+          <circle cx="60" cy="60" r="48" fill="none"
+                  [class]="'gauge__ring ' + successGaugeClass()"
+                  stroke-width="9" stroke-linecap="round"
+                  [attr.stroke-dasharray]="(successRate() * 301.6 / 100) + ' 301.6'"
+                  transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="gauge__center">
+          <span class="gauge__num">{{ successRate() }}<em>%</em></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Now -->
+    <div class="stat" [class.stat--live]="runningJobs() > 0">
+      <div class="stat__head">
+        <span class="stat__label">Live Now</span>
+        @if (runningJobs() > 0) {
+          <span class="stat__pulse"></span>
+        }
+      </div>
+      <span class="stat__value">{{ runningJobs() }}</span>
+      <span class="stat__sub">{{ queuedJobs() }} queued · {{ pausedJobs() }} paused</span>
+    </div>
+
+    <!-- Completed -->
+    <div class="stat">
+      <div class="stat__head">
+        <span class="stat__label">Completed</span>
+      </div>
+      <span class="stat__value">{{ completedJobs() }}</span>
+      <div class="stat__delta">
+        <span class="stat__chip stat__chip--ok">{{ completedJobs() }} done</span>
+        @if (failedJobs() > 0) {
+          <span class="stat__chip stat__chip--err">{{ failedJobs() }} failed</span>
+        }
+      </div>
+    </div>
+
+    <!-- Platform Health (gauge) -->
+    <div class="stat stat--gauge">
+      <div class="stat__head">
+        <span class="stat__label">Platform Health</span>
+        <span class="stat__health-badge stat__health-badge--{{ healthTier() }}">{{ healthLabel() }}</span>
+      </div>
+      <div class="gauge">
+        <svg viewBox="0 0 120 120" class="gauge__svg">
+          <circle cx="60" cy="60" r="48" fill="none" class="gauge__track" stroke-width="9"/>
+          <circle cx="60" cy="60" r="48" fill="none"
+                  [class]="'gauge__ring ' + healthGaugeClass()"
+                  stroke-width="9" stroke-linecap="round"
+                  [attr.stroke-dasharray]="(platformHealth() * 301.6 / 100) + ' 301.6'"
+                  transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="gauge__center">
+          <span class="gauge__num">{{ platformHealth() }}<em>%</em></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════ Main grid ════════════ -->
+  <div class="main-grid">
+
+    <!-- Weekly chart -->
+    <div class="panel panel--chart">
+      <div class="panel__head">
+        <div class="panel__title-group">
+          <span class="panel__title">Weekly Activity</span>
+          <span class="panel__sub">Jobs created by day · last 7 days</span>
+        </div>
+        <div class="panel__meta">
+          <span class="panel__stat">{{ weekTotal() }} total</span>
+          @if (weekFailed() > 0) {
+            <span class="panel__stat panel__stat--err">{{ weekFailed() }} failed</span>
+          }
+        </div>
+      </div>
+
+      <div class="bar-chart">
+        @for (day of weeklyData(); track day.label) {
+          <div class="bar-col" [class.bar-col--today]="day.isToday">
+            <div class="bar-col__track">
+              <div class="bar-col__fill"
+                   [style.height.%]="barH(day.jobs, maxWeeklyJobs())"
+                   [class.bar-col__fill--has-error]="day.failed > 0">
+                <span class="bar-col__tip">
+                  {{ day.jobs }} job{{ day.jobs !== 1 ? 's' : '' }}
+                  @if (day.failed > 0) {
+                    · {{ day.failed }} failed
+                  }
+                </span>
+              </div>
+              @if (day.failed > 0) {
+                <div class="bar-col__err-fill"
+                     [style.height.%]="barH(day.failed, maxWeeklyJobs())"></div>
+              }
+            </div>
+            <span class="bar-col__label">{{ day.label }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="chart-legend">
+        <span class="chart-legend__item chart-legend__item--jobs">Jobs created</span>
+        <span class="chart-legend__item chart-legend__item--failed">Failures</span>
+      </div>
+    </div>
+
+    <!-- Donut -->
+    <div class="panel panel--donut">
+      <div class="panel__head">
+        <div class="panel__title-group">
+          <span class="panel__title">Status</span>
+          <span class="panel__sub">Distribution</span>
+        </div>
+      </div>
+
+      @if (totalJobs() > 0) {
+        <div class="donut-block">
+          <div class="donut-wrap">
+            <svg viewBox="0 0 42 42" class="donut-svg">
+              <circle cx="21" cy="21" r="16" fill="none" stroke="var(--color-border-light)" stroke-width="3.5"/>
+              @for (seg of donutSegments(); track seg.label) {
+                <circle cx="21" cy="21" r="16" fill="none"
+                        [attr.stroke]="seg.color"
+                        stroke-width="3.5"
+                        [attr.stroke-dasharray]="seg.pct + ' ' + (100 - seg.pct)"
+                        [attr.stroke-dashoffset]="100 - seg.offset + 25"
+                        stroke-linecap="round"
+                        class="donut-seg"/>
+              }
+            </svg>
+            <div class="donut-center">
+              <span class="donut-center__val">{{ totalJobs() }}</span>
+              <span class="donut-center__label">jobs</span>
+            </div>
+          </div>
+
+          <div class="donut-legend">
+            @for (s of statusSlices(); track s.label) {
+              <div class="donut-row">
+                <span class="donut-row__dot" [style.background]="s.color"></span>
+                <span class="donut-row__label">{{ s.label }}</span>
+                <span class="donut-row__count">{{ s.count }}</span>
+                <span class="donut-row__pct">{{ s.pct | number:'1.0-0' }}%</span>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="panel__empty">No jobs yet</div>
+      }
+    </div>
+
+    <!-- Breakdown -->
+    <div class="panel panel--breakdown">
+      <div class="panel__head">
+        <div class="panel__title-group">
+          <span class="panel__title">Breakdown</span>
+          <span class="panel__sub">Priority &amp; trigger</span>
+        </div>
+      </div>
+
+      <div class="breakdown-chart-wrap">
+        <div class="breakdown-combo">
+          <div class="bc-yaxis">
+            @for (tick of yTicks(); track tick) {
+              <span class="bc-ytick">{{ tick }}</span>
+            }
+          </div>
+          <div class="bc-bars" #barsRef>
+            @for (g of chartGroups(); track g.label) {
+              <div class="bc-group" [class]="'bc-group--' + g.section">
+                <div class="bc-vals">
+                  <span class="bc-val bc-val--pink">{{ g.pink }}</span>
+                  <span class="bc-val bc-val--blue">{{ g.blue }}</span>
+                </div>
+                <div class="bc-bars-inner">
+                  <div class="bc-bar bc-bar--pink" [style.height.%]="pct(g.pink)"></div>
+                  <div class="bc-bar bc-bar--blue" [style.height.%]="pct(g.blue)"></div>
+                </div>
+                <span class="bc-label">{{ g.label }}</span>
+              </div>
+            }
+            <svg class="bc-line-overlay" #svgRef></svg>
+          </div>
+        </div>
+
+        <div class="bc-legend">
+          <span class="bc-legend__item bc-legend__item--pink">Primary</span>
+          <span class="bc-legend__item bc-legend__item--blue">Secondary</span>
+          <span class="bc-legend__item bc-legend__item--green">Priority trend</span>
+          <span class="bc-legend__item bc-legend__item--dashed">Trigger trend</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity (timeline style — like project-detail) -->
+    <div class="panel panel--activity">
+      <div class="panel__head">
+        <div class="panel__title-group">
+          <span class="panel__title">Recent Activity</span>
+          <span class="panel__sub">Latest 8 jobs</span>
+        </div>
+        <button class="panel__link" (click)="goToJobs()">
+          All jobs
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="activity-skeleton">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="skeleton-row"></div>
+          }
+        </div>
+      } @else if (recentActivity().length === 0) {
+        <div class="panel__empty">No activity yet — create your first job</div>
+      } @else {
+        <div class="feed">
+          @for (item of recentActivity(); track item.id) {
+            <div class="feed__item" (click)="goToJob(item.id)">
+              <div class="feed__rail">
+                <span class="feed__dot feed__dot--{{ item.action }}"></span>
+              </div>
+              <div class="feed__body">
+                <div class="feed__top">
+                  <span class="feed__name">{{ item.name }}</span>
+                  <span class="feed__when">{{ item.when }}</span>
+                </div>
+                <div class="feed__meta">
+                  <span class="feed__pill feed__pill--{{ item.action }}">
+                    <span class="feed__pill-dot"></span>{{ item.action }}
+                  </span>
+                  <span class="feed__type">{{ item.type }}</span>
+                  <span class="feed__url">{{ item.url | slice:0:38 }}{{ item.url.length > 38 ? '…' : '' }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,12 @@
+package com.elyadata.feature.job.domain.model;
+
+public enum WebhookDeliveryStatus {
+    ACCEPTED,
+    REJECTED_UNKNOWN_TOKEN,
+    REJECTED_DISABLED,
+    REJECTED_BAD_SIGNATURE,
+    REJECTED_STALE_TIMESTAMP,
+    REJECTED_MALFORMED_REQUEST,
+    REJECTED_INVALID_STATE,
+    FAILED_INTERNAL
+}

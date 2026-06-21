@@ -1,0 +1,88 @@
+@startuml seqAuthKeycloakBFF
+'=============================================================
+'  Diagramme de séquence — Flux d'authentification Keycloak + BFF
+'=============================================================
+
+skinparam dpi 150
+skinparam DefaultFontName "DejaVu Sans"
+skinparam DefaultFontSize 15
+skinparam shadowing false
+skinparam roundCorner 8
+
+skinparam sequence {
+    ' --- Participants ---
+    ParticipantBackgroundColor #F8FBFF
+    ParticipantBorderColor #2E75B6
+    ParticipantFontColor #15406B
+    ParticipantFontStyle bold
+    ParticipantFontSize 15
+
+    ' --- Lignes de vie ---
+    LifeLineBorderColor #2E75B6
+    LifeLineBackgroundColor #2E75B6
+
+    ' --- Barres d'activation ---
+    ActorBorderColor #2E75B6
+
+    ' --- Messages ---
+    ArrowColor #2E75B6
+    ArrowFontColor #15406B
+    ArrowFontSize 13
+
+    ' --- Cadres (alt, etc.) ---
+    GroupBorderColor #2E75B6
+    GroupBackgroundColor #F8FBFF
+    GroupHeaderFontColor #15406B
+    GroupFontColor #15406B
+}
+
+skinparam note {
+    BackgroundColor #FFF6E9
+    BorderColor #C77F1A
+    FontColor #8A5A12
+}
+
+title Flux d'authentification Keycloak + BFF
+
+participant "Frontend" as FE
+participant "BFF" as BFF
+participant "Keycloak" as KC
+participant "Base de données" as DB
+
+activate FE
+FE -> BFF : 1 : Demande de connexion (identifiants)
+activate BFF
+BFF -> KC : 2 : Demande d'authentification OAuth2
+activate KC
+KC -> KC : 3 : Validation des credentials
+
+alt Credentials valides
+    KC --> BFF : 4 : Émission des tokens
+    deactivate KC
+    BFF -> DB : 5 : Synchronisation du compte utilisateur
+    activate DB
+    DB --> BFF : 6 : Informations du compte (rôle, statut)
+    deactivate DB
+    BFF --> FE : 7 : Session établie
+
+else Credentials non valides
+    KC --> BFF : 8 : Authentification refusée
+    BFF --> FE : 9 : Notification d'échec de connexion
+end
+deactivate BFF
+
+== Renouvellement de session ==
+
+FE -> BFF : 10 : Demande de renouvellement de session
+activate BFF
+BFF -> KC : 11 : Envoi du token de rafraîchissement
+activate KC
+KC -> KC : 12 : Émission d'un nouveau token d'accès
+KC --> BFF :
+deactivate KC
+BFF -> BFF : 13 : Mise à jour de la session côté serveur
+BFF --> FE : 14 : Session prolongée avec succès
+deactivate BFF
+deactivate FE
+
+@enduml

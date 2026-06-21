@@ -1,0 +1,17 @@
+@startuml C4_L1_SystemContext
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+
+Person(user, "User", "configures and runs web scraping jobs")
+
+System(platform, "Scraping Platform", "Configure, launch, and monitor web scraping jobs. Persists configuration and results.")
+
+System_Ext(keycloak, "Keycloak", "OIDC identity provider. Authenticates users via Authorization Code + PKCE (BFF).")
+System_Ext(targets, "Target Websites", "External websites scraped by the platform (e-commerce, public data, etc.).")
+
+Rel(user, platform, "Uses", "")
+Rel(platform, keycloak, "Delegates authentication to", "OIDC ")
+Rel(platform, targets, "Scrapes data from", "HTTPS")
+
+
+@enduml

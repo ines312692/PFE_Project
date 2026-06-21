@@ -1,0 +1,112 @@
+.schema-llm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.llm-model-row {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.llm-model-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.model-chip {
+  height: 30px;
+  padding: 0 .85rem;
+  background: var(--color-bg-muted);
+  border: 1.5px solid var(--color-border-medium);
+  border-radius: 8px;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+
+  &:hover {
+    border-color: var(--elyadata-blue);
+    color: var(--elyadata-blue);
+  }
+
+  &--active {
+    background: rgba(var(--elyadata-blue-rgb), .1);
+    border-color: var(--elyadata-blue);
+    color: var(--elyadata-blue);
+    font-weight: 700;
+  }
+}
+
+.llm-field {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.llm-label {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  letter-spacing: .02em;
+}
+
+.llm-required {
+  color: var(--elyadata-pink);
+  margin-left: .2rem;
+}
+
+.llm-optional {
+  color: var(--color-text-faint);
+  font-weight: 400;
+  margin-left: .25rem;
+}
+
+.llm-textarea {
+  width: 100%;
+  padding: .75rem .9rem;
+  background: var(--color-bg-soft);
+  border: 1.5px solid var(--color-border-medium);
+  border-radius: 10px;
+  font-size: .84rem;
+  color: var(--color-text-primary);
+  outline: none;
+  resize: vertical;
+  line-height: 1.6;
+  font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+
+  &:focus {
+    border-color: var(--elyadata-blue);
+    box-shadow: 0 0 0 3px rgba(var(--elyadata-blue-rgb), .08);
+    background: var(--elyadata-white);
+  }
+
+  &::placeholder {
+    color: var(--color-dot-off);
+  }
+
+  &--sm {
+    min-height: 72px;
+  }
+}
+
+.llm-hint {
+  font-size: .73rem;
+  color: var(--color-text-faint);
+  line-height: 1.5;
+}
+
+
+.llm-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: .4rem;
+  flex-wrap: wrap;
+}
+

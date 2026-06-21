@@ -1,0 +1,116 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: "\\.snap$"
+      - id: end-of-file-fixer
+        exclude: "\\.snap$"
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [ "--maxkb=512" ]
+      - id: mixed-line-ending
+        args: [ "--fix=lf" ]
+      - id: detect-private-key
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types_or: [ ts, html, scss, json, markdown ]
+        additional_dependencies:
+          - prettier@3.3.3
+          - "@prettier/plugin-angular@0.0.2"
+        args: [ "--write", "--ignore-unknown" ]
+
+  - repo: local
+    hooks:
+      - id: eslint
+        name: ESLint
+        language: node
+        entry: npx eslint
+        types: [ ts ]
+        args:
+          - "--max-warnings=0"
+          - "--ext=.ts"
+        additional_dependencies:
+          - eslint@8.57.0
+          - "@angular-eslint/eslint-plugin@18.0.0"
+          - "@typescript-eslint/eslint-plugin@7.0.0"
+          - "@typescript-eslint/parser@7.0.0"
+
+  - repo: local
+    hooks:
+      - id: tsc
+        name: TypeScript type check
+        language: system
+        entry: npx tsc --noEmit --project tsconfig.app.json
+        pass_filenames: false
+        types: [ ts ]
+  - repo: local
+    hooks:
+      - id: ng-build
+        name: Angular production build
+        language: system
+        entry: npx ng build --configuration production
+        pass_filenames: false
+        stages: [ pre-push ]
+
+  - repo: local
+    hooks:
+      - id: jest-unit
+        name: Jest unit tests
+        language: system
+        entry: npx jest --testPathPattern="tests/unit" --passWithNoTests --bail
+        pass_filenames: false
+        stages: [ pre-push ]
+
+  - repo: local
+    hooks:
+      - id: jest-integration
+        name: Jest integration tests
+        language: system
+        entry: npx jest --testPathPattern="tests/integration" --passWithNoTests --bail
+        pass_filenames: false
+        stages: [ pre-push ]
+
+  - repo: local
+    hooks:
+      - id: stylelint
+        name: Stylelint SCSS
+        language: node
+        entry: npx stylelint
+        types: [ scss ]
+        args: [ "--max-warnings=0" ]
+        additional_dependencies:
+          - stylelint@16.6.1
+          - stylelint-config-standard-scss@13.1.0
+  - repo: local
+    hooks:
+      - id: asset-size
+        name: Asset size check
+        language: system
+        entry: bash -c 'find src/assets -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) -size +200k | grep . && echo "❌ Large unoptimized assets found" && exit 1 || exit 0'
+        pass_filenames: false
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: no-prod-env-commit
+        name: Block environment.prod.ts commits
+        language: fail
+        entry: "Do not commit environment.prod.ts — use CI/CD injection instead"
+        files: "src/environments/environment\\.prod\\.ts$"
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [ commit-msg ]
+        args: [ feat, fix, docs, style, refactor, test, chore, build, ci, perf ]

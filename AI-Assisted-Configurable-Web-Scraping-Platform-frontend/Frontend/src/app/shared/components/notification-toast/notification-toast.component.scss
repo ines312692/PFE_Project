@@ -1,0 +1,113 @@
+.toast-container {
+  position: fixed;
+  bottom: 3.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .7rem 1rem .7rem .85rem;
+  border-radius: 12px;
+  min-width: 280px;
+  max-width: 380px;
+  pointer-events: all;
+  box-shadow: 0 8px 28px rgba(var(--color-tooltip-bg), .14);
+  animation: toastIn .3s cubic-bezier(.22, 1, .36, 1);
+  border: 1.5px solid transparent;
+
+  &--success {
+    background: var(--elyadata-white);
+    border-color: rgba(var(--color-green-alt-rgb), .2);
+
+    .toast__icon {
+      color: var(--color-green);
+      background: rgba(var(--color-green-alt-rgb), .08);
+    }
+  }
+
+  &--error {
+    background: var(--elyadata-white);
+    border-color: rgba(var(--elyadata-pink-rgb), .2);
+
+    .toast__icon {
+      color: var(--elyadata-pink);
+      background: rgba(var(--elyadata-pink-rgb), .07);
+    }
+  }
+
+  &--warning {
+    background: var(--elyadata-white);
+    border-color: rgba(var(--color-amber-rgb), .25);
+
+    .toast__icon {
+      color: var(--color-amber);
+      background: rgba(var(--color-amber-rgb), .08);
+    }
+  }
+
+  &--info {
+    background: var(--elyadata-white);
+    border-color: rgba(var(--elyadata-blue-rgb), .2);
+
+    .toast__icon {
+      color: var(--elyadata-blue);
+      background: rgba(var(--elyadata-blue-rgb), .08);
+    }
+  }
+
+  &__icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__message {
+    flex: 1;
+    font-size: .84rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-faint);
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: color .15s, background .15s;
+
+    &:hover {
+      color: var(--color-text-tertiary);
+      background: var(--color-bg-chip);
+    }
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}

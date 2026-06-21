@@ -1,0 +1,176 @@
+@startuml classDiagramSprint3
+'=============================================================
+'  Diagramme de classes — Sprint 3
+'  Pipeline ETL : configuration, étapes, rapport qualité, export
+'=============================================================
+
+skinparam dpi 150
+skinparam DefaultFontName "DejaVu Sans"
+skinparam DefaultFontSize 16
+skinparam ClassFontSize 18
+skinparam ClassFontStyle bold
+skinparam ClassAttributeFontSize 15
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam roundCorner 8
+skinparam nodesep 45
+skinparam ranksep 55
+
+skinparam class {
+    BackgroundColor #F8FBFF
+    BorderColor #2E75B6
+    BorderThickness 1.5
+    ArrowColor #2E75B6
+    FontColor #15406B
+}
+skinparam interface {
+    BackgroundColor #F8FBFF
+    BorderColor #2E75B6
+    FontColor #15406B
+}
+skinparam enum {
+    BackgroundColor #FFF6E9
+    BorderColor #C77F1A
+    FontColor #8A5A12
+    FontStyle bold
+    FontSize 15
+}
+hide circle
+
+' ====================== ORCHESTRATION ======================
+class EtlPipelineRunner {
+    - registry : EtlStepRegistry
+    --
+    + run(...) : EtlRunResult
+}
+
+class EtlStepRegistry {
+    - steps : Map<EtlStepType, EtlStep>
+    --
+    + get(type : EtlStepType) : EtlStep
+}
+
+interface EtlStep {
+    + type() : EtlStepType
+    + apply(...) : List<Map<String, Object>>
+}
+
+class EtlRunResult {
+    - records : List<Map<String, Object>>
+    - stepReports : List<StepReport>
+    - rawCount : int
+    - cleanCount : int
+    - removedCount : int
+    - durationMs : long
+    - qualityReport : QualityReport
+}
+
+class StepReport {
+    - step : String
+    - inputCount : int
+    - outputCount : int
+    - success : boolean
+    - error : String
+}
+
+' ====================== CONFIGURATION ======================
+class EtlConfig {
+    - jobId : UUID
+    - steps : List<EtlStepConfig>
+    - exportDestination : ExportDestination
+    - exportFormat : ExportFormat
+    --
+    + hasSteps() : boolean
+}
+
+class EtlStepConfig {
+    - type : EtlStepType
+    - order : int
+    - enabled : boolean
+    - parameters : Map<String, Object>
+}
+
+' ====================== RAPPORT QUALITÉ ======================
+class QualityReport {
+    - totalRecords : int
+    - processedRecords : int
+    - droppedRecords : int
+    - fieldQualities : List<FieldQuality>
+    - violations : List<RuleViolation>
+}
+
+class FieldQuality {
+    - fieldName : String
+    - filledCount : int
+    - missingCount : int
+    - completeness : double
+}
+
+class RuleViolation {
+    - rule : ValidationRule
+    - fieldName : String
+    - recordIndex : int
+    - message : String
+}
+
+class ValidationRule {
+    - fieldName : String
+    - required : boolean
+    - pattern : String
+    - minLength : int
+    - maxLength : int
+}
+
+' ====================== ÉNUMÉRATIONS ======================
+enum EtlStepType {
+    TRIM_WHITESPACE
+    HTML_STRIPPER
+    CAPITALIZE
+    DATE_NORMALIZER
+    PRICE_NORMALIZER
+    ENUM_NORMALIZER
+    MISSING_VALUE_HANDLER
+    DEDUPLICATE
+    VALIDATE_FIELDS
+}
+
+enum ExportFormat {
+    CSV
+    JSON
+    EXCEL
+}
+
+enum ExportDestination {
+    POSTGRESQL
+    MONGODB
+    FILE
+    REST_API
+}
+
+' ====================== ASSOCIATIONS ORCHESTRATION ======================
+EtlPipelineRunner "1" -- "1" EtlStepRegistry
+EtlStepRegistry "1" -- "0..*" EtlStep
+EtlPipelineRunner ..> EtlConfig
+EtlPipelineRunner ..> EtlRunResult
+EtlRunResult "1" -- "0..*" StepReport
+EtlRunResult "1" -- "0..1" QualityReport
+
+' ====================== ASSOCIATIONS CONFIGURATION / QUALITÉ ======================
+EtlConfig "1" -- "0..*" EtlStepConfig
+QualityReport "1" -- "0..*" FieldQuality
+QualityReport "1" -- "0..*" RuleViolation
+RuleViolation "1" -- "1" ValidationRule
+
+' ====================== ÉNUMÉRATIONS : forcées EN BAS, alignées ======================
+EtlConfig -[hidden]down-> EtlStepType
+EtlStepType -[hidden]right-> ExportFormat
+ExportFormat -[hidden]right-> ExportDestination
+
+EtlStepConfig ..> EtlStepType
+EtlStep ..> EtlStepType
+EtlConfig ..> ExportFormat
+EtlConfig ..> ExportDestination
+
+@enduml

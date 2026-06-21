@@ -1,0 +1,77 @@
+<div class="canvas">
+  <div class="canvas__bg"></div>
+
+  <div class="canvas__flow">
+    <div class="node node--start">
+      <div class="node--start__circle">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/>
+        </svg>
+      </div>
+      <span class="node--start__label">Raw</span>
+      <span class="node--start__count">{{ rawCount() }}</span>
+    </div>
+
+    @for (step of steps(); track trackByIdx($index, step); let i = $index) {
+      <div class="connector">
+        <span class="connector__line"></span>
+        <span class="connector__badge">{{ i }}</span>
+      </div>
+
+      <div class="card"
+           [class.card--selected]="selectedIndex() === step.index"
+           [style.--card-color]="step.color"
+           (click)="onStepClick(step)">
+
+        <div class="card__head" [style.background]="step.color + '18'">
+          <span class="card__icon" [style.background]="step.color">
+            @if (step.def) {
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                   stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path [attr.d]="step.def.icon"/>
+              </svg>
+            }
+          </span>
+          <span class="card__name">{{ step.label }}</span>
+          <span class="card__actions">
+            <svg class="card__play" width="9" height="9" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21"/>
+            </svg>
+            <span class="card__dots">
+              <span></span><span></span><span></span>
+            </span>
+          </span>
+        </div>
+
+        <div class="card__body">
+          <span class="card__cat">
+            {{ step.category.toUpperCase() }} · {{ step.type }}
+          </span>
+
+          <span class="card__pv-label">Preview</span>
+          <div class="card__pv">
+            @for (line of step.paramsPreview; track $index) {
+              <code class="card__pv-line">{{ line }}</code>
+            }
+          </div>
+
+          <span class="card__desc">{{ step.description }}</span>
+        </div>
+      </div>
+    }
+
+    <div class="connector">
+      <span class="connector__line"></span>
+      <span class="connector__badge connector__badge--end">{{ steps().length }}</span>
+    </div>
+
+    <div class="node node--output">
+      <span class="node--output__cat">OUTPUT</span>
+      <span class="node--output__count">{{ outputCount() }}</span>
+      <span class="node--output__label">records</span>
+      @if (removedCount() > 0) {
+        <span class="node--output__delta">−{{ removedCount() }} removed</span>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+<div class="schema-regex">
+
+  <div class="regex-field">
+    <label class="regex-label" for="regex-pattern">
+      Regex Pattern <span class="regex-required">*</span>
+    </label>
+    <input type="text" id="regex-pattern" class="regex-input regex-input--mono"
+           [value]="pattern"
+           (input)="patternChange.emit($any($event.target).value)"
+           placeholder="e.g. \d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?"/>
+    <span class="regex-hint">Use named capture groups: <code>(?P&lt;name&gt;...)</code></span>
+  </div>
+
+  <div class="regex-field">
+    <label class="regex-label" for="regex-group">
+      Capture Group <span class="regex-optional">(optional)</span>
+    </label>
+    <input type="text" id="regex-group" class="regex-input"
+           [value]="group"
+           (input)="groupChange.emit($any($event.target).value)"
+           placeholder="e.g. price"/>
+    <span class="regex-hint">Name of the capture group to extract. Leave empty to use full match.</span>
+  </div>
+
+</div>

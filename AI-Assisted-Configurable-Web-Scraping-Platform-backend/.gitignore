@@ -1,0 +1,87 @@
+# ===========================
+# Environment & Secrets
+# ===========================
+.env
+.env.*
+!.env.example
+*.env
+
+# ===========================
+# Java / Maven (Quarkus)
+# ===========================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Quarkus dev mode
+.quarkus/
+
+# ===========================
+# Python
+# ===========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ===========================
+# IDE - IntelliJ IDEA
+# ===========================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ===========================
+# IDE - VS Code
+# ===========================
+.vscode/
+*.code-workspace
+
+# ===========================
+# OS
+# ===========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===========================
+# Docker
+# ===========================
+.docker/
+
+# ===========================
+# Logs
+# ===========================
+*.log
+logs/
+
+web-scraping-backend-quarkus/.env
+keycloak/
+web-scraping-backend-python/

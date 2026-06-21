@@ -1,0 +1,267 @@
+<div class="topbar">
+  <button class="back-btn" (click)="goBack()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    Jobs
+  </button>
+</div>
+
+@if (showTypePicker() && workspacePhase() === 'creation') {
+  <div class="picker-overlay" [class.picker-overlay--leaving]="pickerLeaving()">
+    <div class="picker-glass" (click)="dismissPicker()"></div>
+    <div class="picker-content" (click)="$event.stopPropagation()">
+
+      <div class="picker-header">
+        <div class="picker-header__badge">New Job</div>
+        <h2 class="picker-header__title">Choose your extraction method</h2>
+        <p class="picker-header__desc">This determines how the platform collects data</p>
+      </div>
+
+      <div class="picker-cards">
+        <button class="picker-card"
+                [class.picker-card--hover]="hoveredType() === 'SCRAPER'"
+                (mouseenter)="hoveredType.set('SCRAPER')"
+                (mouseleave)="hoveredType.set(null)"
+                (click)="selectJobType('SCRAPER')">
+          <div class="picker-card__shimmer"></div>
+          <div class="picker-card__icon picker-card__icon--blue">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <line x1="10" y1="9" x2="8" y2="9"/>
+            </svg>
+          </div>
+          <h3 class="picker-card__name">Scraper</h3>
+          <p class="picker-card__desc">Extract data from specific pages you already know</p>
+          <div class="picker-card__tags">
+            <span class="picker-tag">Known URLs</span>
+            <span class="picker-tag">CSS / LLM</span>
+            <span class="picker-tag">Wait & Click</span>
+          </div>
+          <div class="picker-card__cta">
+            Select
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        </button>
+
+        <button class="picker-card"
+                [class.picker-card--hover]="hoveredType() === 'CRAWLER'"
+                (mouseenter)="hoveredType.set('CRAWLER')"
+                (mouseleave)="hoveredType.set(null)"
+                (click)="selectJobType('CRAWLER')">
+          <div class="picker-card__shimmer"></div>
+          <div class="picker-card__icon picker-card__icon--pink">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <path d="M11 8v6"/>
+              <path d="M8 11h6"/>
+            </svg>
+          </div>
+          <h3 class="picker-card__name">Crawler</h3>
+          <p class="picker-card__desc">Explore an entire website starting from a root URL</p>
+          <div class="picker-card__tags">
+            <span class="picker-tag">Auto-discovery</span>
+            <span class="picker-tag">Depth control</span>
+            <span class="picker-tag">URL filters</span>
+          </div>
+          <div class="picker-card__cta">
+            Select
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        </button>
+      </div>
+
+      <button class="picker-cancel" (click)="goBack()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+          View jobs
+      </button>
+
+    </div>
+  </div>
+}
+
+<div class="workspace" #workspaceEl
+     [class.workspace--dragging]="isDragging() || isDraggingSaved1() || isDraggingSaved2()">
+  @if (workspacePhase() === 'creation') {
+    <div class="workspace__main" [class.workspace__main--leaving]="phaseTransitioning()">
+      <div class="workspace__panel workspace__panel--left" [ngStyle]="leftStyle">
+        <app-job-create
+          #jobCreateForm
+          [jobType]="selectedType()"
+          [showChangeType]="!activeJobId()"
+          (jobCreated)="onJobCreated($event)"
+          (modeChange)="onModeChange($event)"
+          (changeTypeRequest)="reopenTypePicker()">
+        </app-job-create>
+      </div>
+      @if (!isNarrow()) {
+        <div class="splitter"
+             [class.splitter--active]="isDragging()"
+             (mousedown)="onMouseDown($event)"
+             (touchstart)="onTouchStart($event)"
+             (dblclick)="resetSplit()">
+          <button class="splitter__snap splitter__snap--left"
+                  title="Expand left panel"
+                  (mousedown)="$event.stopPropagation()"
+                  (click)="expandLeft()">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <div class="splitter__track">
+            <div class="splitter__grip"><span></span><span></span><span></span></div>
+          </div>
+          <button class="splitter__snap splitter__snap--right"
+                  title="Expand right panel"
+                  (mousedown)="$event.stopPropagation()"
+                  (click)="expandRight()">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="9 6 15 12 9 18"/>
+            </svg>
+          </button>
+          @if (isDragging()) {
+            <div class="splitter__tooltip">{{ leftPct }}% · {{ rightPct }}%</div>
+          }
+        </div>
+      }
+      <div class="workspace__panel workspace__panel--right" [ngStyle]="rightStyle">
+        <!-- Dans le panel droit de la phase creation -->
+        @if (createdJob()?.triggerType === 'WEBHOOK') {
+
+          <div class="wh-runner">
+
+
+            <div class="wh-runner__icon-wrap">
+              <div class="wh-runner__icon-glow"></div>
+              <svg class="wh-runner__icon" width="36" height="36" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/>
+                <path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/>
+                <path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/>
+              </svg>
+            </div>
+
+            <h3 class="wh-runner__title">Webhook-triggered job</h3>
+            <p class="wh-runner__desc">
+              This job runs automatically when your endpoint receives a signed POST request.
+              No manual launch needed from here.
+            </p>
+
+            <ol class="wh-runner__steps">
+              <li class="wh-runner__step">
+                <span class="wh-runner__step-num">1</span>
+                <div class="wh-runner__step-body">
+                  <strong>Save the signing secret</strong>
+                  <p>Copy it from the panel on the left — it won't be shown again.</p>
+                </div>
+              </li>
+              <li class="wh-runner__step">
+                <span class="wh-runner__step-num">2</span>
+                <div class="wh-runner__step-body">
+                  <strong>Configure your external system</strong>
+                  <p>Use the endpoint URL and the cURL example to set up your trigger.</p>
+                </div>
+              </li>
+              <li class="wh-runner__step">
+                <span class="wh-runner__step-num">3</span>
+                <div class="wh-runner__step-body">
+                  <strong>Watch deliveries</strong>
+                  <p>Every call appears in the Recent deliveries feed in real-time.</p>
+                </div>
+              </li>
+            </ol>
+
+            <div class="wh-runner__footer">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>Signatures verified via <code>HMAC-SHA256</code>. Replays beyond 5 minutes are rejected.</span>
+            </div>
+
+          </div>
+
+        } @else {
+          <app-job-runner
+            [showSaveActions]="true"
+            [canSave]="isCreateFormValid"
+            [mode]="activeMode()"
+            [jobType]="selectedType()"
+            (saveJob)="handleSave()"
+            (saveAndRunJob)="handleSaveAndRun()">
+          </app-job-runner>
+        }
+      </div>
+    </div>
+  }
+
+  @if (workspacePhase() === 'saved') {
+    <div class="workspace__panel workspace__panel--config" [ngStyle]="configPanelStyle">
+      <app-job-create
+        [readOnlyMode]="true"
+        [displayJobId]="activeJobId()"
+        [jobType]="selectedType()">
+      </app-job-create>
+    </div>
+    @if (!isNarrow()) {
+      <div class="splitter"
+           [class.splitter--active]="isDraggingSaved1()"
+           (mousedown)="onSaved1MouseDown($event)"
+           (dblclick)="resetSavedSplit()">
+        <div class="splitter__track">
+          <div class="splitter__grip"><span></span><span></span><span></span></div>
+        </div>
+        @if (isDraggingSaved1()) {
+          <div class="splitter__tooltip">{{ s1Pct }}% · {{ s2Pct }}% · {{ s3Pct }}%</div>
+        }
+      </div>
+    }
+    <div class="workspace__panel workspace__panel--runner" [ngStyle]="runnerPanelStyle">
+      <app-job-runner
+        [jobId]="activeJobId()"
+        [mode]="activeMode()"
+        [autoLaunch]="autoLaunchRunner()"
+        [resumePolling]="resumePolling()"
+        [jobType]="selectedType()"
+        (jobCompleted)="onJobLaunched()">
+      </app-job-runner>
+    </div>
+    @if (!isNarrow()) {
+      <div class="splitter"
+           [class.splitter--active]="isDraggingSaved2()"
+           (mousedown)="onSaved2MouseDown($event)"
+           (dblclick)="resetSavedSplit()">
+        <div class="splitter__track">
+          <div class="splitter__grip"><span></span><span></span><span></span></div>
+        </div>
+        @if (isDraggingSaved2()) {
+          <div class="splitter__tooltip">{{ s1Pct }}% · {{ s2Pct }}% · {{ s3Pct }}%</div>
+        }
+      </div>
+    }
+    <div class="workspace__panel workspace__panel--history" [ngStyle]="histPanelStyle">
+      @if (historyLoading()) {
+        <div class="history-loading">
+          <span class="history-loading__spinner"></span>
+          Loading history...
+        </div>
+      } @else if (historyError()) {
+        <div class="history-error">Failed to load history</div>
+      } @else {
+        <app-job-history [executions]="executions()"/>
+      }
+    </div>
+  }
+</div>

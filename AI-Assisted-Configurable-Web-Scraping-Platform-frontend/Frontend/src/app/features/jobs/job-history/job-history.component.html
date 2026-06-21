@@ -1,0 +1,79 @@
+<div class="history-header">
+  <div class="history-header__left">
+    <span class="history-header__title">Execution history</span>
+    <span class="history-header__count">{{ executions().length }}</span>
+  </div>
+</div>
+
+<div class="exec-list">
+  @for (exec of executions(); track exec.id) {
+    <div class="exec-row"
+         [class.exec-row--selected]="selectedExecId() === exec.id"
+         (click)="selectExec(exec.id)">
+      <span class="exec-row__num">#{{ exec.num }}</span>
+      <span class="exec-dot exec-dot--{{ exec.status }}"></span>
+      <div class="exec-row__meta">
+        <span class="exec-row__status">{{ statusLabel(exec.status) }}</span>
+        <span class="exec-row__date">{{ exec.date }}</span>
+      </div>
+      <div class="exec-row__right">
+        @if (exec.records > 0) {
+          <span class="exec-row__records">{{ exec.records }}r</span>
+        }
+        <span class="exec-row__duration">{{ exec.duration }}</span>
+      </div>
+    </div>
+  }
+
+  @if (executions().length === 0) {
+    <div class="exec-empty">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      No runs yet
+    </div>
+  }
+</div>
+
+<!-- plain block scroll — padding-bottom keeps content above footer -->
+<div class="exec-scroll">
+  @if (selectedExec(); as exec) {
+    <div class="exec-detail">
+      <div class="exec-detail__header">
+        <span class="exec-detail__label">Run #{{ exec.num }}</span>
+        <span class="exec-badge exec-badge--{{ exec.status }}">{{ statusLabel(exec.status) }}</span>
+      </div>
+
+      @if (exec.errors.length > 0) {
+        <div class="exec-detail__section">
+          <span class="exec-detail__section-label">Errors</span>
+          @for (err of exec.errors; track $index) {
+            <div class="exec-detail__error">{{ err }}</div>
+          }
+        </div>
+      }
+
+      <div class="exec-detail__section">
+        <span class="exec-detail__section-label">Logs</span>
+        <div class="exec-detail__logs">
+          @for (log of exec.logs; track $index) {
+            <div class="exec-detail__log"
+                 [class.exec-detail__log--warn]="log.includes('[WARNING]')"
+                 [class.exec-detail__log--error]="log.includes('[ERROR]')">
+              {{ log }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="exec-hint">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Click a run to see details
+    </div>
+  }
+</div>

@@ -1,0 +1,631 @@
+<div class="page">
+
+  @if (loading()) {
+    <div class="loader-wrap"><span class="loader"></span></div>
+  }
+
+  @if (!loading() && project()) {
+
+    <div class="topbar">
+      <button class="back-btn" (click)="goBack()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Projects
+      </button>
+      <div class="topbar__actions">
+        <button class="act-btn act-btn--outline" (click)="goToEdit()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Edit Project
+        </button>
+        <button class="act-btn act-btn--run" (click)="goToCreateJob()">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New Job
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-card__accent"
+           [style.background]="'linear-gradient(90deg,' + (project()!.color ?? '#00d4ff') + ',transparent)'">
+      </div>
+      <div class="hero-card__body">
+
+        <div class="hero-card__badges">
+          <span class="pill pill--project"
+                [style.background]="(project()!.color ?? '#00d4ff') + '14'"
+                [style.color]="project()!.color ?? '#00d4ff'"
+                [style.border-color]="(project()!.color ?? '#00d4ff') + '22'">
+            <span class="pill__dot"></span>
+            Project
+          </span>
+          <span class="pill pill--status-{{ project()!.status.toLowerCase() }}">
+            {{ project()!.status }}
+          </span>
+          @if (project()!.ownerUsername) {
+            <span class="pill pill--owner">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              {{ project()!.ownerUsername }}
+            </span>
+          }
+        </div>
+
+        <h1 class="hero-card__title">{{ project()!.name }}</h1>
+
+        @if (project()!.description) {
+          <p class="hero-card__desc">{{ project()!.description }}</p>
+        }
+
+        <div class="hero-card__meta">
+          <span class="hero-card__date">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Created {{ project()!.createdAt | date:'MMM d, yyyy · HH:mm' }}
+            @if (project()!.ownerUsername) {
+              · <strong>{{ project()!.ownerUsername }}</strong>
+            }
+          </span>
+          @if (project()!.updatedAt) {
+            <span class="hero-card__sep"></span>
+            <span class="hero-card__date">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+              Updated {{ project()!.updatedAt | date:'MMM d, yyyy · HH:mm' }}
+              @if (project()!.updatedBy) {
+                · <strong>{{ project()!.updatedBy }}</strong>
+              }
+            </span>
+          }
+        </div>
+      </div>
+
+      <nav class="tabs">
+        <button class="tabs__btn" [class.tabs__btn--active]="activeTab() === 'overview'"
+                (click)="setTab('overview')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" rx="1"/>
+            <rect x="14" y="3" width="7" height="5" rx="1"/>
+            <rect x="14" y="12" width="7" height="9" rx="1"/>
+            <rect x="3" y="16" width="7" height="5" rx="1"/>
+          </svg>
+          Overview
+        </button>
+
+        <button class="tabs__btn" [class.tabs__btn--active]="activeTab() === 'jobs'"
+                (click)="setTab('jobs')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Jobs
+          <span class="tab-count">{{ jobs().length }}</span>
+        </button>
+
+        <button class="tabs__btn" [class.tabs__btn--active]="activeTab() === 'members'"
+                (click)="setTab('members')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Members
+          <span class="tab-count">{{ members().length }}</span>
+        </button>
+
+        <button class="tabs__btn" [class.tabs__btn--active]="activeTab() === 'invitations'"
+                (click)="setTab('invitations')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/>
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+          Invitations
+          @if (pendingCount() > 0) {
+            <span class="tab-count tab-count--pending">{{ pendingCount() }}</span>
+          }
+        </button>
+      </nav>
+    </div>
+
+    <div class="content-card">
+      @if (activeTab() === 'overview') {
+        <div class="fade-in ov2">
+
+          <!-- Hero stats -->
+          <div class="ov2-stats">
+            <div class="ov2-stat ov2-stat--primary">
+              <div class="ov2-stat__head">
+                <span class="ov2-stat__label">Total Jobs</span>
+                <svg class="ov2-stat__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <line x1="3" y1="9" x2="21" y2="9"/>
+                </svg>
+              </div>
+              <span class="ov2-stat__value">{{ jobs().length }}</span>
+              <span class="ov2-stat__delta">
+                <span class="ov2-stat__chip ov2-stat__chip--ok">{{ completedJobs() }} done</span>
+                @if (failedJobs() > 0) {
+                  <span class="ov2-stat__chip ov2-stat__chip--err">{{ failedJobs() }} failed</span>
+                }
+              </span>
+            </div>
+
+            <div class="ov2-stat ov2-stat--gauge">
+              <div class="ov2-stat__head">
+                <span class="ov2-stat__label">Success Rate</span>
+              </div>
+              <div class="ov2-gauge">
+                <svg viewBox="0 0 120 120" class="ov2-gauge__svg">
+                  <circle cx="60" cy="60" r="48" fill="none"
+                          class="ov2-gauge__track" stroke-width="9"/>
+                  <circle cx="60" cy="60" r="48" fill="none"
+                          [class]="'ov2-gauge__ring ' + gaugeStrokeClass()"
+                          stroke-width="9" stroke-linecap="round"
+                          [attr.stroke-dasharray]="(successRate() * 301.6 / 100) + ' 301.6'"
+                          transform="rotate(-90 60 60)"/>
+                </svg>
+                <div class="ov2-gauge__center">
+                  <span class="ov2-gauge__num">{{ successRate() }}<em>%</em></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ov2-stat" [class.ov2-stat--live]="runningJobs() > 0">
+              <div class="ov2-stat__head">
+                <span class="ov2-stat__label">Live Now</span>
+                @if (runningJobs() > 0) {
+                  <span class="ov2-stat__pulse"></span>
+                }
+              </div>
+              <span class="ov2-stat__value">{{ runningJobs() }}</span>
+              <span class="ov2-stat__sub">{{ pendingJobs() }} queued</span>
+            </div>
+
+            <div class="ov2-stat">
+              <div class="ov2-stat__head">
+                <span class="ov2-stat__label">Team</span>
+              </div>
+              <span class="ov2-stat__value">{{ members().length }}</span>
+              <div class="ov2-avatars">
+                @for (m of members().slice(0, 4); track m.id; let idx = $index) {
+                  <span class="ov2-avatar" [style.z-index]="10 - idx" [title]="m.username">
+                         @if (memberAvatar(m); as avatar) {
+                           <img class="ov2-avatar__img" [src]="avatar" [alt]="m.username" (error)="onAvatarError($event)"/>
+                         } @else {
+                           {{ memberInitial(m) }}
+                         }
+                  </span>
+                }
+                @if (members().length > 4) {
+                  <span class="ov2-avatar ov2-avatar--more">+{{ members().length - 4 }}</span>
+                }
+                @if (pendingCount() > 0) {
+                  <span class="ov2-stat__chip ov2-stat__chip--pending">+{{ pendingCount() }} invited</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts row 1: Donut + Area -->
+          <div class="ov2-row ov2-row--split">
+            <div class="ov2-card ov2-card--donut">
+              <div class="ov2-card__head">
+                <div>
+                  <span class="ov2-card__title">Status Distribution</span>
+                  <span class="ov2-card__sub">Breakdown by job outcome</span>
+                </div>
+              </div>
+              <div class="ov2-card__chart">
+                @if (totalJobs() === 0) {
+                  <div class="ov2-empty">No jobs yet</div>
+                } @else {
+                  <ngx-charts-pie-chart
+                    [results]="statusChartData()"
+                    [scheme]="statusColorScheme"
+                    [doughnut]="true"
+                    [arcWidth]="0.32"
+                    [labels]="false"
+                    [gradient]="true"
+                    [animations]="true">
+                  </ngx-charts-pie-chart>
+                }
+              </div>
+            </div>
+
+            <div class="ov2-card ov2-card--area">
+              <div class="ov2-card__head">
+                <div>
+                  <span class="ov2-card__title">Activity Trend</span>
+                  <span class="ov2-card__sub">Jobs created · last 14 days</span>
+                </div>
+                <span class="ov2-card__badge">{{ jobs().length }} total</span>
+              </div>
+              <div class="ov2-card__chart">
+                <ngx-charts-area-chart
+                  [results]="timelineChartData()"
+                  [scheme]="areaColorScheme"
+                  [gradient]="true"
+                  [xAxis]="true"
+                  [yAxis]="true"
+                  [autoScale]="true"
+                  [animations]="true">
+                </ngx-charts-area-chart>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts row 2: Heatmap + Recent -->
+          <div class="ov2-row ov2-row--heatmap">
+            <div class="ov2-card ov2-card--heatmap">
+              <div class="ov2-card__head">
+                <div>
+                  <span class="ov2-card__title">Activity Heatmap</span>
+                  <span class="ov2-card__sub">When jobs are typically created</span>
+                </div>
+                @if (peakActivity().count > 0) {
+                  <span class="ov2-card__badge ov2-card__badge--accent">
+                    Peak · {{ peakActivity().day }} {{ peakActivity().slot }}
+                  </span>
+                }
+              </div>
+              <div class="ov2-card__chart ov2-card__chart--heatmap">
+                @if (totalJobs() === 0) {
+                  <div class="ov2-empty">No activity yet</div>
+                } @else {
+                  <ngx-charts-heat-map
+                    [results]="heatmapChartData()"
+                    [scheme]="heatmapColorScheme"
+                    [xAxis]="true"
+                    [yAxis]="true"
+                    [innerPadding]="3"
+                    [animations]="true">
+                  </ngx-charts-heat-map>
+                }
+              </div>
+            </div>
+
+            <div class="ov2-card ov2-card--feed">
+              <div class="ov2-card__head">
+                <div>
+                  <span class="ov2-card__title">Recent Activity</span>
+                  <span class="ov2-card__sub">Latest 5 jobs</span>
+                </div>
+                <button class="ov2-link" (click)="setTab('jobs')">
+                  All
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
+              </div>
+              @if (recentJobs().length === 0) {
+                <div class="ov2-empty">No jobs yet</div>
+              } @else {
+                <div class="ov2-feed">
+                  @for (job of recentJobs(); track job.id) {
+                    <div class="ov2-feed__item" (click)="goToJob(job.id)">
+                      <div class="ov2-feed__rail">
+                        <span class="ov2-feed__dot ov2-feed__dot--{{ job.status.toLowerCase() }}"></span>
+                      </div>
+                      <div class="ov2-feed__body">
+                        <div class="ov2-feed__top">
+                          <span class="ov2-feed__name">{{ job.name }}</span>
+                          <span class="ov2-feed__when">{{ ago(job.createdAt) }}</span>
+                        </div>
+                        <div class="ov2-feed__meta">
+                          <span class="status-pill status-pill--{{ job.status.toLowerCase() }}">
+                            <span class="status-pill__dot"></span>{{ job.status }}
+                          </span>
+                          <span class="ov2-feed__user">by {{ jobUsername(job) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+      }
+
+      <!-- ════════════ Tab: Jobs ════════════ -->
+      @if (activeTab() === 'jobs') {
+        <div class="fade-in">
+          @if (jobs().length === 0) {
+            <div class="tab-empty">
+              <div class="tab-empty__icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </div>
+              <h4>No jobs yet</h4>
+              <p>Add your first scraping job to get started.</p>
+              <button class="act-btn act-btn--run" (click)="goToCreateJob()">+ New Job</button>
+            </div>
+          } @else {
+            <div class="jobs-table-wrap">
+              <table class="jobs-table">
+                <thead>
+                <tr>
+                  <th>Job Name</th>
+                  <th>Target URL</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                  <th>Created by</th>
+                  <th>Created</th>
+                </tr>
+                </thead>
+                <tbody>
+                  @for (job of jobs(); track job.id) {
+                    <tr class="jobs-row" (click)="goToJob(job.id)">
+                      <td class="col-name">
+                        <div class="job-name-cell">
+                          <div class="job-name-cell__icon" [attr.data-status]="job.status.toLowerCase()">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2">
+                              <circle cx="11" cy="11" r="8"/>
+                              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                          </div>
+                          <span class="job-name-cell__text">{{ job.name }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <a class="url-chip" [href]="job.targetUrl" target="_blank"
+                           (click)="$event.stopPropagation()">
+                          {{ job.targetUrl | slice:0:40 }}{{ job.targetUrl.length > 40 ? '…' : '' }}
+                        </a>
+                      </td>
+                      <td>
+                        <span class="status-pill status-pill--{{ job.status.toLowerCase() }}">
+                          <span class="status-pill__dot"></span>{{ job.status }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="priority-tag priority-tag--{{ job.priority.toLowerCase() }}">
+                          {{ job.priority }}
+                        </span>
+                      </td>
+                      <td>
+                        <div class="author-chip">
+                          <span class="author-chip__avatar">
+                               @if (avatarForUserId(job.createdBy); as avatar) {
+                               <img class="author-chip__avatar-img" [src]="avatar" [alt]="jobUsername(job)" (error)="onAvatarError($event)"/>
+                              } @else {
+                              {{ jobUsernameInitial(job) }}
+                               }
+                          </span>
+                          <span class="author-chip__name">{{ jobUsername(job) }}</span>
+                        </div>
+                      </td>
+                      <td class="date-col">
+                        <span class="date-text">{{ job.createdAt | date:'MMM d, yyyy' }}</span>
+                        <span class="time-text">{{ job.createdAt | date:'HH:mm' }}</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+      @if (activeTab() === 'members') {
+        <div class="fade-in">
+          <div class="members-toolbar">
+            <span class="members-count">
+              {{ members().length }} member{{ members().length !== 1 ? 's' : '' }}
+            </span>
+          </div>
+
+          <div class="members-list">
+            @for (member of members(); track member.id) {
+              <div class="member-row">
+                <div class="member-row__left">
+                  <div class="member-avatar">
+                    @if (memberAvatar(member); as avatar) {
+                      <img class="member-avatar__img" [src]="avatar" [alt]="member.username" (error)="onAvatarError($event)"/>
+                    } @else {
+                      {{ memberInitial(member) }}
+                    }
+                  </div>
+                  <div class="member-info">
+                    <span class="member-info__name">{{ member.username }}</span>
+                    <span class="member-info__email">{{ member.email }}</span>
+                  </div>
+                  <span class="member-joined">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Joined {{ member.joinedAt | date:'MMM d, yyyy' }}
+                  </span>
+                </div>
+                <div class="member-row__right">
+                  @if (member.role === 'OWNER') {
+                    <span [class]="roleBadgeClass(member.role)">{{ member.role }}</span>
+                  } @else {
+                    <select class="role-select"
+                            [ngModel]="member.role"
+                            (ngModelChange)="updateRole(member, $event)">
+                      @for (r of roles; track r) {
+                        <option [value]="r">{{ r }}</option>
+                      }
+                    </select>
+                    <button class="row-action row-action--delete" title="Remove"
+                            (click)="confirmRemove(member.userId)">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2.2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14H6L5 6"/>
+                        <path d="M10 11v6M14 11v6"/>
+                        <path d="M9 6V4h6v2"/>
+                      </svg>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      @if (activeTab() === 'invitations') {
+        <div class="fade-in">
+          <div class="members-toolbar">
+            <span class="members-count">
+              {{ pendingCount() }} pending invitation{{ pendingCount() !== 1 ? 's' : '' }}
+            </span>
+            <button class="act-btn act-btn--run" (click)="openInvitePanel()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Invite Member
+            </button>
+          </div>
+
+          @if (invitations().length === 0) {
+            <div class="tab-empty">
+              <div class="tab-empty__icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                  <path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/>
+                  <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                </svg>
+              </div>
+              <h4>No invitations sent</h4>
+              <p>Invite a user to collaborate on this project.</p>
+            </div>
+          } @else {
+            <div class="members-list">
+              @for (inv of invitations(); track inv.id) {
+                <div class="member-row">
+                  <div class="member-row__left">
+                    <div class="inv-avatar">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <line x1="20" y1="8" x2="20" y2="14"/>
+                        <line x1="23" y1="11" x2="17" y2="11"/>
+                      </svg>
+                    </div>
+                    <div class="member-info">
+                      <span class="member-info__name">Invited by {{ inv.invitedByUsername }}</span>
+                      <span class="member-info__email">Role: {{ inv.role }}</span>
+                    </div>
+                    <span class="member-joined">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      Expires {{ inv.expiresAt | date:'MMM d, yyyy' }}
+                    </span>
+                  </div>
+                  <div class="member-row__right">
+                    <span [class]="invitationStatusClass(inv.status)">{{ inv.status }}</span>
+                    @if (inv.status === 'PENDING') {
+                      <button class="row-action row-action--delete" title="Cancel invitation"
+                              (click)="cancelInvitation(inv.id)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.2">
+                          <line x1="18" y1="6" x2="6" y2="18"/>
+                          <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+  }
+</div>
+
+@if (showInvitePanel()) {
+  <div class="modal-backdrop" (click)="closeInvitePanel()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-box__header">
+        <div class="modal-box__icon modal-box__icon--blue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+            <line x1="20" y1="8" x2="20" y2="14"/>
+            <line x1="23" y1="11" x2="17" y2="11"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Invite a member</h3>
+          <p>The user will receive an in-app notification to accept or decline.</p>
+        </div>
+      </div>
+      <div class="modal-box__body">
+        <div class="modal-field">
+          <label class="modal-label" for="modal_label">Email <span class="modal-label__required">*</span></label>
+          <input class="modal-input" type="email"
+                 placeholder="e.g. user@example.com"
+                 [ngModel]="inviteEmail()"
+                 (ngModelChange)="inviteEmail.set($event)"/>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label" for="modal-label">Role</label>
+          <select class="modal-select"
+                  [ngModel]="inviteRole()"
+                  (ngModelChange)="inviteRole.set($event)">
+            @for (r of roles; track r) {
+              <option [value]="r">{{ r }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="modal-box__actions">
+        <button class="modal-btn modal-btn--cancel" (click)="closeInvitePanel()">Cancel</button>
+        <button class="modal-btn modal-btn--add"
+                [disabled]="!inviteEmail().trim() || inviting()"
+                (click)="sendInvitation()">
+          {{ inviting() ? 'Sending…' : 'Send Invitation' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (confirmRemoveUserId()) {
+  <div class="modal-backdrop" (click)="cancelRemove()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-box__header">
+        <div class="modal-box__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="23" y1="18" x2="17" y2="18"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Remove member?</h3>
+          <p>This member will lose access to the project and all its jobs.</p>
+        </div>
+      </div>
+      <div class="modal-box__actions">
+        <button class="modal-btn modal-btn--cancel" (click)="cancelRemove()">Cancel</button>
+        <button class="modal-btn modal-btn--confirm" (click)="removeMember()">Remove</button>
+      </div>
+    </div>
+  </div>
+}

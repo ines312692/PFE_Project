@@ -1,0 +1,14 @@
+{
+  "/v1": {
+    "target": "http://quarkus-backend-dev:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "cookieDomainRewrite": {
+      "*": "localhost"
+    },
+    "cookiePathRewrite": {
+      "*": "/"
+    },
+    "logLevel": "debug"
+  }
+}

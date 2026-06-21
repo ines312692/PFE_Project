@@ -1,0 +1,59 @@
+
+Frontend/node_modules/
+node_modules/
+
+# Build output local
+Frontend/dist/
+dist/
+
+# Fichiers de cache
+Frontend/.angular/
+.angular/
+**/.cache/
+
+# Tests & Couverture
+Frontend/coverage/
+coverage/
+**/*.spec.ts
+**/*.test.ts
+e2e/
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+Jenkinsfile
+.gitlab-ci.yml
+
+# Documentation
+*.md
+README*
+docs/
+
+# Logs
+*.log
+logs/
+
+# Variables d'environnement locales (jamais dans l'image !)
+.env
+.env.*
+!.env.example
+
+# Docker (évite la récursion)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Makefile
+Makefile

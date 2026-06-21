@@ -1,0 +1,85 @@
+<div class="nf">
+  <div class="nf__grid" aria-hidden="true"></div>
+
+  <div class="nf__inner">
+
+    <!-- Signature: a crawl path that breaks on a missing node -->
+    <div class="nf__viz" aria-hidden="true">
+      <svg class="crawl" viewBox="0 0 460 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- traversed links -->
+        <path class="crawl__trail" d="M44 168 L150 78 L246 150 L338 86" />
+        <!-- broken link to the missing node -->
+        <path class="crawl__trail crawl__trail--broken" d="M338 86 L416 162" />
+
+        <!-- visited nodes -->
+        <g class="crawl__node" style="--d:0s">
+          <circle cx="44" cy="168" r="9"/><circle class="crawl__node-core" cx="44" cy="168" r="3.5"/>
+        </g>
+        <g class="crawl__node" style="--d:.12s">
+          <circle cx="150" cy="78" r="9"/><circle class="crawl__node-core" cx="150" cy="78" r="3.5"/>
+        </g>
+        <g class="crawl__node" style="--d:.24s">
+          <circle cx="246" cy="150" r="9"/><circle class="crawl__node-core" cx="246" cy="150" r="3.5"/>
+        </g>
+        <g class="crawl__node" style="--d:.36s">
+          <circle cx="338" cy="86" r="9"/><circle class="crawl__node-core" cx="338" cy="86" r="3.5"/>
+        </g>
+
+        <!-- missing node -->
+        <g class="crawl__missing">
+          <circle class="crawl__missing-ring" cx="416" cy="162" r="22"/>
+          <line x1="408" y1="154" x2="424" y2="170"/>
+          <line x1="424" y1="154" x2="408" y2="170"/>
+        </g>
+
+        <!-- the crawler, racing the trail -->
+        <circle class="crawl__bot" r="4.5"/>
+      </svg>
+    </div>
+
+    <div class="nf__code">
+      <span class="nf__code-num">404</span>
+      <span class="nf__code-pulse"></span>
+    </div>
+
+    <h1 class="nf__title">This path leads nowhere</h1>
+    <p class="nf__desc">
+      The crawler followed a link to a page that doesn&rsquo;t exist or has moved.
+      Pick a route below to get back on track.
+    </p>
+
+    <div class="nf__path" title="Requested route">
+      <span class="nf__path-dot"></span>
+      <code>{{ attemptedPath }}</code>
+    </div>
+
+    <div class="nf__actions">
+      <button class="nf__btn nf__btn--primary" (click)="goToJobs()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="9" y1="13" x2="15" y2="13"/>
+          <line x1="9" y1="17" x2="15" y2="17"/>
+        </svg>
+        Go to Jobs
+      </button>
+
+      <button class="nf__btn nf__btn--ghost" (click)="goHome()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Dashboard
+      </button>
+
+      <button class="nf__btn nf__btn--ghost" (click)="goBack()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Go back
+      </button>
+    </div>
+
+  </div>
+</div>

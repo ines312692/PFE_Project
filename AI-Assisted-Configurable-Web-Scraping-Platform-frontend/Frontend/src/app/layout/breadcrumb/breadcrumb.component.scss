@@ -1,0 +1,132 @@
+:host {
+  display: contents;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  max-width: 420px;
+  overflow: hidden;
+  animation: breadcrumbIn .2s cubic-bezier(.22, 1, .36, 1);
+
+  &__home {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    color: var(--color-text-slate);
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: color .15s, background .15s;
+
+    &:hover {
+      color: var(--elyadata-blue);
+      background: rgba(var(--elyadata-blue-rgb), .07);
+    }
+  }
+
+  &__sep {
+    display: flex;
+    align-items: center;
+    color: var(--color-text-faint);
+    flex-shrink: 0;
+    padding: 0 1px;
+    opacity: .6;
+  }
+
+  &__list {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    min-width: 0;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    animation: crumbIn .18s cubic-bezier(.22, 1, .36, 1) both;
+
+    @for $i from 1 through 6 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{($i - 1) * 30}ms;
+      }
+    }
+  }
+
+  &__link {
+    display: inline-block;
+    font-size: .75rem;
+    font-weight: 500;
+    color: var(--color-text-slate);
+    text-decoration: none;
+    padding: .22rem .4rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+    transition: color .14s, background .14s;
+    line-height: 1;
+
+    &:hover {
+      color: var(--elyadata-blue);
+      background: rgba(var(--elyadata-blue-rgb), .07);
+    }
+  }
+
+  &__current {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--color-text-slate);
+    padding: .22rem .4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    line-height: 1;
+  }
+}
+
+.navbar__breadcrumb-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border-medium);
+  flex-shrink: 0;
+  opacity: .7;
+}
+
+@keyframes breadcrumbIn {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes crumbIn {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: none;
+  }
+}

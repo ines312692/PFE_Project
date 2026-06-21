@@ -1,0 +1,1396 @@
+<div class="page">
+
+  @if (loading()) {
+    <div class="loader-wrap">
+      <span class="loader"></span>
+    </div>
+  } @else {
+    @if (job(); as j) {
+
+      <!-- ═══════════════════════════════════════════════ TOPBAR -->
+      <div class="topbar">
+        <button class="back-btn" (click)="goBack()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Jobs
+        </button>
+
+        <div class="topbar__actions">
+          @if (canLaunch()) {
+            <button class="act-btn act-btn--run" (click)="launch()">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5,3 19,12 5,21"/>
+              </svg>
+              Run Job
+            </button>
+          }
+
+          @if (canPause()) {
+            <button class="act-btn act-btn--amber" (click)="pause()">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16"/>
+                <rect x="14" y="4" width="4" height="16"/>
+              </svg>
+              Pause
+            </button>
+          }
+
+          @if (isCompleted() && scrapeResult()) {
+            <button class="act-btn act-btn--outline" (click)="goToPipeline()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              Process &amp; Clean
+            </button>
+          }
+
+          <button class="act-btn act-btn--outline" (click)="goToEdit()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════ HERO CARD -->
+      <div class="hero-card"
+           [class.hero-card--scraper]="isScraper()"
+           [class.hero-card--crawler]="isCrawler()">
+
+        <div class="hero-card__accent"></div>
+
+        <div class="hero-card__body">
+          <div class="hero-card__badges">
+            <span class="pill pill--type"
+                  [class.pill--scraper]="isScraper()"
+                  [class.pill--crawler]="isCrawler()">{{ j.jobType }}</span>
+            <span class="pill pill--status pill--status-{{ j.status | lowercase }}">
+              <span class="pill__dot"></span>{{ j.status }}
+            </span>
+            <span class="pill pill--priority pill--priority-{{ j.priority | lowercase }}">{{ j.priority }}</span>
+            <span class="pill pill--trigger">{{ j.triggerType }}</span>
+          </div>
+
+          <h1 class="hero-card__title">{{ j.name }}</h1>
+
+          <a class="hero-card__url" [href]="j.targetUrl" target="_blank" rel="noopener">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            {{ j.targetUrl }}
+          </a>
+
+          <div class="hero-card__meta">
+            <span class="hero-card__date">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Created {{ j.createdAt | date:'MMM d, yyyy · HH:mm' }}
+            </span>
+            <span class="hero-card__sep"></span>
+            <span class="hero-card__date">Updated {{ j.updatedAt | date:'MMM d, yyyy · HH:mm' }}</span>
+            @if (j.cronExpression) {
+              <span class="hero-card__sep"></span>
+              <code class="hero-card__cron">{{ j.cronExpression }}</code>
+            }
+          </div>
+        </div>
+
+        <!-- TABS -->
+        <nav class="tabs">
+          @for (t of tabs(); track t.id) {
+            <button class="tabs__btn"
+                    [class.tabs__btn--active]="activeTab() === t.id"
+                    (click)="setTab(t.id)">
+              @switch (t.icon) {
+                @case ('doc') {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                }
+                @case ('code') {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                  </svg>
+                }
+                @case ('shield') {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                }
+                @case ('history') {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                  </svg>
+                }
+                @case ('table') {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <line x1="3" y1="9" x2="21" y2="9"/>
+                    <line x1="3" y1="15" x2="21" y2="15"/>
+                    <line x1="9" y1="3" x2="9" y2="21"/>
+                  </svg>
+                }
+              }
+              {{ t.label }}
+            </button>
+          }
+        </nav>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════ CONTENT CARD -->
+      <div class="content-card">
+
+        <!-- ─── TAB : OVERVIEW ─── -->
+        @if (activeTab() === 'overview') {
+          <div class="fade-in overview-v2">
+
+            <!-- KPI STRIP -->
+            @if (isCompleted() && scrapeResult(); as r) {
+              <div class="kpi-strip">
+                <div class="kpi">
+                  <span class="kpi__label">Pages</span>
+                  <span class="kpi__value kpi__value--blue">{{ r.pagesCrawled || 'N/A' }}</span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi__label">Records</span>
+                  <span class="kpi__value kpi__value--green">{{ r.records.length }}</span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi__label">Duration</span>
+                  <span class="kpi__value kpi__value--purple">
+                    @if (r.durationMs != null) {
+                      {{ (r.durationMs / 1000).toFixed(1) }}<em>s</em>
+                    } @else {
+                      N/A
+                    }
+                  </span>
+                </div>
+                <div class="kpi">
+                  <span class="kpi__label">Errors</span>
+                  <span class="kpi__value"
+                        [class.kpi__value--green]="r.errors.length === 0"
+                        [class.kpi__value--red]="r.errors.length > 0">
+                    {{ r.errors.length }}
+                  </span>
+                </div>
+                @if (r.errors.length === 0 && r.records.length > 0) {
+                  <span class="kpi-rate">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    100% success
+                  </span>
+                }
+              </div>
+            }
+
+            <!-- CAPABILITIES PILLS -->
+            <div class="caps">
+              <span class="cap"
+                    [class.cap--blue]="j.browserConfig.javascriptEnabled"
+                    [class.cap--neutral]="!j.browserConfig.javascriptEnabled">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                JavaScript: {{ j.browserConfig.javascriptEnabled ? 'On' : 'Off' }}
+              </span>
+
+              <span class="cap"
+                    [class.cap--purple]="j.browserConfig.stealthMode"
+                    [class.cap--neutral]="!j.browserConfig.stealthMode">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+                Stealth: {{ j.browserConfig.stealthMode ? 'On' : 'Off' }}
+              </span>
+              <span class="cap"
+                    [class.cap--green]="j.browserConfig.session?.enabled"
+                    [class.cap--neutral]="!j.browserConfig.session?.enabled">
+                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                               </svg>
+                          Login Session:
+                          @if (j.browserConfig.session?.enabled) {
+                  {{ j.browserConfig.session?.mode === 'COOKIE_IMPORT' ? 'Cookie Import' : 'Form Login' }}
+                } @else {
+                  Off
+                }
+              </span>
+
+              <span class="cap"
+                    [class.cap--purple]="j.proxyConfig?.enabled"
+                    [class.cap--neutral]="!j.proxyConfig?.enabled">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Proxy:
+                @if (j.proxyConfig == null) {
+                  N/A
+                } @else if (j.proxyConfig.enabled) {
+                  {{ j.proxyConfig.rotationStrategy || 'enabled' }}
+                } @else {
+                  Off
+                }
+              </span>
+
+              @if (isScraper()) {
+                <span class="cap"
+                      [class.cap--green]="j.scraperConfig?.scrollToBottom"
+                      [class.cap--neutral]="!j.scraperConfig?.scrollToBottom">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <polyline points="19 12 12 19 5 12"/>
+                  </svg>
+                  Scroll bottom:
+                  @if (j.scraperConfig == null) {
+                    N/A
+                  } @else {
+                    {{ j.scraperConfig.scrollToBottom ? 'On' : 'Off' }}
+                  }
+                </span>
+
+                <span class="cap"
+                      [class.cap--amber]="j.scraperConfig?.paginationType && j.scraperConfig?.paginationType !== 'NONE'"
+                      [class.cap--neutral]="!j.scraperConfig?.paginationType || j.scraperConfig?.paginationType === 'NONE'">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="6" width="20" height="12" rx="2"/>
+                    <line x1="9" y1="6" x2="9" y2="18"/>
+                    <line x1="15" y1="6" x2="15" y2="18"/>
+                  </svg>
+                  Pagination:
+                  {{ j.scraperConfig?.paginationType ?? 'N/A' }}
+                  @if (j.scraperConfig?.paginationType && j.scraperConfig?.paginationType !== 'NONE') {
+                    · {{ j.scraperConfig?.maxPaginationPages ?? 'N/A' }}p
+                  }
+                </span>
+
+                <span class="cap cap--neutral">
+                  Mode:
+                  @if (j.scraperConfig == null) {
+                    N/A
+                  } @else {
+                    {{ j.scraperConfig.singlePageMode ? 'Single Page' : 'Multi URL' }}
+                  }
+                </span>
+
+                <span class="cap cap--neutral">
+                  Seeds: {{ j.scraperConfig?.seedUrls?.length ?? 'N/A' }}
+                </span>
+              }
+
+
+              <span class="cap cap--neutral">Extraction: {{ j.extractionMode }}</span>
+            </div>
+
+            <!-- NUMERIC PARAMS GRID -->
+            <div class="num-grid">
+              <div class="num">
+                <span class="num__label">Request delay</span>
+                <span class="num__value">
+                  @if (j.browserConfig.requestDelayMs != null) {
+                    {{ j.browserConfig.requestDelayMs }}<em>ms</em>
+                  } @else {
+                    N/A
+                  }
+                </span>
+              </div>
+              <div class="num">
+                <span class="num__label">Timeout</span>
+                <span class="num__value">
+                  @if (j.browserConfig.timeoutMs != null) {
+                    {{ j.browserConfig.timeoutMs }}<em>ms</em>
+                  } @else {
+                    N/A
+                  }
+                </span>
+              </div>
+
+              @if (isScraper()) {
+                <div class="num">
+                  <span class="num__label">Pagination</span>
+                  <span class="num__value">{{ j.scraperConfig?.paginationType ?? 'N/A' }}</span>
+                </div>
+                <div class="num">
+                  <span class="num__label">Max pages</span>
+                  <span class="num__value">{{ j.scraperConfig?.maxPaginationPages ?? 'N/A' }}</span>
+                </div>
+              } @else if (isCrawler()) {
+                <div class="num">
+                  <span class="num__label">Max pages</span>
+                  <span class="num__value">{{ j.crawlerConfig?.maxPages ?? 'N/A' }}</span>
+                </div>
+                <div class="num">
+                  <span class="num__label">Max depth</span>
+                  <span class="num__value">{{ j.crawlerConfig?.maxDepth ?? 'N/A' }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- COLLAPSIBLE DETAILS -->
+
+            <!-- Seed URLs -->
+            <details class="acc">
+              <summary class="acc__head">
+                <svg class="acc__chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+                <span class="acc__title">Seed URLs</span>
+                <span class="acc__count">{{ j.scraperConfig?.seedUrls?.length ?? 'N/A' }} URLs</span>
+              </summary>
+              <div class="acc__body">
+                @if (hasSeedUrls() && j.scraperConfig?.seedUrls?.length) {
+                  @for (url of j.scraperConfig!.seedUrls; track url) {
+                    <code class="seed-url">{{ url }}</code>
+                  }
+                } @else {
+                  <code class="seed-url">N/A</code>
+                }
+              </div>
+            </details>
+
+            <!-- Pre-extraction actions -->
+            @if (isScraper()) {
+              <details class="acc">
+                <summary class="acc__head">
+                  <svg class="acc__chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                  <span class="acc__title">Pre-extraction actions</span>
+                  <span class="acc__count">
+                    {{ preActions().length }} action{{ preActions().length > 1 ? 's' : '' }}
+                  </span>
+                </summary>
+                <div class="acc__body">
+                  @if (hasPreActions()) {
+                    <div class="pre-actions">
+                      @for (action of preActions(); track $index; let i = $index) {
+                        <div class="pre-action">
+                          <span class="pre-action__num">{{ i + 1 }}</span>
+                          <div class="pre-action__body">
+                            <div class="pre-action__head">
+                              <span class="pre-action__type">{{ action.type }}</span>
+                              @if (action.optional) {
+                                <span class="pre-action__opt">optional</span>
+                              }
+                              @if (action.timeoutMs != null) {
+                                <span class="pre-action__timeout">{{ action.timeoutMs }}ms</span>
+                              }
+                            </div>
+                            @if (action.label) {
+                              <span class="pre-action__label">{{ action.label }}</span>
+                            }
+                            @if (action.selector) {
+                              <code class="pre-action__selector">{{ action.selector }}</code>
+                            }
+                            @if (action.value) {
+                              <div class="pre-action__value">
+                                <span class="pre-action__value-k">value</span>
+                                <code>{{ action.value }}</code>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <code class="seed-url">No pre-actions configured</code>
+                  }
+                </div>
+              </details>
+            }
+
+            <!-- Crawler settings -->
+            @if (isCrawler()) {
+              <details class="acc">
+                <summary class="acc__head">
+                  <svg class="acc__chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                  <span class="acc__title">Crawler settings</span>
+                </summary>
+                <div class="acc__body acc__body--kv">
+                  @if (j.crawlerConfig; as cc) {
+                    <div class="kv">
+                      <span class="kv__k">Follow redirects</span>
+                      <span class="kv__v" [class.kv__v--on]="cc.followRedirects">
+                        {{ cc.followRedirects ? 'On' : 'Off' }}
+                      </span>
+                    </div>
+                    <div class="kv">
+                      <span class="kv__k">Respect robots.txt</span>
+                      <span class="kv__v" [class.kv__v--on]="cc.respectRobotsTxt">
+                        {{ cc.respectRobotsTxt ? 'On' : 'Off' }}
+                      </span>
+                    </div>
+                    <div class="kv">
+                      <span class="kv__k">Include</span>
+                      <code class="kv__code">{{ cc.urlIncludePatterns ?? 'N/A' }}</code>
+                    </div>
+                    <div class="kv">
+                      <span class="kv__k">Exclude</span>
+                      <code class="kv__code">{{ cc.urlExcludePatterns ?? 'N/A' }}</code>
+                    </div>
+                    <div class="kv">
+                      <span class="kv__k">Sitemap</span>
+                      <code class="kv__code">{{ cc.sitemapUrl ?? 'N/A' }}</code>
+                    </div>
+                  } @else {
+                    <div class="kv">
+                      <span class="kv__k">Settings</span>
+                      <span class="kv__v">N/A</span>
+                    </div>
+                  }
+                </div>
+              </details>
+            }
+
+            <!-- Selectors -->
+            @if (isScraper()) {
+              <details class="acc">
+                <summary class="acc__head">
+                  <svg class="acc__chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                  <span class="acc__title">Selectors</span>
+                </summary>
+                <div class="acc__body acc__body--kv">
+                  <div class="kv">
+                    <span class="kv__k">Wait for</span>
+                    <code class="kv__code">{{ j.scraperConfig?.waitForSelector ?? 'N/A' }}</code>
+                  </div>
+                  <div class="kv">
+                    <span class="kv__k">Click before</span>
+                    <code class="kv__code">{{ j.scraperConfig?.clickBeforeExtract ?? 'N/A' }}</code>
+                  </div>
+                  <div class="kv">
+                    <span class="kv__k">Pagination</span>
+                    <code class="kv__code">{{ j.scraperConfig?.paginationSelector ?? 'N/A' }}</code>
+                  </div>
+                </div>
+              </details>
+            }
+
+            <!-- Proxy config -->
+            <details class="acc">
+              <summary class="acc__head">
+                <svg class="acc__chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+                <span class="acc__title">Proxy configuration</span>
+                <span class="acc__status" [class.acc__status--on]="j.proxyConfig?.enabled">
+                  <span class="acc__dot"></span>
+                  @if (j.proxyConfig == null) {
+                    N/A
+                  } @else {
+                    {{ j.proxyConfig.enabled ? 'Active' : 'Disabled' }}
+                  }
+                </span>
+              </summary>
+              <div class="acc__body acc__body--kv">
+                @if (j.proxyConfig; as pc) {
+                  <div class="kv">
+                    <span class="kv__k">Enabled</span>
+                    <span class="kv__v" [class.kv__v--on]="pc.enabled">
+                      {{ pc.enabled ? 'Yes' : 'No' }}
+                    </span>
+                  </div>
+                  <div class="kv">
+                    <span class="kv__k">Rotation strategy</span>
+                    <span class="kv__v" [class.kv__v--on]="pc.rotationStrategy">
+                      {{ rotationStrategyLabel() }}
+                    </span>
+                  </div>
+                  <div class="kv">
+                    <span class="kv__k">Max latency</span>
+                    <span class="kv__v">
+                      @if (pc.maxLatencyMs != null) {
+                        {{ pc.maxLatencyMs }}<em>ms</em>
+                      } @else {
+                        N/A
+                      }
+                    </span>
+                  </div>
+                  <div class="kv">
+                    <span class="kv__k">Min success rate</span>
+                    <span class="kv__v">
+                      @if (pc.minSuccessRate != null) {
+                        {{ (pc.minSuccessRate * 100).toFixed(0) }}<em>%</em>
+                      } @else {
+                        N/A
+                      }
+                    </span>
+                  </div>
+                  <div class="kv kv--tags">
+                    <span class="kv__k">Countries</span>
+                    @if (pc.countries && pc.countries.length) {
+                      <span class="kv__tags">
+                        @for (c of pc.countries; track c) {
+                          <span class="kv__tag">{{ c }}</span>
+                        }
+                      </span>
+                    } @else {
+                      <span class="kv__v">N/A</span>
+                    }
+                  </div>
+                } @else {
+                  <div class="kv">
+                    <span class="kv__k">Status</span>
+                    <span class="kv__v">N/A</span>
+                  </div>
+                }
+              </div>
+            </details>
+
+            <!-- User agent -->
+            <details class="acc">
+              <summary class="acc__head">
+                <svg class="acc__chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+                <span class="acc__title">User agent</span>
+              </summary>
+              <div class="acc__body">
+                <code class="ua-line">{{ j.browserConfig.userAgent || 'N/A' }}</code>
+              </div>
+            </details>
+
+            @if (j.browserConfig.session?.enabled) {
+              <details class="acc">
+                <summary class="acc__head">
+                  <svg class="acc__chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                  <span class="acc__title">Authenticated session</span>
+                  <span class="acc__status acc__status--on">
+        <span class="acc__dot"></span>
+                    {{ j.browserConfig.session?.mode === 'COOKIE_IMPORT' ? 'Cookie Import' : 'Form Login' }}
+      </span>
+                </summary>
+                <div class="acc__body acc__body--kv">
+                  <div class="kv">
+                    <span class="kv__k">Method</span>
+                    <span class="kv__v kv__v--on">
+          {{ j.browserConfig.session?.mode === 'COOKIE_IMPORT' ? 'Cookie Import' : 'Form Login' }}
+        </span>
+                  </div>
+                  @if (j.browserConfig.session?.mode === 'FORM') {
+                    <div class="kv">
+                      <span class="kv__k">Login URL</span>
+                      <code class="kv__code">{{ j.browserConfig.session?.loginUrl ?? 'N/A' }}</code>
+                    </div>
+                    <div class="kv">
+                      <span class="kv__k">Username selector</span>
+                      <code class="kv__code">{{ j.browserConfig.session?.usernameSelector ?? 'N/A' }}</code>
+                    </div>
+                    <div class="kv">
+                      <span class="kv__k">Password selector</span>
+                      <code class="kv__code">{{ j.browserConfig.session?.passwordSelector ?? 'N/A' }}</code>
+                    </div>
+                    <div class="kv">
+                      <span class="kv__k">Submit selector</span>
+                      <code class="kv__code">{{ j.browserConfig.session?.submitSelector ?? 'N/A' }}</code>
+                    </div>
+                    <div class="kv">
+                      <span class="kv__k">Success selector</span>
+                      <code class="kv__code">{{ j.browserConfig.session?.successSelector ?? 'N/A' }}</code>
+                    </div>
+                    <div class="kv">
+                      <span class="kv__k">Credentials</span>
+                      <span class="kv__v">•••••• (encrypted, never returned)</span>
+                    </div>
+                  } @else {
+                    <div class="kv">
+                      <span class="kv__k">Cookies</span>
+                      <span class="kv__v">storageState stored (encrypted, never returned)</span>
+                    </div>
+                  }
+                </div>
+              </details>
+            }
+
+          </div>
+        }
+
+        <!-- ─── TAB : EXTRACTION ─── -->
+        @if (activeTab() === 'extraction') {
+          <div class="fade-in">
+
+            @if (j.extractionSchema) {
+              <div class="section-header">
+                <h3 class="section__title">Extraction Fields</h3>
+                <span class="mode-badge">{{ j.extractionMode }}</span>
+              </div>
+
+              @if (hasFields()) {
+                <div class="schema-wrap">
+                  <table class="schema-tbl">
+                    <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Selector</th>
+                      <th>Type</th>
+                      <th>Attribute</th>
+                      <th>Req</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      @for (f of j.extractionSchema!.fields; track f.name) {
+                        <tr>
+                          <td class="schema-tbl__name">{{ f.name }}</td>
+                          <td><code class="sc">{{ f.selector }}</code></td>
+                          <td><span class="type-badge">{{ f.type }}</span></td>
+                          <td>
+                            @if (f.attribute) {
+                              <code class="sc">{{ f.attribute }}</code>
+                            } @else {
+                              <span class="na">—</span>
+                            }
+                          </td>
+                          <td>
+                            <span class="req" [class.req--yes]="f.required">{{ f.required ? 'Yes' : 'No' }}</span>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+
+              @if (isLlm()) {
+                <div class="llm-section">
+                  <div class="llm-model">
+                    <span class="llm-model__label">Model</span>
+                    <span class="llm-model__value">{{ llmModelLabel() }}</span>
+                  </div>
+                  @if (j.extractionSchema!.llmPrompt) {
+                    <div class="llm-block">
+                      <span class="llm-block__label">Prompt</span>
+                      <pre class="llm-pre">{{ j.extractionSchema!.llmPrompt }}</pre>
+                    </div>
+                  }
+                  @if (j.extractionSchema!.llmOutputFormat) {
+                    <div class="llm-block">
+                      <span class="llm-block__label">Output Format</span>
+                      <pre class="llm-pre llm-pre--mono">{{ j.extractionSchema!.llmOutputFormat }}</pre>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (isRegex()) {
+                <section class="section" style="margin-top:1rem">
+                  <div class="prop-grid">
+                    @if (j.extractionSchema!.regexPattern) {
+                      <div class="prop">
+                        <span class="prop__label">Pattern</span>
+                        <code class="sc sc--lg">{{ j.extractionSchema!.regexPattern }}</code>
+                      </div>
+                    }
+                    @if (j.extractionSchema!.regexGroup) {
+                      <div class="prop">
+                        <span class="prop__label">Capture Group</span>
+                        <code class="sc sc--lg">{{ j.extractionSchema!.regexGroup }}</code>
+                      </div>
+                    }
+                  </div>
+                </section>
+              }
+
+            } @else {
+              <div class="schema-empty">
+                <div class="schema-empty__icon-wrap">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="9" y1="13" x2="15" y2="13"/>
+                  </svg>
+                </div>
+                <p class="schema-empty__title">No schema defined</p>
+                <p class="schema-empty__sub">
+                  Extraction mode is set to {{ j.extractionMode }}
+                  the engine will detect structure automatically.
+                </p>
+                <span class="schema-empty__hint">Click Edit to configure an extraction schema</span>
+              </div>
+            }
+
+          </div>
+        }
+
+        <!-- ─── TAB : NETWORK ─── -->
+        @if (activeTab() === 'network') {
+          <div class="fade-in">
+
+            <section class="section">
+              <h3 class="section__title">Retry Policy</h3>
+              <div class="prop-grid">
+                <div class="prop">
+                  <span class="prop__label">Max Retries</span>
+                  <span class="prop__value">{{ j.retryPolicy.maxRetries }}</span>
+                </div>
+                <div class="prop">
+                  <span class="prop__label">Backoff</span>
+                  <span class="prop__value">{{ j.retryPolicy.retryBackoffMultiplier }}<em>x</em></span>
+                </div>
+                <div class="prop">
+                  <span class="prop__label">Init Delay</span>
+                  <span class="prop__value">{{ j.retryPolicy.retryInitialDelayMs }}<em>ms</em></span>
+                </div>
+                <div class="prop">
+                  <span class="prop__label">Max Delay</span>
+                  <span class="prop__value">{{ j.retryPolicy.retryMaxDelayMs }}<em>ms</em></span>
+                </div>
+              </div>
+            </section>
+
+            <section class="section">
+              <h3 class="section__title">Circuit Breaker</h3>
+              <div class="cb" [class.cb--on]="j.retryPolicy.circuitBreakerEnabled">
+                <div class="cb__header">
+                  <span class="cb__dot"></span>
+                  <span class="cb__title">Circuit Breaker</span>
+                  <span class="cb__badge">{{ j.retryPolicy.circuitBreakerEnabled ? 'Enabled' : 'Disabled' }}</span>
+                </div>
+                @if (j.retryPolicy.circuitBreakerEnabled) {
+                  <div class="cb__details">
+                    <div class="cb__detail">
+                      <span class="cb__detail-label">Threshold</span>
+                      <span class="cb__detail-value">{{ j.retryPolicy.circuitBreakerThreshold * 100 }}%</span>
+                    </div>
+                    <div class="cb__detail">
+                      <span class="cb__detail-label">Reset</span>
+                      <span class="cb__detail-value">{{ j.retryPolicy.circuitBreakerResetSeconds }}s</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+
+          </div>
+        }
+
+        <!-- ─── TAB : HISTORY ─── -->
+        @if (activeTab() === 'history') {
+          <div class="fade-in">
+
+            @if (executions().length === 0) {
+              <div class="timeline-empty">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>No executions yet run the job to see history here.</span>
+              </div>
+            } @else {
+              <div class="timeline">
+                @for (exec of executions(); track exec.id; let last = $last) {
+                  <div class="tl-node"
+                       [class.tl-node--selected]="selectedExecId() === exec.id"
+                       (click)="selectExec(exec.id)">
+
+                    @if (!last) {
+                      <div class="tl-node__line tl-node__line--{{ exec.status }}"></div>
+                    }
+
+                    <div class="tl-node__dot tl-node__dot--{{ exec.status }}">
+                      @switch (exec.status) {
+                        @case ('completed') {
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        }
+                        @case ('failed') {
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                        }
+                        @case ('running') {
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5,3 19,12 5,21"/>
+                          </svg>
+                        }
+                        @case ('warning') {
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3">
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                          </svg>
+                        }
+                        @default {
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3">
+                            <circle cx="12" cy="12" r="4"/>
+                          </svg>
+                        }
+                      }
+                    </div>
+
+                    <div class="tl-card tl-card--{{ exec.status }}">
+                      <div class="tl-card__top">
+                        <span class="tl-card__num">#{{ exec.num }}</span>
+                        <span
+                          class="tl-card__badge tl-card__badge--{{ exec.status }}">{{ statusLabel(exec.status) }}</span>
+                        <span class="tl-card__date">{{ exec.date }}</span>
+                        <div class="tl-card__right">
+                          @if (exec.records > 0) {
+                            <span class="tl-card__records">{{ exec.records }} records</span>
+                          }
+                          <span class="tl-card__duration">{{ exec.duration }}</span>
+                        </div>
+                      </div>
+
+                      @if (selectedExecId() === exec.id) {
+                        <div class="tl-detail">
+
+                          <!-- ① CONFIGURATION -->
+                          <div class="tl-detail__section">
+                            <span class="tl-detail__label">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                   stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                              </svg>
+                              Configuration
+                            </span>
+                            <div class="exec-kv-list">
+                              <div class="exec-kv-row">
+                                <span class="exec-kv-row__k">Type</span>
+                                <span class="exec-kv-row__v">{{ job()?.jobType }}</span>
+                              </div>
+                              <div class="exec-kv-row">
+                                <span class="exec-kv-row__k">JavaScript</span>
+                                <span class="exec-kv-row__v"
+                                      [class.exec-kv-row__v--on]="job()?.browserConfig?.javascriptEnabled">
+                                  {{ job()?.browserConfig?.javascriptEnabled ? 'Enabled' : 'Disabled' }}
+                                </span>
+                              </div>
+                              <div class="exec-kv-row">
+                                <span class="exec-kv-row__k">Stealth</span>
+                                <span class="exec-kv-row__v"
+                                      [class.exec-kv-row__v--on]="job()?.browserConfig?.stealthMode">
+                                  {{ job()?.browserConfig?.stealthMode ? 'On' : 'Off' }}
+                                </span>
+                              </div>
+                              <div class="exec-kv-row">
+                                <span class="exec-kv-row__k">Timeout</span>
+                                <span class="exec-kv-row__v">{{ job()?.browserConfig?.timeoutMs }}<em>ms</em></span>
+                              </div>
+                              <div class="exec-kv-row">
+                                <span class="exec-kv-row__k">Delay</span>
+                                <span class="exec-kv-row__v">{{ job()?.browserConfig?.requestDelayMs }}
+                                  <em>ms</em></span>
+                              </div>
+                              <div class="exec-kv-row">
+                                <span class="exec-kv-row__k">Retries</span>
+                                <span class="exec-kv-row__v">{{ job()?.retryPolicy?.maxRetries }}</span>
+                              </div>
+                              <div class="exec-kv-row">
+                                <span class="exec-kv-row__k">Circuit Breaker</span>
+                                <span class="exec-kv-row__v"
+                                      [class.exec-kv-row__v--on]="job()?.retryPolicy?.circuitBreakerEnabled">
+                                  {{ job()?.retryPolicy?.circuitBreakerEnabled ? 'Enabled' : 'Disabled' }}
+                                </span>
+                              </div>
+                              <div class="exec-kv-row">
+                                <span class="exec-kv-row__k">Proxy</span>
+                                <span class="exec-kv-row__v"
+                                      [class.exec-kv-row__v--on]="job()?.proxyConfig?.enabled">
+                                  {{ job()?.proxyConfig?.enabled ? job()?.proxyConfig?.rotationStrategy : 'Disabled' }}
+                                </span>
+                              </div>
+                              @if (isScraper() && job()?.scraperConfig?.paginationType &&
+                              job()?.scraperConfig?.paginationType !== 'NONE') {
+                                <div class="exec-kv-row">
+                                  <span class="exec-kv-row__k">Pagination</span>
+                                  <span class="exec-kv-row__v">{{ job()?.scraperConfig?.paginationType }}</span>
+                                </div>
+                                <div class="exec-kv-row">
+                                  <span class="exec-kv-row__k">Max Pages</span>
+                                  <span class="exec-kv-row__v">{{ job()?.scraperConfig?.maxPaginationPages }}</span>
+                                </div>
+                              }
+                              @if (isCrawler()) {
+                                <div class="exec-kv-row">
+                                  <span class="exec-kv-row__k">Max Depth</span>
+                                  <span class="exec-kv-row__v">{{ job()?.crawlerConfig?.maxDepth }}</span>
+                                </div>
+                                <div class="exec-kv-row">
+                                  <span class="exec-kv-row__k">Max Pages</span>
+                                  <span class="exec-kv-row__v">{{ job()?.crawlerConfig?.maxPages }}</span>
+                                </div>
+                                <div class="exec-kv-row">
+                                  <span class="exec-kv-row__k">robots.txt</span>
+                                  <span class="exec-kv-row__v"
+                                        [class.exec-kv-row__v--on]="job()?.crawlerConfig?.respectRobotsTxt">
+                                    {{ job()?.crawlerConfig?.respectRobotsTxt ? 'Respect' : 'Ignore' }}
+                                  </span>
+                                </div>
+                              }
+                              @if (job()?.browserConfig?.userAgent) {
+                                <div class="exec-kv-row exec-kv-row--code">
+                                  <span class="exec-kv-row__k">User-Agent</span>
+                                  <code class="exec-kv-row__code">{{ job()?.browserConfig?.userAgent }}</code>
+                                </div>
+                              }
+                            </div>
+                          </div>
+
+                          <!-- ② EXTRACTION SCHEMA -->
+                          @if (job()?.extractionSchema || job()?.extractionMode) {
+                            <details class="exec-accordion" (click)="$event.stopPropagation()">
+                              <summary class="exec-accordion__trigger">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                  <polyline points="16 18 22 12 16 6"/>
+                                  <polyline points="8 6 2 12 8 18"/>
+                                </svg>
+                                Extraction Schema
+                                <svg class="exec-accordion__chevron" width="11" height="11" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2.5">
+                                  <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                              </summary>
+                              <div class="exec-accordion__body">
+                                @if (isLlm() && job()?.extractionSchema?.llmPrompt) {
+                                  <div class="exec-kv-list" style="margin-top:.5rem">
+                                    <div class="exec-kv-row">
+                                      <span class="exec-kv-row__k">Model</span>
+                                      <span class="exec-kv-row__v exec-kv-row__v--on">{{ llmModelLabel() }}</span>
+                                    </div>
+                                    <div class="exec-kv-row exec-kv-row--code">
+                                      <span class="exec-kv-row__k">Prompt</span>
+                                      <pre class="exec-kv-row__pre">{{ job()?.extractionSchema?.llmPrompt }}</pre>
+                                    </div>
+                                    @if (job()?.extractionSchema?.llmOutputFormat) {
+                                      <div class="exec-kv-row exec-kv-row--code">
+                                        <span class="exec-kv-row__k">Output</span>
+                                        <pre
+                                          class="exec-kv-row__pre">{{ job()?.extractionSchema?.llmOutputFormat }}</pre>
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                                @if (isRegex()) {
+                                  <div class="exec-kv-list" style="margin-top:.5rem">
+                                    @if (job()?.extractionSchema?.regexPattern) {
+                                      <div class="exec-kv-row exec-kv-row--code">
+                                        <span class="exec-kv-row__k">Pattern</span>
+                                        <code
+                                          class="exec-kv-row__code">{{ job()?.extractionSchema?.regexPattern }}</code>
+                                      </div>
+                                    }
+                                    @if (job()?.extractionSchema?.regexGroup) {
+                                      <div class="exec-kv-row">
+                                        <span class="exec-kv-row__k">Group</span>
+                                        <code class="exec-kv-row__code">{{ job()?.extractionSchema?.regexGroup }}</code>
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                                @if (!hasFields() && !isLlm() && !isRegex()) {
+                                  <div class="exec-kv-list">
+                                    <div class="exec-kv-row">
+                                      <span class="exec-kv-row__k">Mode</span>
+                                      <span class="exec-kv-row__v">Auto-detection</span>
+                                    </div>
+                                  </div>
+                                }
+                              </div>
+                            </details>
+                          }
+
+                          <!-- ③ ERRORS -->
+                          @if (exec.errors.length > 0) {
+                            <div class="tl-detail__section">
+                              <span class="tl-detail__label">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                  <path
+                                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                  <line x1="12" y1="9" x2="12" y2="13"/>
+                                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                </svg>
+                                Errors ({{ exec.errors.length }})
+                              </span>
+                              @for (err of exec.errors; track $index) {
+                                <div class="tl-detail__error">{{ err }}</div>
+                              }
+                            </div>
+                          }
+
+                          <!-- ④ LOGS -->
+                          <div class="tl-detail__section">
+                            <span class="tl-detail__label">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                   stroke-width="2">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                              </svg>
+                              Logs
+                            </span>
+                            <div class="tl-detail__logs">
+                              @for (log of exec.logs; track $index) {
+                                <div class="tl-log"
+                                     [class.tl-log--warn]="log.includes('[WARNING]')"
+                                     [class.tl-log--error]="log.includes('[ERROR]')"
+                                     [class.tl-log--info]="log.includes('[INFO]')">
+                                  <span class="tl-log__line">{{ $index + 1 }}</span>
+                                  {{ log }}
+                                </div>
+                              }
+                            </div>
+                          </div>
+
+                          <!-- ⑤ RESULTS -->
+                          @if (exec.recordsData.length > 0) {
+                            <div class="tl-detail__section">
+                              <div class="tl-detail__head">
+                                <span class="tl-detail__label">
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                       stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                    <line x1="3" y1="9" x2="21" y2="9"/>
+                                    <line x1="3" y1="15" x2="21" y2="15"/>
+                                    <line x1="9" y1="3" x2="9" y2="21"/>
+                                  </svg>
+                                  Results ({{ exec.recordsData.length }})
+                                </span>
+                                <div class="tl-detail__actions">
+                                  <div class="view-toggle view-toggle--sm">
+                                    <button class="view-toggle__btn"
+                                            [class.view-toggle__btn--active]="execViewMode() === 'table'"
+                                            (click)="setExecViewMode('table', $event)">Table
+                                    </button>
+                                    <button class="view-toggle__btn"
+                                            [class.view-toggle__btn--active]="execViewMode() === 'json'"
+                                            (click)="setExecViewMode('json', $event)">JSON
+                                    </button>
+                                  </div>
+                                  <button class="btn-export btn-export--sm" (click)="exportExecCsv(exec, $event)">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2.5">
+                                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                      <polyline points="7 10 12 15 17 10"/>
+                                      <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    CSV
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div class="tl-detail__meta">
+                                <span class="mp mp--blue">{{ exec.pagesCrawled }} pages</span>
+                                <span class="mp mp--grey">{{ (exec.durationMs / 1000).toFixed(1) }}s</span>
+                                @if (exec.engineUsed) {
+                                  <span class="mp mp--grey">{{ exec.engineUsed }}</span>
+                                }
+                              </div>
+
+                              @if (execViewMode() === 'table') {
+                                <div class="tl-detail__table-wrap">
+                                  <table class="res-tbl">
+                                    <thead>
+                                    <tr>
+                                      @for (col of execColumns(); track col) {
+                                        <th>{{ col }}</th>
+                                      }
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                      @for (row of exec.recordsData; track $index) {
+                                        <tr>
+                                          @for (col of execColumns(); track col) {
+                                            <td>{{ row[col] ?? '—' }}</td>
+                                          }
+                                        </tr>
+                                      }
+                                    </tbody>
+                                  </table>
+                                </div>
+                              } @else {
+                                <div class="tl-detail__json">
+                                  <pre><code>{{ execJson() }}</code></pre>
+                                </div>
+                              }
+                            </div>
+                          }
+
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+        }
+
+        <!-- ─── TAB : RESULTS ─── -->
+        @if (activeTab() === 'results') {
+          <div class="fade-in">
+
+            @if (!isHtmlMode()) {
+              <div class="res-toolbar">
+                <div class="res-pills">
+                  @if (scrapeResult(); as r) {
+                    <span class="mp mp--blue">{{ r.pagesCrawled }} pages</span>
+                    <span class="mp mp--purple">{{ r.records.length }} records</span>
+                    @if (r.errors.length > 0) {
+                      <span class="mp mp--red">{{ r.errors.length }} errors</span>
+                    }
+                    <span class="mp mp--grey">{{ (r.durationMs / 1000).toFixed(1) }}s</span>
+                    <span class="mp mp--grey">{{ r.engineUsed }}</span>
+                  }
+                </div>
+                <div class="res-actions">
+                  <div class="view-toggle">
+                    <button class="view-toggle__btn"
+                            [class.view-toggle__btn--active]="viewMode() === 'table'"
+                            (click)="viewMode.set('table')">Table
+                    </button>
+                    <button class="view-toggle__btn"
+                            [class.view-toggle__btn--active]="viewMode() === 'json'"
+                            (click)="viewMode.set('json')">JSON
+                    </button>
+                  </div>
+                  <button class="btn-export" (click)="exportCsv()">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export CSV
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (resultsLoading()) {
+              <div class="res-loading">
+                <span class="loader"></span>
+                <span>Loading results…</span>
+              </div>
+            } @else if (!scrapeResult()) {
+              <div class="res-empty">No results available</div>
+            } @else if (scrapeResult()!.records.length === 0) {
+              <div class="res-empty">Job completed but no records were extracted.</div>
+            } @else {
+
+              @if (isHtmlMode()) {
+                <!-- ─── MODE AUTO : prévisualisation HTML ─── -->
+                <div class="html-toolbar">
+                  <span class="html-toolbar__count">
+                    {{ htmlPages().length }} page{{ htmlPages().length > 1 ? 's' : '' }} captured
+                  </span>
+                  <div class="view-toggle">
+                    <button class="view-toggle__btn"
+                            [class.view-toggle__btn--active]="htmlViewMode() === 'preview'"
+                            (click)="setHtmlViewMode('preview')">Preview
+                    </button>
+                    <button class="view-toggle__btn"
+                            [class.view-toggle__btn--active]="htmlViewMode() === 'source'"
+                            (click)="setHtmlViewMode('source')">Source
+                    </button>
+                  </div>
+                </div>
+
+                <div class="html-pages">
+                  <div class="html-pages">
+                    @for (page of htmlPages(); track page.url; let i = $index) {
+                      <div class="html-page">
+                        <div class="html-page__head">
+                          <span class="html-page__num">#{{ i + 1 }}</span>
+                          <a class="html-page__url" [href]="page.url" target="_blank" rel="noopener">
+                            {{ page.url }}
+                          </a>
+                          <span class="html-page__size">{{ formatBytes(page.length) }}</span>
+                          <button class="html-page__preview-btn" (click)="openPreview(page)">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                              <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            Preview
+                          </button>
+                          <button class="html-page__dl" (click)="downloadHtml(page, i)" title="Download HTML">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                              <polyline points="7 10 12 15 17 10"/>
+                              <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            .html
+                          </button>
+                        </div>
+
+                        @if (htmlViewMode() === 'source') {
+                          <pre class="html-page__source"><code>{{ page.html }}</code></pre>
+                        } @else {
+                          <div class="html-page__thumb" (click)="openPreview(page)">
+                            <iframe
+                              class="html-page__thumb-iframe"
+                              [src]="page.safeUrl"
+                              sandbox="allow-same-origin"
+                              loading="lazy"
+                              title="HTML thumbnail"
+                              referrerpolicy="no-referrer"
+                              tabindex="-1"
+                            ></iframe>
+                            <div class="html-page__thumb-overlay">
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                              </svg>
+                              <span>Click to open full preview</span>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+
+              } @else {
+                <!-- ─── MODE STRUCTURÉ : table/json existants ─── -->
+                @if (viewMode() === 'table') {
+                  <div class="res-table-wrap">
+                    <table class="res-tbl">
+                      <thead>
+                      <tr>
+                        @for (col of tableColumns(); track col) {
+                          <th>{{ col }}</th>
+                        }
+                      </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of scrapeResult()!.records; track $index) {
+                          <tr>
+                            @for (col of tableColumns(); track col) {
+                              <td>{{ row[col] ?? '—' }}</td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+                @if (viewMode() === 'json') {
+                  <div class="res-json">
+                    <pre><code>{{ resultsJson() }}</code></pre>
+                  </div>
+                }
+              }
+
+              @if (scrapeResult()!.errors.length > 0) {
+                <div class="res-errors">
+                  <span class="res-errors__title">Errors</span>
+                  @for (err of scrapeResult()!.errors; track $index) {
+                    <div class="res-errors__item">{{ err }}</div>
+                  }
+                </div>
+              }
+            }
+
+            @if (hasDiscoveredFiles()) {
+              <div class="discovered-files">
+                <div class="discovered-files__header">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  Site Files Discovered
+                  <span class="discovered-files__count">{{ discoveredFiles().length }}</span>
+                </div>
+                <div class="discovered-files__list">
+                  @for (file of discoveredFiles(); track file.url) {
+                    <div class="discovered-file">
+                      <div class="discovered-file__meta">
+                        <span
+                          class="discovered-file__type discovered-file__type--{{ file.fileType | lowercase }}">{{ file.fileType }}</span>
+                        <span class="discovered-file__status"
+                              [class.discovered-file__status--ok]="file.statusCode < 400">{{ file.statusCode }}</span>
+                        <a class="discovered-file__url"
+                           [href]="file.url"
+                           target="_blank"
+                           rel="noopener noreferrer">{{ file.url }}</a>
+                      </div>
+                      @if (file.content) {
+                        <pre class="discovered-file__content">{{ file.content }}</pre>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+          </div>
+        }
+
+      </div>
+    }
+  }
+
+  @if (previewPage(); as p) {
+    <div class="preview-modal" (click)="closePreview()">
+      <div class="preview-modal__inner" (click)="$event.stopPropagation()">
+        <div class="preview-modal__head">
+          <div class="preview-modal__info">
+            <span class="preview-modal__badge">HTML Preview</span>
+            <a class="preview-modal__url" [href]="p.url" target="_blank" rel="noopener">{{ p.url }}</a>
+            <span class="preview-modal__size">{{ formatBytes(p.length) }}</span>
+          </div>
+          <div class="preview-modal__actions">
+            <button class="preview-modal__btn" (click)="downloadHtml(p, 0)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Download
+            </button>
+            <a class="preview-modal__btn" [href]="p.url" target="_blank" rel="noopener">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+              Open original
+            </a>
+            <button class="preview-modal__close" (click)="closePreview()" title="Close (Esc)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <iframe
+          class="preview-modal__iframe"
+          [src]="p.safeUrl"
+          sandbox="allow-same-origin allow-popups"
+          title="HTML full preview"
+          referrerpolicy="no-referrer"
+        ></iframe>
+      </div>
+    </div>
+  }
+
+</div>

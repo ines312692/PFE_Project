@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/AI-Assisted-Configurable-Web-Scraping-Platform-backend" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/AI-Assisted-Configurable-Web-Scraping-Platform-frontend" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ai-assisted-configurable-web-scraping-platform-keycloak" vcs="Git" />
+  </component>
+</project>

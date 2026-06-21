@@ -1,0 +1,260 @@
+<div class="ci-page">
+
+  @if (loading()) {
+    <div class="ci-loading">
+      <div class="ci-loading__spinner"></div>
+      <p>Loading intervention…</p>
+    </div>
+  }
+
+  @if (notFound() && !loading()) {
+    <div class="ci-not-found">
+      <div class="ci-not-found__icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h2>No pending intervention</h2>
+      <p>This job is not currently waiting for human input. It may have been resolved already, or the request timed out.</p>
+      <button class="ci-btn ci-btn--primary" (click)="backToJob()">Back to job</button>
+    </div>
+  }
+
+  @if (intervention(); as iv) {
+    <div class="ci-header">
+      <div class="ci-header__left">
+        <div class="ci-header__eyebrow">
+          <span class="ci-header__dot"></span>
+          Human-In-The-Loop
+        </div>
+        <h1 class="ci-header__title">CAPTCHA Resolution Required</h1>
+        <p class="ci-header__desc">
+          @if (isInterstitial()) {
+            Our automated solvers couldn't clear this <strong>{{ captchaLabel() }}</strong>.
+              Please solve it in the open browser window, then confirm below to resume the scrape.
+          } @else {
+            Our automated solvers couldn't bypass this <strong>{{ captchaLabel() }}</strong>.
+              Please solve it yourself and submit the resulting token below.
+          }
+        </p>
+      </div>
+
+      <div class="ci-header__right">
+        <div class="ci-timer" [class.ci-timer--warn]="remainingMs() < 120000" [class.ci-timer--expired]="expired()">
+          <div class="ci-timer__icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="ci-timer__text">
+            <span class="ci-timer__label">Time remaining</span>
+            <span class="ci-timer__value">{{ remainingDisplay() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ci-layout">
+      <section class="ci-card ci-card--screenshot">
+        <header class="ci-card__head">
+          <h3 class="ci-card__title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            Page screenshot
+          </h3>
+          <span class="ci-card__sub">What the scraper sees</span>
+        </header>
+        <div class="ci-screenshot">
+          <img [src]="'data:image/png;base64,' + iv.screenshotBase64" alt="Captcha page screenshot"/>
+        </div>
+      </section>
+
+      <section class="ci-card ci-card--actions">
+        <header class="ci-card__head">
+          <h3 class="ci-card__title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Resolve the captcha
+          </h3>
+          <span class="ci-card__sub">{{ iv.pageUrl }}</span>
+        </header>
+
+        @if (isInterstitial()) {
+          <!-- ===== PARCOURS INTERSTITIEL CLOUDFLARE (pas de token) ===== -->
+          <ol class="ci-steps">
+            <li class="ci-step">
+              <span class="ci-step__num">1</span>
+              <div class="ci-step__body">
+                <div class="ci-step__title">Go to the open browser window</div>
+                <p class="ci-step__desc">
+                  The scraper has already opened a visible browser on the server showing this
+                  Cloudflare challenge. Switch to that window you don't need DevTools or a token.
+                </p>
+              </div>
+            </li>
+
+            <li class="ci-step">
+              <span class="ci-step__num">2</span>
+              <div class="ci-step__body">
+                <div class="ci-step__title">Solve the challenge</div>
+                <p class="ci-step__desc">
+                  Tick "Verify you are human" and wait for the green check. The page should then
+                  load past the challenge.
+                </p>
+              </div>
+            </li>
+
+            <li class="ci-step">
+              <span class="ci-step__num">3</span>
+              <div class="ci-step__body">
+                <div class="ci-step__title">Confirm here to resume</div>
+                <p class="ci-step__desc">
+                  Once the challenge is cleared, click the button below. The scrape resumes
+                  automatically using the cleared session.
+                </p>
+              </div>
+            </li>
+          </ol>
+
+          <footer class="ci-card__foot">
+            <button class="ci-btn ci-btn--ghost"
+                    (click)="cancel()"
+                    [disabled]="cancelling() || submitting()">
+              @if (cancelling()) { Cancelling… } @else { Cancel intervention }
+            </button>
+            <button class="ci-btn ci-btn--primary"
+                    (click)="confirm()"
+                    [disabled]="submitting() || expired()">
+              @if (submitting()) {
+                <span class="ci-btn__spinner"></span> Confirming…
+              } @else if (expired()) {
+                Expired
+              } @else {
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                I've solved it resume scrape
+              }
+            </button>
+          </footer>
+
+        } @else {
+          <!-- ===== PARCOURS TOKEN (reCAPTCHA / hCaptcha / Turnstile embedded) ===== -->
+          <ol class="ci-steps">
+            <li class="ci-step">
+              <span class="ci-step__num">1</span>
+              <div class="ci-step__body">
+                <div class="ci-step__title">Open the original page</div>
+                <p class="ci-step__desc">A new tab will load the same URL using your own browser & IP.</p>
+                <button class="ci-btn ci-btn--ghost ci-btn--sm" (click)="openOriginal()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                  Open page in new tab
+                </button>
+              </div>
+            </li>
+
+            <li class="ci-step">
+              <span class="ci-step__num">2</span>
+              <div class="ci-step__body">
+                <div class="ci-step__title">Solve the CAPTCHA yourself</div>
+                <p class="ci-step__desc">Tick the box, identify the images, etc. Wait for the green checkmark.</p>
+              </div>
+            </li>
+
+            <li class="ci-step">
+              <span class="ci-step__num">3</span>
+              <div class="ci-step__body">
+                <div class="ci-step__title">Copy the resolution token</div>
+                <p class="ci-step__desc">Open DevTools (F12) → Console, then run:</p>
+                <div class="ci-code">
+                  <code>{{ tokenSelector() }}</code>
+                  <button class="ci-code__copy" (click)="copySelector()">
+                    @if (copied()) {
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Copied
+                    } @else {
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                      </svg>
+                      Copy
+                    }
+                  </button>
+                </div>
+                <button class="ci-help-toggle" (click)="toggleHelp()">
+                  {{ showHelp() ? 'Hide' : 'Show' }} detailed help
+                </button>
+                @if (showHelp()) {
+                  <div class="ci-help">
+                    <p><strong>Step by step:</strong></p>
+                    <ul>
+                      <li>In the opened tab, press <kbd>F12</kbd> (or right-click → Inspect)</li>
+                      <li>Click the <strong>Console</strong> tab</li>
+                      <li>Paste the command above and press <kbd>Enter</kbd></li>
+                      <li>Copy the long string that appears (starts with <code>03A...</code> or similar)</li>
+                    </ul>
+                  </div>
+                }
+              </div>
+            </li>
+
+            <li class="ci-step">
+              <span class="ci-step__num">4</span>
+              <div class="ci-step__body">
+                <div class="ci-step__title">Paste the token below</div>
+                <textarea
+                  class="ci-token-input"
+                  rows="4"
+                  placeholder="Paste the captcha token here…"
+                  [ngModel]="tokenInput()"
+                  (ngModelChange)="tokenInput.set($event)"
+                  [disabled]="submitting() || expired()"></textarea>
+                <span class="ci-token-info">
+                  {{ tokenInput().length }} characters
+                  @if (tokenInput().length > 0 && tokenInput().length < 100) {
+                    <span class="ci-token-info--warn"> tokens are usually 800+ chars long</span>
+                  }
+                </span>
+              </div>
+            </li>
+          </ol>
+
+          <footer class="ci-card__foot">
+            <button class="ci-btn ci-btn--ghost"
+                    (click)="cancel()"
+                    [disabled]="cancelling() || submitting()">
+              @if (cancelling()) { Cancelling… } @else { Cancel intervention }
+            </button>
+            <button class="ci-btn ci-btn--primary"
+                    (click)="submit()"
+                    [disabled]="submitting() || expired() || tokenInput().trim().length === 0">
+              @if (submitting()) {
+                <span class="ci-btn__spinner"></span> Submitting…
+              } @else if (expired()) {
+                Expired
+              } @else {
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Submit token & resume scrape
+              }
+            </button>
+          </footer>
+        }
+      </section>
+    </div>
+  }
+</div>

@@ -1,0 +1,23 @@
+keycloak/
+├── themes/
+│   ├── elyadata/
+│       ├── login/
+│           ├── resources/
+│           │   ├── css/
+│           │   │   └── login.css
+│           │   ├── img/
+│           │       ├── ElyadataLogoWhite.png
+│           │       └── elyadata.png
+│           ├── error.ftl
+│           ├── info.ftl
+│           ├── login-config-totp.ftl
+│           ├── login-otp.ftl
+│           ├── login-page-expired.ftl
+│           ├── login-reset-password.ftl
+│           ├── login-update-password.ftl
+│           ├── login-verify-email.ftl
+│           ├── login.ftl
+│           ├── register.ftl
+│           └── theme.properties
+├── realm-export.json
+└── sync-users-to-keycloak.sh

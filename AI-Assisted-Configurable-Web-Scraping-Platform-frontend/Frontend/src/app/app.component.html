@@ -1,0 +1,22 @@
+@if (!isPublicRoute()) {
+  <app-navbar (sidebarToggle)="onSidebarToggle()"></app-navbar>
+
+  <app-sidebar
+    [forceExpand]="sidebarForceExpand()"
+    (expandedChange)="onSidebarExpandedChange($event)"
+  ></app-sidebar>
+}
+
+<main class="app-content"
+      [class.app-content--authenticated]="isLoggedIn() && !isPublicRoute()"
+      [class.app-content--auth]="isAuthRoute()"
+      [class.app-content--landing]="isLanding()">
+  <router-outlet></router-outlet>
+</main>
+
+<app-notification-toast></app-notification-toast>
+
+@if (!isPublicRoute()) {
+  <app-assistant></app-assistant>
+  <app-footer></app-footer>
+}

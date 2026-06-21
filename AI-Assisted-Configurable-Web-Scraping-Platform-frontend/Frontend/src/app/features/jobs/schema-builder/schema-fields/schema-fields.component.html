@@ -1,0 +1,206 @@
+<div class="schema-fields">
+
+  <div class="schema-fields__header">
+    <div class="schema-fields__info">
+      <span class="schema-fields__mode-badge">
+        {{ mode === 'CSS_SELECTOR' ? 'CSS Selector' : 'XPath' }}
+      </span>
+    </div>
+
+    <div class="schema-fields__actions">
+      @if (mode === 'CSS_SELECTOR') {
+        <button type="button"
+                class="validate-btn"
+                (click)="validateSchema()"
+                [disabled]="validating() || !canValidate()"
+                [title]="canValidate() ? 'Test selectors against the target page' : 'Fill target URL and all fields first'">
+          @if (validating()) {
+            <span class="validate-btn__spinner"></span>
+            Validating…
+          } @else {
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Validate Schema
+          }
+        </button>
+      }
+
+      <button type="button" class="add-field-btn" (click)="addField()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add field
+      </button>
+    </div>
+  </div>
+
+  @if (fields.length > 0) {
+    <div class="field-row field-row--header">
+      <span class="field-col">Field name</span>
+      <span class="field-col">{{ mode === 'CSS_SELECTOR' ? 'CSS Selector' : 'XPath' }}</span>
+      <span class="field-col">Type</span>
+      <span class="field-col">Attribute</span>
+      <span class="field-col field-col--center">Req.</span>
+      <span class="field-col"></span>
+    </div>
+  }
+
+  @for (field of fields; track trackByIndex($index)) {
+    <div class="field-block"
+         [class.field-block--ok]="getStatus(field.name) === 'OK'"
+         [class.field-block--broken]="getStatus(field.name) === 'BROKEN'"
+         [class.field-block--suggested]="getStatus(field.name) === 'SUGGESTED'">
+
+      <div class="field-row">
+
+        <div class="field-col">
+          <input type="text" class="field-input"
+                 [value]="field.name"
+                 (input)="updateFieldProp($index, 'name', $any($event.target).value)"
+                 placeholder="e.g. title"/>
+        </div>
+
+        <div class="field-col">
+          <input type="text" class="field-input field-input--mono"
+                 [value]="field.selector"
+                 (input)="updateFieldProp($index, 'selector', $any($event.target).value)"
+                 [placeholder]="mode === 'CSS_SELECTOR' ? 'h1.product-title' : '//h1[@class]'"/>
+        </div>
+
+        <div class="field-col">
+          <select class="field-select"
+                  [value]="field.type"
+                  (change)="updateFieldProp($index, 'type', $any($event.target).value)">
+            @for (t of fieldTypes; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field-col">
+          @if (field.type === 'ATTRIBUTE') {
+            <input type="text" class="field-input"
+                   [value]="field.attribute ?? ''"
+                   (input)="updateFieldProp($index, 'attribute', $any($event.target).value)"
+                   placeholder="e.g. href"/>
+          } @else {
+            <span class="field-attr-na">—</span>
+          }
+        </div>
+
+        <div class="field-col field-col--center">
+          <label class="req-checkbox">
+            <input type="checkbox"
+                   [checked]="field.required"
+                   (change)="updateFieldProp($index, 'required', $any($event.target).checked)"/>
+            <span class="req-checkbox__box"></span>
+          </label>
+        </div>
+
+        <div class="field-col field-col--center">
+          <button type="button" class="del-btn"
+                  (click)="removeField($index)"
+                  [disabled]="fields.length <= 1"
+                  title="Remove field">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6M14 11v6"/>
+              <path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      @if (getResult(field.name); as result) {
+
+        @if (result.status === 'OK') {
+          <div class="validation-banner validation-banner--ok">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <div class="validation-banner__body">
+              <span class="validation-banner__title">
+                Matched <strong>{{ result.matchCount }}</strong>
+                element{{ result.matchCount > 1 ? 's' : '' }}
+              </span>
+              @if (result.previewValues.length > 0) {
+                <div class="validation-preview">
+                  @for (v of result.previewValues; track v) {
+                    <code class="validation-preview__value">{{ v }}</code>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (result.status === 'BROKEN') {
+          <div class="validation-banner validation-banner--broken">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div class="validation-banner__body">
+              <span class="validation-banner__title">Selector doesn't work</span>
+              @if (result.errorReason) {
+                <span class="validation-banner__reason">{{ result.errorReason }}</span>
+              }
+              <span class="validation-banner__hint">
+                No AI suggestion available — try a different selector based on the page HTML.
+              </span>
+            </div>
+          </div>
+        }
+
+        @if (result.status === 'SUGGESTED' && result.suggestedSelector) {
+          <div class="validation-banner validation-banner--suggested">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path
+                d="M9.663 17h4.673M12 3v1M3 12H2M22 12h-1M5.05 5.05l-.7-.7M19.65 4.35l-.7.7M12 8a4 4 0 0 0-2 7.5V18h4v-2.5A4 4 0 0 0 12 8z"/>
+            </svg>
+            <div class="validation-banner__body">
+              <span class="validation-banner__title">
+                AI suggests a different selector
+                @if (result.suggestionConfidence != null) {
+                  <span class="validation-confidence">
+                    {{ (result.suggestionConfidence * 100) | number:'1.0-0' }}% confidence
+                  </span>
+                }
+              </span>
+              <code class="validation-banner__code">{{ result.suggestedSelector }}</code>
+              @if (result.suggestionRationale) {
+                <span class="validation-banner__reason">{{ result.suggestionRationale }}</span>
+              }
+              <div class="validation-banner__actions">
+                <button type="button"
+                        class="validation-btn validation-btn--primary"
+                        (click)="applySuggestion($index)">
+                  Use suggestion
+                </button>
+                <button type="button"
+                        class="validation-btn validation-btn--ghost"
+                        (click)="dismissSuggestion(field.name)">
+                  Keep current
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+      }
+
+    </div>
+  }
+
+  @if (fields.length === 0) {
+    <div class="schema-empty">
+      <p>No fields yet. Click <strong>Add field</strong> to start.</p>
+    </div>
+  }
+
+</div>

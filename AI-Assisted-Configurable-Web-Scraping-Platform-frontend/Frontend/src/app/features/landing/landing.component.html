@@ -1,0 +1,596 @@
+<div class="landing">
+
+  @if (showAnnounce()) {
+    <div class="announce" role="region" aria-label="Announcement">
+      <div class="announce__inner">
+        <span class="announce__badge">New</span>
+        <span class="announce__text">
+        AI-powered self-healing scrapers automatically fix broken selectors.
+      </span>
+        <a class="announce__link" href="#features" (click)="scrollToFeatures($event)">
+          Explore features
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+      </div>
+      <button class="announce__close" (click)="dismissAnnounce()" aria-label="Dismiss announcement">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  }
+
+  <app-navbar (login)="goToLogin()" (register)="goToRegister()"></app-navbar>
+
+  <section class="hero">
+    <div class="hero__bg" aria-hidden="true">
+      <svg class="hero__bg-wash" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <radialGradient id="bg-w1" cx="15%" cy="20%" r="50%">
+            <stop offset="0%" stop-color="var(--elyadata-blue)" stop-opacity=".05"/>
+            <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="bg-w2" cx="85%" cy="72%" r="45%">
+            <stop offset="0%" stop-color="var(--elyadata-pink)" stop-opacity=".04"/>
+            <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="bg-w3" cx="52%" cy="8%" r="38%">
+            <stop offset="0%" stop-color="var(--elyadata-mauve)" stop-opacity=".035"/>
+            <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1600" height="900" fill="url(#bg-w1)"/>
+        <rect width="1600" height="900" fill="url(#bg-w2)"/>
+        <rect width="1600" height="900" fill="url(#bg-w3)"/>
+      </svg>
+
+      <svg class="hero__bg-curves" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+        <circle class="bg-arc bg-arc--w08" cx="-120" cy="-80" r="620"/>
+        <circle class="bg-arc bg-arc--w06" cx="-200" cy="-150" r="780"/>
+        <circle class="bg-arc bg-arc--w1" cx="80" cy="120" r="380"/>
+        <circle class="bg-arc bg-arc--w08" cx="1720" cy="-60" r="560"/>
+        <circle class="bg-arc bg-arc--w06" cx="1800" cy="-180" r="740"/>
+        <circle class="bg-arc bg-arc--w09" cx="1500" cy="100" r="320"/>
+        <circle class="bg-arc bg-arc--w05" cx="800" cy="450" r="640"/>
+
+        <circle class="bg-flow bg-flow--cyan" cx="-120" cy="-80" r="620"/>
+        <circle class="bg-flow bg-flow--pink" cx="1720" cy="-60" r="560"/>
+        <circle class="bg-flow bg-flow--mauve" cx="800" cy="450" r="640"/>
+
+        <circle class="bg-ring bg-ring--pink" cx="459" cy="141" r="5" style="animation-delay:0s"/>
+        <circle class="bg-dot  bg-dot--pink" cx="459" cy="141" r="3.5"/>
+        <circle class="bg-ring bg-ring--cyan" cx="1180" cy="89" r="5" style="animation-delay:.6s"/>
+        <circle class="bg-dot  bg-dot--cyan" cx="1180" cy="89" r="3.5"/>
+        <circle class="bg-ring bg-ring--mauve" cx="1412" cy="408" r="5" style="animation-delay:1.2s"/>
+        <circle class="bg-dot  bg-dot--mauve" cx="1412" cy="408" r="3.2"/>
+        <circle class="bg-ring bg-ring--cyan" cx="299" cy="700" r="5" style="animation-delay:.9s"/>
+        <circle class="bg-dot  bg-dot--cyan" cx="299" cy="700" r="3"/>
+        <circle class="bg-ring bg-ring--pink" cx="160" cy="472" r="5" style="animation-delay:1.5s"/>
+        <circle class="bg-dot  bg-dot--pink" cx="160" cy="472" r="3.5"/>
+      </svg>
+
+      @for (p of particles; track p.id) {
+        <div class="particle"
+             [style.left.%]="p.x"
+             [style.top.%]="p.y"
+             [style.width.px]="p.size"
+             [style.height.px]="p.size"
+             [style.animation-duration.s]="p.duration"
+             [style.animation-delay.s]="p.delay"
+             [class.particle--blue]="p.color === 'blue'"
+             [class.particle--pink]="p.color === 'pink'"
+             [class.particle--purple]="p.color === 'purple'">
+        </div>
+      }
+    </div>
+
+    <div class="hero__main">
+      <div class="hero__content">
+        <h1 class="hero__title">
+          <span class="hero__line hero__line--1">
+            <span class="hero__split--blue">Elya</span><span class="hero__split--pink">Scrape</span>
+          </span>
+          <span class="hero__line hero__line--sub">
+            <span class="hero__gradient">Extract Structured</span>
+            <span class="hero__black"> Data from </span>
+            <span class="hero__pink">Any Website</span>
+          </span>
+        </h1>
+
+        <blockquote class="hero__quote">
+          ElyaScrape is the platform every data team dreamed of building after too many broken pipelines. So we built
+          it.
+        </blockquote>
+        <p class="hero__desc">
+          Configure intelligent scraping jobs, bypass anti-bot protections,
+          clean and normalize data all from one powerful, unified platform.
+        </p>
+        <div class="hero__actions">
+          <button class="cta cta--primary" (click)="goToRegister()">
+            <span>Start Scraping</span>
+          </button>
+          <button class="cta cta--ghost" (click)="goToLogin()">
+            <span>See How it works</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust">
+      <div class="trust__inner">
+        <div class="trust__item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="13 17 18 12 13 7"/>
+            <polyline points="6 17 11 12 6 7"/>
+          </svg>
+          <span>High-Performance Crawling</span>
+        </div>
+        <div class="trust__dot"></div>
+        <div class="trust__item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Anti-Bot Evasion</span>
+        </div>
+        <div class="trust__dot"></div>
+        <div class="trust__item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+            <circle cx="12" cy="12" r="3.5"/>
+          </svg>
+          <span>AI-Powered Extraction</span>
+        </div>
+        <div class="trust__dot"></div>
+        <div class="trust__item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span>Schema-Driven Extraction</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero__scroll" (click)="scrollToNext()">
+      <span class="hero__scroll-label">Scroll down</span>
+      <svg class="hero__scroll-svg" width="24" height="40" viewBox="0 0 24 40" fill="none">
+        <polyline class="hero__scroll-chevron hero__scroll-chevron--1" points="4,6 12,14 20,6"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <polyline class="hero__scroll-chevron hero__scroll-chevron--2" points="4,17 12,25 20,17"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <polyline class="hero__scroll-chevron hero__scroll-chevron--3" points="4,28 12,36 20,28"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </section>
+  <section class="stats reveal" #reveal>
+    <div class="stats__inner">
+      @for (s of stats; track s.label) {
+        <div class="stats__item">
+          <div class="stats__value">
+            <span class="stats__num">{{ s.value }}</span><span class="stats__suffix">{{ s.suffix }}</span>
+          </div>
+          <div class="stats__label">{{ s.label }}</div>
+        </div>
+      }
+    </div>
+  </section>
+  <section class="features reveal" id="features" #reveal>
+    <div class="features__header">
+      <span class="eyebrow">Platform</span>
+      <h2 class="section-title">Everything you need to scrape at scale</h2>
+      <p class="section-sub">A complete platform from URL to structured data. Built and integrated, no assembly
+        required.</p>
+    </div>
+
+    <div class="features__grid">
+      @for (f of features; track f.title) {
+        <div class="feature">
+          <div class="feature__icon" [attr.data-tone]="f.tone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                 stroke-linecap="round" stroke-linejoin="round">
+              @switch (f.icon) {
+                @case ('schema') {
+                  <path d="M4 6h16M4 12h16M4 18h10"/>
+                  <path d="M19 16l3 3-3 3"/>
+                }
+                @case ('shield') {
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <path d="m9 12 2 2 4-4"/>
+                }
+                @case ('heal') {
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                  <path d="M21 3v6h-6"/>
+                }
+                @case ('chart') {
+                  <path d="M3 3v18h18"/>
+                  <path d="m7 14 4-4 4 4 5-5"/>
+                }
+                @case ('pipeline') {
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                }
+                @case ('plug') {
+                  <path d="M22 8.5V6a2 2 0 0 0-2-2h-2.5"/>
+                  <path d="M2 15.5V18a2 2 0 0 0 2 2h2.5"/>
+                  <path d="M22 15.5V18a2 2 0 0 1-2 2h-2.5"/>
+                  <path d="M2 8.5V6a2 2 0 0 1 2-2h2.5"/>
+                  <circle cx="12" cy="12" r="3"/>
+                }
+                @case ('wizard') {
+                  <path d="m14 7 3 3"/>
+                  <path d="M5 6v4"/>
+                  <path d="M19 14v4"/>
+                  <path d="M10 2v2"/>
+                  <path d="M7 8H3"/>
+                  <path d="M21 16h-4"/>
+                  <path d="M11 3H9"/>
+                  <path d="M3 21 21 3"/>
+                }
+                @case ('export') {
+                  <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                  <path d="M3 5v14a9 3 0 0 0 18 0V5"/>
+                  <path d="M3 12a9 3 0 0 0 18 0"/>
+                }
+                @case ('gdpr') {
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <path d="M9 12l2 2 4-4"/>
+                }
+              }
+            </svg>
+          </div>
+          <h3 class="feature__title">{{ f.title }}</h3>
+          <p class="feature__desc">{{ f.desc }}</p>
+        </div>
+      }
+    </div>
+  </section>
+  <section class="demo reveal" #reveal>
+    <div class="demo__header">
+      <span class="eyebrow">Live demo</span>
+      <h2 class="section-title">Try it now no account required</h2>
+      <p class="section-sub">Enter any URL and see the platform extract, clean, and format your data.</p>
+    </div>
+    <div class="demo__card">
+      <div class="demo__tabs">
+        @for (m of demoModes; track m.key) {
+          <button class="demo__tab"
+                  [class.demo__tab--active]="demoMode() === m.key"
+                  (click)="setDemoMode(m.key)">
+            {{ m.label }}
+          </button>
+        }
+      </div>
+      <div class="demo__input-area">
+        <div class="demo__input-row">
+          <div class="demo__url-field">
+            <span class="demo__url-prefix">https://</span>
+            <input class="demo__url-input" type="text"
+                   [ngModel]="demoUrl()"
+                   (ngModelChange)="demoUrl.set($event)"
+                   placeholder="example.com/products"/>
+          </div>
+          <button class="demo__run-btn"
+                  [class.demo__run-btn--loading]="demoRunning()"
+                  [disabled]="demoRunning()"
+                  (click)="runDemo()">
+            @if (demoRunning()) {
+              <span class="demo__spinner"></span>
+              Scraping...
+            } @else {
+              Start Scraping
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            }
+          </button>
+        </div>
+        <div class="demo__formats">
+          <span class="demo__formats-label">Output format:</span>
+          @for (f of demoFormats; track f) {
+            <label class="demo__format-option">
+              <input type="radio" name="demoFormat" [value]="f"
+                     [checked]="demoFormat() === f"
+                     (change)="demoFormat.set(f)"/>
+              <span class="demo__format-check"></span>
+              <span class="demo__format-name">{{ f | titlecase }}</span>
+            </label>
+          }
+        </div>
+      </div>
+      @if (demoRunning()) {
+        <div class="demo__loading">
+          <div class="demo__loading-bar">
+            <div class="demo__loading-fill"></div>
+          </div>
+          <div class="demo__loading-steps">
+            <span class="demo__step demo__step--active">Connecting</span>
+            <span class="demo__step">Bypassing protection</span>
+            <span class="demo__step">Extracting data</span>
+          </div>
+        </div>
+      }
+      @if (demoResult()) {
+        <div class="demo__result">
+          <div class="demo__result-header">
+            <span class="demo__result-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline
+                points="20 6 9 17 4 12"/></svg>
+              3 records extracted
+            </span>
+            <span class="demo__result-time">1.24s</span>
+          </div>
+          <pre class="demo__result-code"><code>{{ demoResult() }}</code></pre>
+        </div>
+      }
+    </div>
+  </section>
+  <section class="compare reveal" #reveal>
+    <div class="compare__header">
+      <span class="eyebrow">Why ElyaScrape</span>
+      <h2 class="section-title">How we compare to the alternatives</h2>
+      <p class="section-sub">Side-by-side against the platforms data teams currently use.</p>
+    </div>
+
+    <div class="compare__table-wrap">
+      <table class="compare__table">
+        <thead>
+        <tr>
+          <th class="compare__feature-col">Capability</th>
+          <th class="compare__us-col">
+            <div class="compare__brand compare__brand--us">
+              <span class="compare__brand-blue">Elya</span><span class="compare__brand-pink">Scrape</span>
+            </div>
+          </th>
+          <th>Apify</th>
+          <th>Octoparse</th>
+          <th>Bright Data</th>
+          <th>Scrapy</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (row of comparison; track row.label) {
+            <tr>
+              <td class="compare__feature-cell">{{ row.label }}</td>
+              <td class="compare__us-cell">
+                <ng-container [ngTemplateOutlet]="cellTpl"
+                              [ngTemplateOutletContext]="{$implicit: row.us}"></ng-container>
+              </td>
+              <td>
+                <ng-container [ngTemplateOutlet]="cellTpl"
+                              [ngTemplateOutletContext]="{$implicit: row.apify}"></ng-container>
+              </td>
+              <td>
+                <ng-container [ngTemplateOutlet]="cellTpl"
+                              [ngTemplateOutletContext]="{$implicit: row.octoparse}"></ng-container>
+              </td>
+              <td>
+                <ng-container [ngTemplateOutlet]="cellTpl"
+                              [ngTemplateOutletContext]="{$implicit: row.brightdata}"></ng-container>
+              </td>
+              <td>
+                <ng-container [ngTemplateOutlet]="cellTpl"
+                              [ngTemplateOutletContext]="{$implicit: row.scrapy}"></ng-container>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <ng-template #cellTpl let-val>
+        @if (val === 'yes') {
+          <span class="compare__check compare__check--yes" aria-label="Yes">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline
+              points="20 6 9 17 4 12"/></svg>
+          </span>
+        } @else if (val === 'no') {
+          <span class="compare__check compare__check--no" aria-label="No">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line
+              x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </span>
+        } @else if (val === 'partial') {
+          <span class="compare__check compare__check--partial" aria-label="Partial">Partial</span>
+        } @else {
+          <span class="compare__text">{{ val }}</span>
+        }
+      </ng-template>
+    </div>
+  </section>
+
+  <section class="pricing reveal" id="pricing" #reveal>
+    <div class="pricing__header">
+      <span class="eyebrow">Pricing</span>
+      <h2 class="section-title">Simple, transparent pricing</h2>
+      <p class="section-sub">Plans that scale with your projects. Start with a free trial, no card required.</p>
+
+      <div class="pricing__toggle">
+        <button class="pricing__toggle-btn"
+                [class.pricing__toggle-btn--active]="billing() === 'monthly'"
+                (click)="billing.set('monthly')">Monthly
+        </button>
+        <button class="pricing__toggle-btn"
+                [class.pricing__toggle-btn--active]="billing() === 'yearly'"
+                (click)="billing.set('yearly')">
+          Yearly <span class="pricing__save">−20%</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pricing__grid">
+      @for (plan of plans; track plan.name) {
+        <div class="plan" [class.plan--featured]="plan.featured">
+          @if (plan.featured) {
+            <div class="plan__badge">Most popular</div>
+          }
+          <div class="plan__name">{{ plan.name }}</div>
+          <div class="plan__price">
+            @if (plan.priceMonthly === 0) {
+              <span class="plan__amount">Free</span>
+            } @else if (plan.priceMonthly === null) {
+              <span class="plan__amount">Custom</span>
+            } @else {
+              <span class="plan__currency">€</span>
+              <span
+                class="plan__amount">{{ billing() === 'monthly' ? plan.priceMonthly : (plan.priceMonthly * 0.8) | number:'1.0-0' }}</span>
+              <span class="plan__period">/mo</span>
+            }
+          </div>
+          <p class="plan__tagline">{{ plan.tagline }}</p>
+          <button class="plan__cta"
+                  [class.plan__cta--primary]="plan.featured"
+                  (click)="goToRegister()">{{ plan.ctaLabel }}
+          </button>
+          <ul class="plan__features">
+            @for (feat of plan.features; track feat) {
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {{ feat }}
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ============================================
+       FAQ
+       ============================================ -->
+  <section class="faq reveal" id="faq" #reveal>
+    <div class="faq__header">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="section-title">Questions, answered</h2>
+      <p class="section-sub">Everything you need to know before getting started.</p>
+    </div>
+    <div class="faq__list">
+      @for (item of faqs(); track item.q; let i = $index) {
+        <div class="faq__item" [class.faq__item--open]="item.open">
+          <button class="faq__q" (click)="toggleFaq(i)" [attr.aria-expanded]="item.open">
+            <span class="faq__q-text">{{ item.q }}</span>
+            <span class="faq__q-chevron" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq__a-wrap">
+            <p class="faq__a">{{ item.a }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+  <section class="bottom-cta">
+    <div class="bottom-cta__bg" aria-hidden="true">
+      <svg class="bottom-cta__bg-wash" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <radialGradient id="cta-w1" cx="15%" cy="25%" r="55%">
+            <stop offset="0%" stop-color="var(--elyadata-blue)" stop-opacity=".09"/>
+            <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="cta-w2" cx="88%" cy="78%" r="48%">
+            <stop offset="0%" stop-color="var(--elyadata-pink)" stop-opacity=".07"/>
+            <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="cta-w3" cx="50%" cy="50%" r="42%">
+            <stop offset="0%" stop-color="var(--elyadata-mauve)" stop-opacity=".055"/>
+            <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1600" height="600" fill="url(#cta-w1)"/>
+        <rect width="1600" height="600" fill="url(#cta-w2)"/>
+        <rect width="1600" height="600" fill="url(#cta-w3)"/>
+      </svg>
+
+      <svg class="bottom-cta__bg-curves" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice">
+        <circle class="bg-arc bg-arc--w08" cx="-120" cy="-80" r="520"/>
+        <circle class="bg-arc bg-arc--w06" cx="-200" cy="-150" r="680"/>
+        <circle class="bg-arc bg-arc--w1" cx="80" cy="120" r="320"/>
+        <circle class="bg-arc bg-arc--w08" cx="1720" cy="-60" r="500"/>
+        <circle class="bg-arc bg-arc--w06" cx="1800" cy="-180" r="660"/>
+        <circle class="bg-arc bg-arc--w09" cx="1500" cy="100" r="280"/>
+        <circle class="bg-arc bg-arc--w05" cx="800" cy="300" r="540"/>
+
+        <circle class="bg-flow bg-flow--cyan" cx="-120" cy="-80" r="520"/>
+        <circle class="bg-flow bg-flow--pink" cx="1720" cy="-60" r="500"/>
+        <circle class="bg-flow bg-flow--mauve" cx="800" cy="300" r="540"/>
+
+        <circle class="bg-ring bg-ring--pink" cx="380" cy="120" r="5" style="animation-delay:0s"/>
+        <circle class="bg-dot  bg-dot--pink" cx="380" cy="120" r="3.5"/>
+        <circle class="bg-ring bg-ring--cyan" cx="1180" cy="100" r="5" style="animation-delay:.6s"/>
+        <circle class="bg-dot  bg-dot--cyan" cx="1180" cy="100" r="3.5"/>
+        <circle class="bg-ring bg-ring--mauve" cx="1320" cy="420" r="5" style="animation-delay:1.2s"/>
+        <circle class="bg-dot  bg-dot--mauve" cx="1320" cy="420" r="3.2"/>
+        <circle class="bg-ring bg-ring--cyan" cx="240" cy="480" r="5" style="animation-delay:.9s"/>
+        <circle class="bg-dot  bg-dot--cyan" cx="240" cy="480" r="3"/>
+      </svg>
+    </div>
+
+    <div class="bottom-cta__content">
+      <h2 class="bottom-cta__title">Ready to extract structured data?</h2>
+      <p class="bottom-cta__sub">Production-ready and secure by design. Onboard your team in minutes.</p>
+      <div class="bottom-cta__actions">
+        <button class="cta cta--primary" (click)="goToRegister()">
+          <span>Start Free Trial</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+        <button class="cta cta--ghost" (click)="goToLogin()">Sign In</button>
+      </div>
+    </div>
+  </section>
+
+  <app-footer></app-footer>
+  <button class="scroll-top"
+          [class.scroll-top--visible]="showScrollTop()"
+          (click)="scrollToTop()"
+          aria-label="Back to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5"
+         stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="19" x2="12" y2="5"/>
+      <polyline points="5 12 12 5 19 12"/>
+    </svg>
+  </button>
+  @if (showCookies()) {
+    <div class="cookies" role="dialog" aria-label="Cookie consent">
+      <div class="cookies__inner">
+        <div class="cookies__icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M21.598 11.064a1.006 1.006 0 0 0-.854-.84 4.002 4.002 0 0 1-3.564-3.564 1.006 1.006 0 0 0-.84-.854 4.002 4.002 0 0 1-3.318-3.881 1.001 1.001 0 0 0-1.218-.97A10 10 0 1 0 22 12c0-.328-.018-.652-.05-.97a1.001 1.001 0 0 0-.352.034z"/>
+            <circle cx="8.5" cy="11.5" r=".5" fill="currentColor"/>
+            <circle cx="15.5" cy="14.5" r=".5" fill="currentColor"/>
+            <circle cx="10" cy="16" r=".5" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="cookies__text">
+          <strong>We value your privacy.</strong>
+          We use cookies to enhance your browsing experience and analyze our traffic.
+          By clicking “Accept all” you consent to our use of cookies.
+          <a class="cookies__link" href="#" (click)="$event.preventDefault()">Read our policy</a>.
+        </div>
+        <div class="cookies__actions">
+          <button class="cookies__btn cookies__btn--ghost" (click)="rejectCookies()">Reject</button>
+          <button class="cookies__btn cookies__btn--primary" (click)="acceptCookies()">Accept all</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

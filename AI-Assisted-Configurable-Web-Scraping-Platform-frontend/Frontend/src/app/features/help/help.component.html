@@ -1,0 +1,193 @@
+<div class="help">
+  <div class="help__hero">
+    <div class="help__eyebrow">Help center</div>
+    <h1 class="help__title">How can we help?</h1>
+    <p class="help__sub">
+      Browse the platform by section, or jump straight to the answers below.
+    </p>
+  </div>
+
+  <div class="help__sections">
+    @for (section of sections(); track section.label) {
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">{{ section.label }}</h2>
+        </div>
+        <div class="panel__grid">
+          @for (item of section.items; track item.route) {
+            <a class="help-card" [routerLink]="item.route">
+              <span class="help-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  @switch (item.icon) {
+                    @case ('home') {
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                      <polyline points="9 22 9 12 15 12 15 22"/>
+                    }
+                    @case ('dashboard') {
+                      <rect x="3" y="3" width="7" height="7"/>
+                      <rect x="14" y="3" width="7" height="7"/>
+                      <rect x="14" y="14" width="7" height="7"/>
+                      <rect x="3" y="14" width="7" height="7"/>
+                    }
+                    @case ('project') {
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    }
+                    @case ('work') {
+                      <rect x="2" y="7" width="20" height="14" rx="2"/>
+                      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                    }
+                    @case ('template') {
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    }
+                    @case ('monitor_heart') {
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    }
+                    @case ('schema') {
+                      <polyline points="16 18 22 12 16 6"/>
+                      <polyline points="8 6 2 12 8 18"/>
+                    }
+                    @case ('users') {
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    }
+                    @case ('hub') {
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                    }
+                    @case ('history') {
+                      <path d="M3 3v5h5"/>
+                      <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
+                      <polyline points="12 7 12 12 15 15"/>
+                    }
+                    @default {
+                      <rect x="2" y="7" width="20" height="14" rx="2"/>
+                      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                    }
+                  }
+                </svg>
+              </span>
+              <span class="help-card__body">
+                <span class="help-card__label">
+                  {{ item.label }}
+                  @if (!item.roles.includes('*')) {
+                    <span class="help-card__badge">Admin</span>
+                  }
+                </span>
+                <span class="help-card__desc">{{ item.description }}</span>
+              </span>
+              <svg class="help-card__arrow" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- FAQ -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Frequently asked</h2>
+      </div>
+      <div class="panel__faq">
+        @for (item of faqs(); track item.q; let i = $index) {
+          <div class="faq-item" [class.faq-item--open]="item.open">
+            <button class="faq-item__q" (click)="toggleFaq(i)" [attr.aria-expanded]="item.open">
+              <span>{{ item.q }}</span>
+              <span class="faq-item__chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </span>
+            </button>
+            <div class="faq-item__a-wrap">
+              <p class="faq-item__a">{{ item.a }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+
+  <!-- Contact -->
+  <section class="help__contact">
+    <div class="help__contact-text">
+      <h3>Still stuck?</h3>
+      <p>Send us a message and we'll get back to you.</p>
+    </div>
+    <button class="help__contact-btn" (click)="openContact()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <path d="m22 7-10 5L2 7"/>
+      </svg>
+      Contact support
+    </button>
+  </section>
+
+</div>
+
+@if (contactOpen()) {
+  <div class="contact-overlay" (click)="closeContact()">
+    <div class="contact-modal" role="dialog" aria-label="Contact support"
+         (click)="$event.stopPropagation()">
+      <div class="contact-modal__header">
+        <div>
+          <h3 class="contact-modal__title">Contact support</h3>
+          <p class="contact-modal__sub">Tell us what's going on we'll reply by email.</p>
+        </div>
+        <button class="contact-modal__close" (click)="closeContact()"
+                [disabled]="sending()" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="contact-modal__body">
+        <label class="contact-field">
+          <span class="contact-field__label">Subject</span>
+          <input class="contact-field__input" type="text"
+                 placeholder="Short summary of your issue"
+                 [ngModel]="contactSubject()"
+                 (ngModelChange)="contactSubject.set($event)"
+                 [disabled]="sending()"/>
+        </label>
+
+        <label class="contact-field">
+          <span class="contact-field__label">Message</span>
+          <textarea class="contact-field__input contact-field__textarea"
+                    placeholder="Describe what happened, what you expected, and any steps to reproduce…"
+                    rows="5"
+                    [ngModel]="contactMessage()"
+                    (ngModelChange)="contactMessage.set($event)"
+                    [disabled]="sending()"></textarea>
+          <span class="contact-field__hint">At least 10 characters.</span>
+        </label>
+      </div>
+
+      <div class="contact-modal__footer">
+        <button class="contact-btn contact-btn--ghost" (click)="closeContact()"
+                [disabled]="sending()">Cancel
+        </button>
+        <button class="contact-btn contact-btn--primary" (click)="sendContact()"
+                [disabled]="!canSend() || sending()">
+          @if (sending()) {
+            <span class="contact-spinner"></span>
+            Sending…
+          } @else {
+            Send message
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

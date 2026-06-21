@@ -1,0 +1,37 @@
+@startuml C4_Dynamic_JobExecution
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Dynamic.puml
+
+
+Person(user, "User", "")
+Container(frontend, "Frontend SPA", "Angular")
+Container(api, "JobController", "Quarkus / JAX-RS")
+Container(svc, "JobServiceImpl", "Quarkus CDI")
+Container(engine, "ScrapeEngine", "Quarkus async worker")
+ContainerDb(db, "PostgreSQL", "Jobs, schemas, results")
+System_Ext(targets, "Target Websites", "External HTTP")
+
+' ------ Creation phase ------
+Rel_D(user, frontend, "1. Choose job type: SCRAPER or CRAWLER")
+Rel_D(user, frontend, "2. Configure: scraperConfig or crawlerConfig,\nbrowserConfig, extraction schema, retryPolicy")
+
+Rel(frontend, api,  "3. POST /v1/jobs", "JSON / HTTPS")
+Rel(api,      svc,  "4. createJob(...)")
+Rel(svc,      db,   "5. jobAdapter.save + schemaAdapter.save", "JDBC")
+
+' ------ Launch phase ------
+Rel(frontend, api,  "6. POST /v1/jobs/{id}/launch", "JSON / HTTPS")
+Rel(api,      svc,  "7. launchJob(id)")
+Rel(svc,      db,   "8. update status = RUNNING", "JDBC")
+Rel(svc,      engine, "9. managedExecutor.runAsync(runScrape)")
+
+' ------ Execution phase (async worker) ------
+Rel(engine, targets, "10. Browser renders page(s)\nCSS / XPath / LLM / regex extraction", "HTTPS")
+Rel(engine, db,      "11. scrapeResultAdapter.save\n      + update job status", "JDBC")
+
+' ------ Read-back phase ------
+Rel(frontend, api, "12. GET /v1/jobs/{id} + /scrape-results", "JSON / HTTPS")
+Rel(api,      db,  "13. fetch job + results", "JDBC")
+Rel_U(user,   frontend, "14. View records, logs, metrics")
+
+
+@enduml

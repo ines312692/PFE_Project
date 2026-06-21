@@ -1,0 +1,75 @@
+@startuml
+skinparam backgroundColor white
+skinparam sequenceArrowColor black
+skinparam sequenceLifeLineBorderColor black
+skinparam sequenceParticipantBorderColor black
+skinparam sequenceParticipantBackgroundColor white
+skinparam sequenceParticipantFontColor black
+skinparam sequenceGroupBorderColor black
+skinparam sequenceGroupFontColor black
+skinparam sequenceGroupBackgroundColor #F5F5F5
+skinparam noteBorderColor black
+skinparam noteBackgroundColor white
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+participant "Angular\n(Frontend)" as FE
+participant "BFF\n(Quarkus / AuthController)" as BFF
+participant "Keycloak\n(IAM)" as KC
+database "Base de données\n(PostgreSQL)" as DB
+
+== Authentification ==
+
+FE -> BFF : POST /auth/login\n{ email, password }
+activate BFF
+
+BFF -> KC : OAuth2 Token Request\n{ credentials, client_secret }
+activate KC
+
+KC -> KC : Validation\ndes credentials
+
+alt Credentials valides
+    KC --> BFF : { access_token, refresh_token }
+    deactivate KC
+
+    BFF -> DB : Synchronisation / vérification\ndu compte utilisateur
+    activate DB
+    DB --> BFF : User { id, role, status }
+    deactivate DB
+
+    BFF --> FE : HTTP 200\nSet-Cookie: session=...\n(HttpOnly, Secure, SameSite=Strict)
+
+else Credentials invalides
+    KC --> BFF : HTTP 401 Unauthorized
+    deactivate KC
+    BFF --> FE : HTTP 401\n{ message: "Identifiants incorrects" }
+end
+
+deactivate BFF
+
+== Requête authentifiée ==
+
+FE -> BFF : GET /api/resource\n[Cookie: session]
+activate BFF
+BFF -> BFF : Lecture du token\ndepuis la session serveur
+BFF -> KC : Validation du token\n(introspection)
+activate KC
+KC --> BFF : Token valide
+deactivate KC
+BFF --> FE : HTTP 200 { données }
+deactivate BFF
+
+== Renouvellement du token ==
+
+FE -> BFF : POST /auth/refresh\n[Cookie: session]
+activate BFF
+BFF -> KC : Refresh Token Request
+activate KC
+KC --> BFF : { new_access_token }
+deactivate KC
+BFF -> BFF : Mise à jour du token\ncôté serveur
+BFF --> FE : HTTP 200\n(session prolongée)
+deactivate BFF
+
+@enduml

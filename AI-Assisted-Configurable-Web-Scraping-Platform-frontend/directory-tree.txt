@@ -1,0 +1,399 @@
+src/
+├── app/
+│   ├── core/
+│   │   ├── auth/
+│   │   │   └── auth.service.ts
+│   │   ├── constants/
+│   │   │   ├── breadcrumb.constants.ts
+│   │   │   ├── extraction.constants.ts
+│   │   │   ├── proxy-dashboard.constants.ts
+│   │   │   ├── schema-preset.constants.ts
+│   │   │   ├── schema.constants.ts
+│   │   │   └── workspace.constants.ts
+│   │   ├── guards/
+│   │   │   ├── auth.guard.ts
+│   │   │   └── role.guard.ts
+│   │   ├── interceptors/
+│   │   │   ├── auth.interceptor.ts
+│   │   │   ├── error.interceptor.ts
+│   │   │   └── loading.interceptor.ts
+│   │   ├── models/
+│   │   │   ├── api-response.model.ts
+│   │   │   ├── audit-log.model.ts
+│   │   │   ├── auth.model.ts
+│   │   │   ├── captcha-intervention.model.ts
+│   │   │   ├── data-version.model.ts
+│   │   │   ├── etl.model.ts
+│   │   │   ├── job-execution.model.ts
+│   │   │   ├── job-form.model.ts
+│   │   │   ├── job-templates.model.ts
+│   │   │   ├── job.model.ts
+│   │   │   ├── notification.model.ts
+│   │   │   ├── project-invitation.model.ts
+│   │   │   ├── project.model.ts
+│   │   │   ├── prompt-assistant.model.ts
+│   │   │   ├── proxy.model.ts
+│   │   │   ├── schema-validation.model.ts
+│   │   │   ├── scrape-result.model.ts
+│   │   │   ├── site-probe.model.ts
+│   │   │   ├── user.model.ts
+│   │   │   └── webhook.model.ts
+│   │   ├── services/
+│   │       ├── api.ts
+│   │       ├── audit-log.service.ts
+│   │       ├── captcha-intervention.service.ts
+│   │       ├── cookie-storage.service.ts
+│   │       ├── data-version.service.ts
+│   │       ├── etl.service.ts
+│   │       ├── job.service.ts
+│   │       ├── loading.service.ts
+│   │       ├── monitoring.service.ts
+│   │       ├── notification.service.ts
+│   │       ├── project-invitation.service.ts
+│   │       ├── project.service.ts
+│   │       ├── prompt-assistant.service.ts
+│   │       ├── proxy.service.ts
+│   │       ├── schedule.service.ts
+│   │       ├── schema-validator.service.ts
+│   │       ├── scrape-result.service.ts
+│   │       ├── site-probe.service.ts
+│   │       ├── static-assistant.service.ts
+│   │       ├── template.service.ts
+│   │       ├── theme.service.ts
+│   │       ├── toast.service.ts
+│   │       ├── user.service.ts
+│   │       ├── visual-selector.service.ts
+│   │       └── webhook.service.ts
+│   ├── features/
+│   │   ├── admin/
+│   │   │   ├── audit-logs/
+│   │   │   │   ├── audit-logs.component.html
+│   │   │   │   ├── audit-logs.component.scss
+│   │   │   │   └── audit-logs.component.ts
+│   │   │   ├── proxy-dashboard/
+│   │   │   │   ├── proxy-dashboard.component.html
+│   │   │   │   ├── proxy-dashboard.component.scss
+│   │   │   │   └── proxy-dashboard.component.ts
+│   │   │   ├── proxy-list/
+│   │   │   │   ├── proxy-list.component.html
+│   │   │   │   ├── proxy-list.component.scss
+│   │   │   │   └── proxy-list.component.ts
+│   │   │   ├── users/
+│   │   │   │   ├── user-list.component.html
+│   │   │   │   ├── user-list.component.scss
+│   │   │   │   └── user-list.component.ts
+│   │   │   ├── admin.component.html
+│   │   │   ├── admin.component.scss
+│   │   │   ├── admin.component.ts
+│   │   │   └── admin.routes.ts
+│   │   ├── auth/
+│   │   │   ├── callback/
+│   │   │   │   └── callback.component.ts
+│   │   │   ├── login/
+│   │   │   │   ├── login.component.html
+│   │   │   │   ├── login.component.scss
+│   │   │   │   └── login.component.ts
+│   │   │   ├── register/
+│   │   │   │   ├── register.component.html
+│   │   │   │   ├── register.component.scss
+│   │   │   │   └── register.component.ts
+│   │   │   └── auth.routes.ts
+│   │   ├── dashboard/
+│   │   │   ├── dashboard.component.html
+│   │   │   ├── dashboard.component.scss
+│   │   │   └── dashboard.component.ts
+│   │   ├── docs/
+│   │   │   ├── docs.component.html
+│   │   │   ├── docs.component.scss
+│   │   │   └── docs.component.ts
+│   │   ├── help/
+│   │   │   ├── help.component.html
+│   │   │   ├── help.component.scss
+│   │   │   └── help.component.ts
+│   │   ├── home/
+│   │   │   ├── home.component.html
+│   │   │   ├── home.component.scss
+│   │   │   └── home.component.ts
+│   │   ├── jobs/
+│   │   │   ├── captcha-intervention/
+│   │   │   │   ├── captcha-intervention.component.html
+│   │   │   │   ├── captcha-intervention.component.scss
+│   │   │   │   └── captcha-intervention.component.ts
+│   │   │   ├── data-pipeline/
+│   │   │   │   ├── pipeline-history/
+│   │   │   │   │   ├── data-preview-modal/
+│   │   │   │   │   │   ├── data-preview-modal.component.html
+│   │   │   │   │   │   ├── data-preview-modal.component.scss
+│   │   │   │   │   │   └── data-preview-modal.component.ts
+│   │   │   │   │   ├── workflow-canvas/
+│   │   │   │   │   │   ├── workflow-canvas.component.html
+│   │   │   │   │   │   ├── workflow-canvas.component.scss
+│   │   │   │   │   │   └── workflow-canvas.component.ts
+│   │   │   │   │   ├── pipeline-history.component.html
+│   │   │   │   │   ├── pipeline-history.component.scss
+│   │   │   │   │   └── pipeline-history.component.ts
+│   │   │   │   ├── quality-report-panel/
+│   │   │   │   │   ├── quality-report-panel.component.html
+│   │   │   │   │   ├── quality-report-panel.component.scss
+│   │   │   │   │   └── quality-report-panel.component.ts
+│   │   │   │   ├── data-pipeline.component.html
+│   │   │   │   ├── data-pipeline.component.scss
+│   │   │   │   └── data-pipeline.component.ts
+│   │   │   ├── job-agenda/
+│   │   │   │   ├── job-agenda.component.html
+│   │   │   │   ├── job-agenda.component.scss
+│   │   │   │   └── job-agenda.component.ts
+│   │   │   ├── job-create/
+│   │   │   │   ├── probe-report/
+│   │   │   │   │   ├── probe-report.component.html
+│   │   │   │   │   ├── probe-report.component.scss
+│   │   │   │   │   └── probe-report.component.ts
+│   │   │   │   ├── job-create.component.html
+│   │   │   │   ├── job-create.component.scss
+│   │   │   │   └── job-create.component.ts
+│   │   │   ├── job-detail/
+│   │   │   │   ├── job-detail.component.html
+│   │   │   │   ├── job-detail.component.scss
+│   │   │   │   └── job-detail.component.ts
+│   │   │   ├── job-history/
+│   │   │   │   ├── job-history.component.html
+│   │   │   │   ├── job-history.component.scss
+│   │   │   │   └── job-history.component.ts
+│   │   │   ├── job-list/
+│   │   │   │   ├── job-list.component.html
+│   │   │   │   ├── job-list.component.scss
+│   │   │   │   └── job-list.component.ts
+│   │   │   ├── job-runner/
+│   │   │   │   ├── job-runner.component.html
+│   │   │   │   ├── job-runner.component.scss
+│   │   │   │   └── job-runner.component.ts
+│   │   │   ├── job-templates/
+│   │   │   │   ├── job-templates.component.html
+│   │   │   │   ├── job-templates.component.scss
+│   │   │   │   └── job-templates.component.ts
+│   │   │   ├── job-workspace/
+│   │   │   │   ├── job-workspace.component.html
+│   │   │   │   ├── job-workspace.component.scss
+│   │   │   │   └── job-workspace.component.ts
+│   │   │   ├── schema-builder/
+│   │   │   │   ├── mode-picker/
+│   │   │   │   │   ├── mode-picker.component.html
+│   │   │   │   │   ├── mode-picker.component.scss
+│   │   │   │   │   └── mode-picker.component.ts
+│   │   │   │   ├── schema-fields/
+│   │   │   │   │   ├── schema-fields.component.html
+│   │   │   │   │   ├── schema-fields.component.scss
+│   │   │   │   │   └── schema-fields.component.ts
+│   │   │   │   ├── schema-llm/
+│   │   │   │   │   ├── prompt-assistant/
+│   │   │   │   │   │   ├── prompt-assistant.component.html
+│   │   │   │   │   │   ├── prompt-assistant.component.scss
+│   │   │   │   │   │   └── prompt-assistant.component.ts
+│   │   │   │   │   ├── schema-llm.component.html
+│   │   │   │   │   ├── schema-llm.component.scss
+│   │   │   │   │   └── schema-llm.component.ts
+│   │   │   │   ├── schema-preset/
+│   │   │   │   │   ├── schema-preset.component.html
+│   │   │   │   │   ├── schema-preset.component.scss
+│   │   │   │   │   └── schema-preset.component.ts
+│   │   │   │   ├── schema-regex/
+│   │   │   │   │   ├── schema-regex.component.html
+│   │   │   │   │   ├── schema-regex.component.scss
+│   │   │   │   │   └── schema-regex.component.ts
+│   │   │   │   ├── visual-selector/
+│   │   │   │   │   ├── visual-selector.component.html
+│   │   │   │   │   ├── visual-selector.component.scss
+│   │   │   │   │   └── visual-selector.component.ts
+│   │   │   │   ├── schema-builder.component.html
+│   │   │   │   ├── schema-builder.component.scss
+│   │   │   │   └── schema-builder.component.ts
+│   │   │   ├── webhook-config/
+│   │   │   │   ├── webhook-config.component.html
+│   │   │   │   ├── webhook-config.component.scss
+│   │   │   │   └── webhook-config.component.ts
+│   │   │   └── jobs.routes.ts
+│   │   ├── landing/
+│   │   │   ├── components/
+│   │   │   │   ├── footer/
+│   │   │   │   │   ├── footer.component.html
+│   │   │   │   │   ├── footer.component.scss
+│   │   │   │   │   └── footer.component.ts
+│   │   │   │   ├── navbar/
+│   │   │   │   │   ├── navbar.component.html
+│   │   │   │   │   ├── navbar.component.scss
+│   │   │   │   │   └── navbar.component.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── landing.component.html
+│   │   │   ├── landing.component.scss
+│   │   │   └── landing.component.ts
+│   │   ├── monitoring/
+│   │   │   ├── monitoring.component.html
+│   │   │   ├── monitoring.component.scss
+│   │   │   └── monitoring.component.ts
+│   │   ├── not-found/
+│   │   │   ├── not-found.component.html
+│   │   │   ├── not-found.component.scss
+│   │   │   └── not-found.component.ts
+│   │   ├── notifications/
+│   │   │   ├── notifications.component.html
+│   │   │   ├── notifications.component.scss
+│   │   │   ├── notifications.component.ts
+│   │   │   └── notifications.routes.ts
+│   │   ├── profile/
+│   │   │   ├── profile.component.html
+│   │   │   ├── profile.component.scss
+│   │   │   └── profile.component.ts
+│   │   ├── projects/
+│   │   │   ├── project-detail/
+│   │   │   │   ├── project-detail.component.html
+│   │   │   │   ├── project-detail.component.scss
+│   │   │   │   └── project-detail.component.ts
+│   │   │   ├── project-list/
+│   │   │   │   ├── project-list.component.html
+│   │   │   │   ├── project-list.component.scss
+│   │   │   │   └── project-list.component.ts
+│   │   │   ├── project-workspace/
+│   │   │   │   ├── project-workspace.component.html
+│   │   │   │   ├── project-workspace.component.scss
+│   │   │   │   └── project-workspace.component.ts
+│   │   │   └── projects.routes.ts
+│   │   ├── settings/
+│   │       ├── settings.component.html
+│   │       ├── settings.component.scss
+│   │       └── settings.component.ts
+│   ├── layout/
+│   │   ├── breadcrumb/
+│   │   │   ├── breadcrumb.component.html
+│   │   │   ├── breadcrumb.component.scss
+│   │   │   └── breadcrumb.component.ts
+│   │   ├── footer/
+│   │   │   ├── footer.component.html
+│   │   │   ├── footer.component.scss
+│   │   │   └── footer.component.ts
+│   │   ├── navbar/
+│   │   │   ├── nav-items.config.ts
+│   │   │   ├── navbar.component.html
+│   │   │   ├── navbar.component.scss
+│   │   │   └── navbar.component.ts
+│   │   ├── sidebar/
+│   │       ├── sidebar.component.html
+│   │       ├── sidebar.component.scss
+│   │       └── sidebar.component.ts
+│   ├── shared/
+│   │   ├── components/
+│   │   │   ├── assistant/
+│   │   │   │   ├── assistant.component.html
+│   │   │   │   ├── assistant.component.scss
+│   │   │   │   ├── assistant.component.ts
+│   │   │   │   ├── assistant.knowledge.ts
+│   │   │   │   └── assistant.model.ts
+│   │   │   ├── confirm-dialog/
+│   │   │   │   ├── confirm-dialog.component.html
+│   │   │   │   ├── confirm-dialog.component.scss
+│   │   │   │   └── confirm-dialog.component.ts
+│   │   │   ├── data-table/
+│   │   │   │   ├── data-table.component.html
+│   │   │   │   ├── data-table.component.scss
+│   │   │   │   └── data-table.component.ts
+│   │   │   ├── date-range-picker/
+│   │   │   │   ├── date-range-picker.component.html
+│   │   │   │   ├── date-range-picker.component.scss
+│   │   │   │   └── date-range-picker.component.ts
+│   │   │   ├── empty-state/
+│   │   │   │   ├── empty-state.component.html
+│   │   │   │   ├── empty-state.component.scss
+│   │   │   │   └── empty-state.component.ts
+│   │   │   ├── export-dialog/
+│   │   │   │   ├── export-dialog.component.html
+│   │   │   │   ├── export-dialog.component.scss
+│   │   │   │   └── export-dialog.component.ts
+│   │   │   ├── loading-spinner/
+│   │   │   │   ├── loading-spinner.component.html
+│   │   │   │   ├── loading-spinner.component.scss
+│   │   │   │   └── loading-spinner.component.ts
+│   │   │   ├── notification-toast/
+│   │   │   │   ├── notification-toast.component.html
+│   │   │   │   ├── notification-toast.component.scss
+│   │   │   │   └── notification-toast.component.ts
+│   │   │   ├── status-badge/
+│   │   │       ├── status-badge.component.html
+│   │   │       ├── status-badge.component.scss
+│   │   │       └── status-badge.component.ts
+│   │   ├── constants/
+│   │   │   └── colors.ts
+│   │   ├── directives/
+│   │   │   ├── click-outside.directive.ts
+│   │   │   └── has-role.directive.ts
+│   │   ├── pipes/
+│   │       ├── date-format.pipe.ts
+│   │       ├── status-color.pipe.ts
+│   │       └── truncate.pipe.ts
+│   ├── app.component.html
+│   ├── app.component.scss
+│   ├── app.component.ts
+│   ├── app.config.server.ts
+│   ├── app.config.ts
+│   ├── app.html
+│   ├── app.routes.server.ts
+│   ├── app.routes.ts
+│   ├── app.scss
+│   └── app.ts
+├── assets/
+│   ├── ElyadataLogoWhite.png
+│   ├── ElyadataLogoWhite.svg
+│   ├── Logomark.svg
+│   ├── elyadata.png
+│   ├── elyadata.svg
+│   ├── logi.png
+│   └── world.svg
+├── environments/
+│   ├── environment.prod.ts
+│   └── environment.ts
+├── tests/
+│   ├── e2e/
+│   │   ├── fixtures/
+│   │   │   └── mock-data.ts
+│   │   ├── helpers/
+│   │   │   └── setup.ts
+│   │   ├── specs/
+│   │       ├── job-create.spec.ts
+│   │       ├── job-detail.spec.ts
+│   │       ├── job-list.spec.ts
+│   │       └── job-templates.spec.ts
+│   ├── helpers/
+│   │   └── mock-factories.ts
+│   ├── integration/
+│   │   ├── interceptors-chain.integration.spec.ts
+│   │   └── jobs-crud-flow.integration.spec.ts
+│   ├── unit/
+│       ├── components/
+│       │   ├── jobs/
+│       │       ├── job-create.component.spec.ts
+│       │       ├── job-detail.component.spec.ts
+│       │       ├── job-history.component.spec.ts
+│       │       ├── job-list.component.spec.ts
+│       │       ├── job-templates.component.spec.ts
+│       │       └── job-workspace.component.spec.ts
+│       ├── core/
+│       │   ├── services/
+│       │       ├── auth.service.spec.ts
+│       │       ├── cookie-storage.service.spec.ts
+│       │       ├── job.service.spec.ts
+│       │       ├── loading.service.spec.ts
+│       │       ├── notification.service.spec.ts
+│       │       ├── site-probe.service.spec.ts
+│       │       ├── toast.service.spec.ts
+│       │       └── user.service.spec.ts
+│       ├── guards/
+│       │   ├── auth.guard.spec.ts
+│       │   └── role.guard.spec.ts
+│       ├── interceptors/
+│           ├── auth.interceptor.spec.ts
+│           ├── error.interceptor.spec.ts
+│           └── loading.interceptor.spec.ts
+├── index.html
+├── main.server.ts
+├── main.ts
+├── server.ts
+├── setup-jest.ts
+└── styles.scss

@@ -1,0 +1,146 @@
+<div class="topbar">
+  <button class="back-btn" (click)="goBack()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    Projects
+  </button>
+</div>
+<div class="form-page">
+  <div class="form-layout">
+    <div class="form-panel">
+
+      <div class="form-panel__header">
+        <div class="form-panel__icon" [style.background]="color() + '18'" [style.border-color]="color() + '30'"
+             [style.color]="color()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 7a2 2 0 0 1 2-2h3l2 2h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="form-panel__title">{{ isEdit() ? 'Edit Project' : 'New Project' }}</h1>
+          <p class="form-panel__subtitle">
+            {{ isEdit() ? 'Update project settings and metadata.' : 'Create a shared workspace to organize scraping jobs.' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+      <div class="field">
+        <div class="field__head">
+          <label class="field__label">Project Name <span class="field__req">*</span></label>
+          <span class="field__count">{{ name().length }}/120</span>
+        </div>
+        <input class="field__input" type="text"
+               placeholder="e.g. E-commerce Price Monitoring"
+               [ngModel]="name()"
+               (ngModelChange)="name.set($event)"
+               maxlength="120"/>
+      </div>
+
+      <!-- Description -->
+      <div class="field">
+        <div class="field__head">
+          <label class="field__label">Description <span class="field__opt">Optional</span></label>
+          <span class="field__count">{{ description().length }}/500</span>
+        </div>
+        <textarea class="field__textarea" rows="3"
+                  placeholder="What is this project about? What data will be extracted?"
+                  [ngModel]="description()"
+                  (ngModelChange)="description.set($event)"
+                  maxlength="500"></textarea>
+      </div>
+
+      <!-- Color -->
+      <div class="field">
+        <div class="field__head">
+          <label class="field__label">Project Color</label>
+          <div class="color-selected">
+            <span class="color-selected__dot" [style.background]="color()"></span>
+            <span class="color-selected__hex">{{ color() }}</span>
+          </div>
+        </div>
+        <div class="palette-grid">
+          @for (c of colors; track c) {
+            <button class="palette-chip"
+                    [class.palette-chip--active]="color() === c"
+                    [style.--chip-color]="c"
+                    (click)="selectColor(c)"
+                    [title]="c">
+              <span class="palette-chip__fill"></span>
+              @if (color() === c) {
+                <svg class="palette-chip__check" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff"
+                     stroke-width="3.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              }
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button class="btn-ghost" (click)="cancel()">Cancel</button>
+        <button class="btn-primary"
+                [disabled]="!isFormValid() || saving()"
+                (click)="save()">
+          @if (saving()) {
+            <span class="btn-primary__spinner"></span>
+          }
+          {{ saving() ? (isEdit() ? 'Saving…' : 'Creating…') : (isEdit() ? 'Save Changes' : 'Create Project') }}
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Right: Live Preview -->
+    <div class="preview-panel">
+      <div class="preview-panel__label">Live Preview</div>
+
+      <div class="preview-card">
+        <div class="preview-card__bar"
+             [style.background]="'linear-gradient(90deg,' + color() + ',' + color() + '55)'"></div>
+        <div class="preview-card__body">
+          <div class="preview-card__avatar"
+               [style.background]="color() + '18'"
+               [style.color]="color()">
+            {{ previewInitials() }}
+          </div>
+          <div class="preview-card__info">
+            <div class="preview-card__name">{{ name().trim() || 'Project Name' }}</div>
+            @if (description().trim()) {
+              <div class="preview-card__desc">
+                {{ description().trim() | slice:0:70 }}{{ description().trim().length > 70 ? '…' : '' }}
+              </div>
+            } @else {
+              <div class="preview-card__desc preview-card__desc--empty">No description</div>
+            }
+          </div>
+        </div>
+        <div class="preview-card__footer">
+          <span class="preview-badge" [style.background]="color() + '12'" [style.color]="color()">
+            <span class="preview-badge__dot" [style.background]="color()"></span>
+            ACTIVE
+          </span>
+          <span class="preview-card__meta">0 jobs · 0 members</span>
+        </div>
+      </div>
+
+      <div class="preview-hints">
+        <div class="preview-hint">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          This is how your project will appear across the platform.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,15 @@
+.footer {
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+
+  a {
+    color: var(--elyadata-pink);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

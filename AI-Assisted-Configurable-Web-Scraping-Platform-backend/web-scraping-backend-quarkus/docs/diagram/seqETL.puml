@@ -1,0 +1,61 @@
+@startuml seqETL
+'=============================================================
+'  Diagramme de séquence — Pipeline ETL (Sprint 3)
+'  Exécution du pipeline sur les données extraites d'un job
+'=============================================================
+
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam defaultFontSize 18
+skinparam sequence {
+    ArrowColor #2E75B6
+    LifeLineBorderColor #2E75B6
+    ParticipantBorderColor #2E75B6
+    ParticipantBackgroundColor #F8FBFF
+    ActorBorderColor #2E75B6
+    ArrowFontSize 18
+    ParticipantFontSize 18
+    ActorFontSize 18
+}
+
+actor "Utilisateur" as User
+participant "Frontend" as FE
+participant "EtlController" as Ctrl
+participant "EtlPipelineRunner" as Runner
+participant "EtlStep\n(étapes)" as Step
+participant "ExportService" as Export
+database "Base de données" as DB
+
+User -> FE : Configure et lance le pipeline ETL
+FE -> Ctrl : 1 : POST /etl/run (config)
+activate Ctrl
+
+Ctrl -> Runner : 2 : run(etlConfig, données brutes)
+activate Runner
+
+loop pour chaque étape ordonnée
+    Runner -> Step : 3 : apply(records)
+    activate Step
+    Step --> Runner : 4 : records transformés
+    deactivate Step
+end
+
+alt toutes les étapes réussissent
+    Runner -> Export : 5 : export(records, destination)
+    activate Export
+    Export -> DB : 6 : charge les données
+    Export --> Runner : 7 : confirmation
+    deactivate Export
+    Runner --> Ctrl : 8 : rapport de qualité
+    Ctrl --> FE : 9 : succès + statistiques
+    FE --> User : 10 : données traitées et exportées
+else une étape échoue
+    Runner --> Ctrl : 11 : erreur + rapport partiel
+    Ctrl --> FE : 12 : échec journalisé
+    FE --> User : 13 : notification d'erreur
+end
+
+deactivate Runner
+deactivate Ctrl
+
+@enduml

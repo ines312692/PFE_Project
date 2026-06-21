@@ -1,0 +1,130 @@
+<!-- === data-preview-modal.component.html === -->
+<div class="modal-backdrop" (click)="closed.emit()">
+  <div class="preview-modal" (click)="$event.stopPropagation()">
+
+    <div class="preview-modal__header">
+      <div class="preview-modal__title-wrap">
+        <div class="preview-modal__title-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M3 9h18M3 15h18M9 3v18"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="preview-modal__title">
+            @if (version(); as v) {
+              {{ v.label ?? (v.versionNumber === 0 ? 'Raw data' : 'Pipeline run ' + v.versionNumber) }}
+            } @else {
+              Data preview
+            }
+          </h3>
+          <p class="preview-modal__sub">
+            @if (version(); as v) {
+              Version {{ v.versionNumber }} · {{ records().length }} records ·
+              {{ columns().length }} columns
+            }
+          </p>
+        </div>
+      </div>
+      <button class="preview-modal__close" (click)="closed.emit()" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="preview-tabs">
+      <button class="preview-tabs__btn"
+              [class.preview-tabs__btn--active]="tab() === 'table'"
+              (click)="tab.set('table')" type="button">
+        Table
+      </button>
+      <button class="preview-tabs__btn"
+              [class.preview-tabs__btn--active]="tab() === 'json'"
+              (click)="tab.set('json')" type="button">
+        JSON
+      </button>
+      <div class="preview-tabs__spacer"></div>
+      @if (tab() === 'json' && records().length > 0) {
+        <button class="preview-tabs__copy" (click)="copyJson()" type="button">
+          @if (copied()) {
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Copied
+          } @else {
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          }
+        </button>
+      }
+    </nav>
+
+    <div class="preview-modal__body">
+      @if (loading()) {
+        <div class="preview-state"><span class="loader"></span></div>
+      } @else if (records().length === 0) {
+        <div class="preview-state preview-state--empty">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.4">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M3 9h18M3 15h18M9 3v18"/>
+          </svg>
+          <span>No records in this version</span>
+        </div>
+      } @else if (tab() === 'table') {
+        <div class="preview-table-wrap">
+          <table class="preview-table">
+            <thead>
+            <tr>
+              <th class="col-num">#</th>
+              @for (col of columns(); track trackCol($index, col)) {
+                <th>{{ col }}</th>
+              }
+            </tr>
+            </thead>
+            <tbody>
+              @for (row of records(); track trackRow($index); let i = $index) {
+                <tr>
+                  <td class="col-num">{{ i + 1 }}</td>
+                  @for (col of columns(); track trackCol($index, col)) {
+                    <td [title]="cell(row, col)">
+                      @if (isEmpty(row, col)) {
+                        <span class="cell--empty">empty</span>
+                      } @else {
+                        {{ cell(row, col) }}
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <pre class="preview-json">{{ jsonText() }}</pre>
+      }
+    </div>
+
+    <div class="preview-modal__footer">
+      <span class="preview-modal__footer-info">
+        @if (version(); as v) {
+          Showing <strong>{{ records().length }}</strong> records from
+          <strong>v{{ v.versionNumber }}</strong>
+        }
+      </span>
+      <button class="pv-btn pv-btn--primary" (click)="closed.emit()" type="button">
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>

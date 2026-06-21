@@ -1,0 +1,72 @@
+@startuml architecture_physique
+title Architecture physique Déploiement (conteneurs Docker)
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam node {
+  BorderColor #2E59A7
+  BackgroundColor #F5F8FD
+}
+skinparam database {
+  BorderColor #2E59A7
+  BackgroundColor #FFFFFF
+}
+skinparam cloud {
+  BorderColor #888888
+}
+
+actor "Utilisateur" as User
+
+node "Poste client" {
+  artifact "Navigateur web" as Browser
+}
+
+cloud "Internet" as Net
+
+node "Serveur d'application (Docker Host)" {
+  node "Conteneur Frontend" {
+    artifact "Angular + Nginx" as Front
+  }
+  node "Conteneur Backend (BFF)" {
+    artifact "API REST / BFF\n+ SSE" as Back
+  }
+  node "Conteneur Keycloak" {
+    artifact "Keycloak (IAM)" as KC
+  }
+  node "Conteneur Workers" {
+    artifact "Worker Crawling\n+ Anti-bot" as Worker
+  }
+  node "Conteneur File de tâches" {
+    queue "Broker (jobs)" as Broker
+  }
+}
+
+node "Serveur de données" {
+  database "PostgreSQL" as PG
+  database "MongoDB" as Mongo
+}
+
+cloud "Sites web cibles" as Targets
+cloud "Fournisseur LLM" as LLM
+cloud "Sources de proxies" as Proxy
+
+User --> Browser
+Browser --> Net : HTTPS
+Net --> Front : HTTPS (443)
+Front --> Back : HTTP interne
+Back ..> Browser : flux SSE
+
+Back --> KC : OIDC / OAuth2
+Back --> Broker : publication des jobs
+Broker --> Worker : consommation
+Back --> PG
+Back --> Mongo
+Worker --> Mongo : résultats / logs
+Worker --> PG : statut des jobs
+
+Worker --> Net : requêtes sortantes
+Net --> Targets
+Worker --> Proxy : récupération / rotation
+Back --> LLM : extraction assistée par IA
+
+@enduml

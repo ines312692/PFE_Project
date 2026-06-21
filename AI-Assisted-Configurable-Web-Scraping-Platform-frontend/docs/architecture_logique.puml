@@ -1,0 +1,60 @@
+@startuml architecture_logique
+title Architecture logique Plateforme de Web Scraping assistée par IA
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam rectangle {
+  BorderColor #2E59A7
+  BackgroundColor #F5F8FD
+}
+skinparam package {
+  BorderColor #2E59A7
+  BackgroundColor #FFFFFF
+  FontColor #2E59A7
+}
+
+actor Utilisateur as User
+
+package "Présentation" {
+  [Application Web Angular] as SPA
+}
+
+package "Backend (BFF)" {
+  [API REST + Notifications SSE] as BFF
+}
+
+package "Métier" {
+  [Gestion Utilisateurs & Projets] as Mgmt
+  [Moteur de Scraping\n(crawling, anti-bot, proxies)] as Scraper
+  [Pipeline ETL] as ETL
+  [Extraction par IA & Templates] as AI
+}
+
+package "Sécurité" {
+  [Keycloak (IAM)] as KC
+}
+
+package "Données" {
+  database "Bases de données\n(PostgreSQL / MongoDB)" as DB
+}
+
+package "Services externes" {
+  cloud "Sites cibles" as Targets
+  cloud "Fournisseur LLM" as LLM
+}
+
+User --> SPA
+SPA --> BFF
+BFF --> KC
+BFF --> Mgmt
+BFF --> Scraper
+Scraper --> ETL
+ETL --> AI
+AI --> LLM
+Scraper --> Targets
+Mgmt --> DB
+Scraper --> DB
+ETL --> DB
+
+@enduml

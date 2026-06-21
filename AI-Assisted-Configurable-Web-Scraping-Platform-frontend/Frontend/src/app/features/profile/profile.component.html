@@ -1,0 +1,250 @@
+<div class="page">
+
+  @if (loading()) {
+    <div class="loader-wrap"><span class="loader"></span></div>
+  }
+
+  @if (!loading() && profile()) {
+
+    <div class="page-header">
+      <div class="page-header__eyebrow">
+        <span class="page-header__dot"></span>
+        Account
+      </div>
+      <h1 class="page-header__title">Profile</h1>
+      <p class="page-header__desc">Manage your personal information and security settings</p>
+    </div>
+
+    <div class="profile-grid">
+      <div class="card identity-card">
+        <div class="identity-card__avatar-wrap">
+          @if (profile()!.avatarUrl) {
+            <img class="identity-card__avatar identity-card__avatar--img"
+                 [src]="profile()!.avatarUrl" alt="Avatar"/>
+          } @else {
+            <div class="identity-card__avatar">{{ initials }}</div>
+          }
+          <div class="identity-card__avatar-ring"></div>
+
+          <label class="identity-card__avatar-edit"
+                 [class.identity-card__avatar-edit--loading]="avatarUploading()"
+                 [attr.aria-disabled]="avatarUploading()"
+                 title="Change photo">
+            @if (avatarUploading()) {
+              <span class="spinner"></span>
+            } @else {
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            }
+            <input type="file" accept="image/*" hidden
+                   [disabled]="avatarUploading()"
+                   (change)="onAvatarSelected($event)"/>
+          </label>
+        </div>
+        <h2 class="identity-card__name">{{ profile()!.username }}</h2>
+        <p class="identity-card__email">{{ profile()!.email }}</p>
+        <span class="role-badge role-badge--{{ profile()!.role.toLowerCase() }}">
+          {{ profile()!.role }}
+        </span>
+        <div class="identity-card__stats">
+          <div class="identity-stat">
+            <span class="identity-stat__label">Member since</span>
+            <span class="identity-stat__value">{{ memberSince }}</span>
+          </div>
+          <div class="identity-stat__sep"></div>
+          <div class="identity-stat">
+            <span class="identity-stat__label">Status</span>
+            <span class="identity-stat__value identity-stat__value--active">
+              {{ profile()!.enabled ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="card info-card">
+        <div class="card__head">
+          <h3>Account Information</h3>
+          <p>Your account details managed by the platform</p>
+        </div>
+        <div class="info-rows">
+          <div class="info-row">
+            <div class="info-row__left">
+              <span class="info-row__label">Username</span>
+              <span class="info-row__value">{{ profile()!.username }}</span>
+            </div>
+            <span class="info-row__tag">Read only</span>
+          </div>
+          <div class="info-row">
+            <div class="info-row__left">
+              <span class="info-row__label">Email address</span>
+              <span class="info-row__value">{{ profile()!.email }}</span>
+            </div>
+            <span class="info-row__tag">Read only</span>
+          </div>
+          <div class="info-row">
+            <div class="info-row__left">
+              <span class="info-row__label">Role</span>
+              <span class="info-row__value">{{ profile()!.role }}</span>
+            </div>
+            <span class="info-row__tag">Assigned by admin</span>
+          </div>
+          <div class="info-row info-row--last">
+            <div class="info-row__left">
+              <span class="info-row__label">Account ID</span>
+              <span class="info-row__value info-row__value--mono">{{ profile()!.id }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card pwd-card">
+        <div class="card__head">
+          <h3>Change Password</h3>
+          <p>Choose a strong password to keep your account secure</p>
+        </div>
+
+        @if (pwdSuccess()) {
+          <div class="alert alert--success">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            {{ pwdSuccess() }}
+          </div>
+        }
+        @if (pwdError()) {
+          <div class="alert alert--error">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ pwdError() }}
+          </div>
+        }
+
+        <div class="pwd-fields">
+          <div class="field">
+            <label class="field__label" for="currentPassword">Current password</label>
+            <div class="field__wrap">
+              <input
+                id="currentPassword"
+                class="field__input"
+                [type]="showCurrent() ? 'text' : 'password'"
+                [(ngModel)]="currentPassword"
+                placeholder="Enter current password"
+                autocomplete="current-password"
+              />
+              <button type="button" class="field__eye" (click)="toggleCurrent()"
+                      [attr.aria-label]="showCurrent() ? 'Hide current password' : 'Show current password'">
+                @if (showCurrent()) {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="newPassword">New password</label>
+            <div class="field__wrap">
+              <input
+                id="newPassword"
+                class="field__input"
+                [type]="showNew() ? 'text' : 'password'"
+                [(ngModel)]="newPassword"
+                placeholder="At least 8 characters"
+                autocomplete="new-password"
+              />
+              <button type="button" class="field__eye" (click)="toggleNew()"
+                      [attr.aria-label]="showNew() ? 'Hide new password' : 'Show new password'">
+                @if (showNew()) {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (newPassword) {
+              <div class="strength">
+                <div class="strength__bars">
+                  @for (i of [1, 2, 3, 4]; track i) {
+                    <div class="strength__bar"
+                         [class.strength__bar--filled]="passwordStrength.level >= i"
+                         [attr.data-level]="passwordStrength.level"></div>
+                  }
+                </div>
+                <span class="strength__label" [attr.data-level]="passwordStrength.level">
+                  {{ passwordStrength.label }}
+                </span>
+              </div>
+            }
+          </div>
+          <div class="field">
+            <label class="field__label" for="confirmPassword">Confirm new password</label>
+            <div class="field__wrap">
+              <input
+                id="confirmPassword"
+                class="field__input"
+                [type]="showConfirm() ? 'text' : 'password'"
+                [(ngModel)]="confirmPassword"
+                placeholder="Repeat new password"
+                autocomplete="new-password"
+              />
+              <button type="button" class="field__eye" (click)="toggleConfirm()"
+                      [attr.aria-label]="showConfirm() ? 'Hide confirmation password' : 'Show confirmation password'">
+                @if (showConfirm()) {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <button class="save-btn" [disabled]="pwdLoading()" (click)="submitPassword()">
+          @if (pwdLoading()) {
+            <span class="spinner"></span>
+            Updating…
+          } @else {
+            Update password
+          }
+        </button>
+
+      </div>
+
+    </div>
+  }
+
+</div>

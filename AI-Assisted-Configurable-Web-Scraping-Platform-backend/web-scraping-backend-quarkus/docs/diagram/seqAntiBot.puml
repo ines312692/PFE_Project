@@ -1,0 +1,71 @@
+@startuml seqAntiBot
+'=============================================================
+'  Diagramme de séquence — Collecte sur un site protégé (Sprint 5)
+'  Analyse préalable, proxy, stealth, comportement humain, captcha
+'=============================================================
+skinparam DefaultFontSize 18
+skinparam ClassFontSize 18
+skinparam ClassAttributeFontSize 16
+scale 1.5
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam sequence {
+    ArrowColor #2E75B6
+    LifeLineBorderColor #2E75B6
+    ParticipantBorderColor #2E75B6
+    ParticipantBackgroundColor #F8FBFF
+    ActorBorderColor #2E75B6
+}
+
+actor "Utilisateur" as User
+participant "SiteProbeService" as Probe
+participant "ScrapeEngine" as Engine
+participant "ProxyPoolService" as Pool
+participant "Navigateur furtif\n(PlaywrightBrowser)" as Browser
+participant "CaptchaHandler" as Captcha
+participant "Site cible" as Site
+
+User -> Probe : Analyse le site cible
+activate Probe
+Probe -> Site : 1 : sonde (protections, JS, défi)
+Site --> Probe : 2 : réponse
+Probe --> User : 3 : protections + score de difficulté
+deactivate Probe
+
+User -> Engine : 4 : lance la collecte
+activate Engine
+
+Engine -> Pool : 5 : sélectionne un proxy (stratégie de rotation)
+activate Pool
+Pool --> Engine : 6 : proxy sain et non « grillé »
+deactivate Pool
+
+Engine -> Browser : 7 : ouvre la page (mode furtif + proxy)
+activate Browser
+Browser -> Browser : 8 : masque marqueurs + harmonise empreinte
+Browser -> Site : 9 : requête (comportement humain simulé)
+activate Site
+Site --> Browser : 10 : contenu de la page
+deactivate Site
+
+alt défi de vérification détecté
+    Browser -> Captcha : 11 : résous le défi
+    activate Captcha
+    alt résolution automatique réussie
+        Captcha --> Browser : 12 : token de résolution
+    else échec automatique
+        Captcha -> User : 13 : demande d'intervention humaine
+        User --> Captcha : 14 : résolution manuelle
+        Captcha --> Browser : 15 : token de résolution
+    end
+    deactivate Captcha
+    Browser -> Site : 16 : rejoue la requête avec token
+end
+
+Browser --> Engine : 17 : contenu collecté
+deactivate Browser
+
+Engine --> User : 18 : résultat de la collecte
+deactivate Engine
+
+@enduml

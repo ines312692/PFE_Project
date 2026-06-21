@@ -1,0 +1,167 @@
+@startuml classDiagramSprint1
+'=============================================================
+'  Diagramme de classes — Sprint 1
+'=============================================================
+
+skinparam dpi 150
+skinparam DefaultFontName "DejaVu Sans"
+skinparam DefaultFontSize 15
+skinparam ClassFontSize 17
+skinparam ClassFontStyle bold
+skinparam ClassAttributeFontSize 14
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam roundCorner 8
+
+skinparam class {
+    BackgroundColor #F8FBFF
+    BorderColor #2E75B6
+    BorderThickness 1.5
+    ArrowColor #2E75B6
+    FontColor #15406B
+}
+skinparam enum {
+    BackgroundColor #FFF6E9
+    BorderColor #C77F1A
+    FontColor #8A5A12
+    FontStyle bold
+}
+hide circle
+
+class User {
+    - idUser : UUID
+    - username : String
+    - email : String
+    - role : UserRole
+    - enabled : Boolean
+    - createdAt : Instant
+    --
+    + createUser(...) : User
+    + getAllUsers() : List<User>
+    + getUserById(id) : User
+    + updateUser(...) : User
+    + deleteUser(id) : void
+}
+
+class Project {
+    - idProject : UUID
+    - name : String
+    - description : String
+    - color : String
+    - status : ProjectStatus
+    - ownerId : UUID
+    - createdAt : Instant
+    --
+    + createProject(...) : Project
+    + search(...) : Page<Project>
+    + getStats(...) : ProjectStats
+    + updateProject(...) : Project
+    + archiveProject(...) : void
+    + deleteProject(...) : void
+    + addMember(...) : ProjectMember
+    + removeMember(...) : void
+    + updateMemberRole(...) : ProjectMember
+    + getProjectMembers(...) : List<ProjectMember>
+    + assertMemberAccess(...) : void
+    + assertMinimumRole(...) : void
+}
+
+class ProjectMember {
+    - idProjectMember : UUID
+    - projectId : UUID
+    - userId : UUID
+    - username : String
+    - email : String
+    - role : ProjectRole
+    - joinedAt : Instant
+}
+
+class ProjectInvitation {
+    - idProjectInvitation : UUID
+    - projectId : UUID
+    - projectName : String
+    - invitedBy : UUID
+    - invitedUser : UUID
+    - role : ProjectRole
+    - status : InvitationStatus
+    - createdAt : Instant
+    - expiresAt : Instant
+    --
+    + send(...) : ProjectInvitation
+    + accept(...) : ProjectInvitation
+    + decline(...) : ProjectInvitation
+    + getPendingForUser(...) : List
+    + getPendingForProject(...) : List
+}
+
+class Notification {
+    - idNotification : UUID
+    - userId : UUID
+    - jobId : UUID
+    - type : NotificationType
+    - title : String
+    - message : String
+    - read : boolean
+    - createdAt : Instant
+    --
+    + notify(...) : void
+    + getUserNotifications(...) : List
+    + getUnreadCount(...) : long
+    + markAsRead(...) : void
+    + markAllAsRead(...) : void
+    + createAndBroadcast(...) : void
+}
+
+enum UserRole {
+    ADMIN
+    OPERATOR
+    READER
+}
+enum ProjectStatus {
+    ACTIVE
+    ARCHIVED
+}
+enum ProjectRole {
+    OWNER
+    MEMBER
+    VIEWER
+}
+enum InvitationStatus {
+    PENDING
+    ACCEPTED
+    DECLINED
+    EXPIRED
+}
+enum NotificationType {
+    JOB_COMPLETED
+    JOB_FAILED
+    PROJECT_INVITATION
+    CAPTCHA_INTERVENTION_REQUIRED
+}
+
+' ===== Associations =====
+User "1" -- "0..*" ProjectMember
+Project "1" -- "0..*" ProjectMember
+Project "1" -- "0..*" ProjectInvitation
+User "1" -- "0..*" ProjectInvitation
+User "1" -- "0..*" Notification
+
+' ===== Enums alignées en bas =====
+User -[hidden]down- UserRole
+UserRole -[hidden]right- ProjectStatus
+ProjectStatus -[hidden]right- ProjectRole
+ProjectRole -[hidden]right- InvitationStatus
+InvitationStatus -[hidden]right- NotificationType
+
+User ..> UserRole
+Project ..> ProjectStatus
+ProjectMember ..> ProjectRole
+ProjectInvitation ..> ProjectRole
+ProjectInvitation ..> InvitationStatus
+Notification ..> NotificationType
+
+@enduml

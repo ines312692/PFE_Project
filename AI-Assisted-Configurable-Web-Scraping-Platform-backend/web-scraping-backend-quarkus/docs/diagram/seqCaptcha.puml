@@ -1,0 +1,103 @@
+@startuml seqCaptchaResolution
+!pragma teoz true
+
+skinparam dpi 100
+skinparam DefaultFontName "DejaVu Sans"
+skinparam DefaultFontSize 15
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 200
+skinparam ParticipantPadding 40
+skinparam BoxPadding 20
+
+skinparam sequence {
+    ParticipantBackgroundColor #2E75B6
+    ParticipantBorderColor #15406B
+    ParticipantFontColor white
+    ParticipantFontStyle bold
+    ParticipantFontSize 15
+
+    ActorBackgroundColor #2E75B6
+    ActorBorderColor #15406B
+    ActorFontColor black
+    ActorFontStyle bold
+    ActorFontSize 15
+
+    LifeLineBorderColor #2E75B6
+    LifeLineBackgroundColor #D6E4FF
+
+    ArrowColor #15406B
+    ArrowFontColor black
+    ArrowFontSize 13
+
+    GroupBorderColor #15406B
+    GroupBackgroundColor #EAF2FB
+    GroupHeaderFontColor black
+    GroupHeaderFontStyle bold
+    GroupHeaderFontSize 14
+    GroupFontColor black
+}
+
+actor "Utilisateur" as U
+participant "Orchestrateur\nde résolution" as H
+participant "Détecteurs\n(structure / image / vision)" as D
+participant "Cache de\nréponses" as C
+participant "Solveur dédié\n(par type)" as S
+participant "Pilote visuel\n(IA)" as P
+participant "Intervention\nhumaine" as HI
+
+H -> D : Analyser la page
+D --> H : Type de défi détecté (ou aucun)
+
+alt Aucun défi
+    H --> U : Poursuite normale de la collecte
+else Défi détecté
+
+    group Réutilisation
+        H -> C : Réponse déjà connue ?
+        alt Réponse en cache valide
+            C --> H : Réponse mémorisée
+            H -> H : Réinjecter la réponse
+            H --> U : Défi franchi (cache)
+        else Pas de réponse réutilisable
+            C --> H : Aucune
+
+            group Solveur dédié
+                H -> S : Résoudre selon le type
+                alt Succès
+                    S --> H : Réponse valide
+                    H -> C : Mémoriser la réponse
+                    H --> U : Défi franchi (solveur dédié)
+                else Échec
+
+                    group Pilote visuel
+                        H -> P : Tenter la résolution guidée par l'IA
+                        loop Tant que non résolu (max N itérations)
+                            P -> P : Observer, décider et exécuter une action
+                        end
+                        alt Succès
+                            P --> H : Défi résolu
+                            H --> U : Défi franchi (pilote visuel)
+                        else Échec
+
+                            group Intervention humaine
+                                H -> HI : Demander une résolution manuelle
+                                HI -> U : Notifier + mettre le job en attente
+                                U -> HI : Résoudre le défi dans le navigateur
+                                alt Résolu à temps
+                                    HI --> H : Défi levé
+                                    H --> U : Reprise automatique de la collecte
+                                else Délai dépassé
+                                    HI --> H : Échec
+                                    H --> U : Collecte interrompue
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+@enduml

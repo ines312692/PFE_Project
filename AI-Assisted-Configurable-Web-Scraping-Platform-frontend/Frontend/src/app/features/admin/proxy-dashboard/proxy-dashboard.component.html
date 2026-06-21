@@ -1,0 +1,437 @@
+<div class="dash" [class.dash--loading]="loading() && !data()">
+  <div class="dash__head">
+    <div class="tpl__header-left">
+      <div class="tpl__eyebrow">
+        <span class="tpl__eyebrow-dot"></span>
+        Admin Panel · Proxy Pool
+      </div>
+      <h1 class="tpl__title">Dashboard</h1>
+      <p class="jobs-header__desc">
+        Pool health, distribution and anti-bot coverage at a glance
+      </p>
+    </div>
+    <div class="dash__head-right">
+      @if (data()?.lastRefreshAt) {
+        <div class="dash__clock">
+          {{ relativeTime(data()!.lastRefreshAt!) }}
+          <span>· last refresh</span>
+        </div>
+      }
+      <button class="dash__cta dash__cta--ghost" (click)="goToList()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        View Pool
+      </button>
+      <button class="dash__cta" [disabled]="refreshing()" (click)="refresh()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.8" [class.spinning]="refreshing()">
+          <polyline points="23 4 23 10 17 10"/>
+          <polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  @if (data(); as d) {
+    <div class="stats-grid">
+      <div class="stat ">
+        <div class="stat__head">
+          <span class="stat__label">Total Proxies</span>
+          <svg class="stat__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+          </svg>
+        </div>
+        <span class="stat__value">{{ d.total }}</span>
+        <div class="stat__delta">
+          <span class="stat__chip stat__chip--ok">{{ d.active }} active</span>
+          @if (d.blacklisted > 0) {
+            <span class="stat__chip stat__chip--err">{{ d.blacklisted }} blocked</span>
+          }
+        </div>
+      </div>
+
+      <!-- Success Rate gauge -->
+      <div class="stat stat--gauge">
+        <div class="stat__head">
+          <span class="stat__label">Success Rate</span>
+        </div>
+        <div class="gauge">
+          <svg viewBox="0 0 120 120" class="gauge__svg">
+            <circle cx="60" cy="60" r="48" fill="none" class="gauge__track" stroke-width="9"/>
+            <circle cx="60" cy="60" r="48" fill="none"
+                    [class]="'gauge__ring ' + healthGaugeClass()"
+                    stroke-width="9" stroke-linecap="round"
+                    [attr.stroke-dasharray]="((successPct() ?? 0) * 301.6 / 100) + ' 301.6'"
+                    transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="gauge__center">
+            @if (successPct() != null) {
+              <span class="gauge__num">{{ successPct() }}<em>%</em></span>
+            } @else {
+              <span class="gauge__num gauge__num--muted">—</span>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="stat" [class.stat--live]="(d.avgLatencyMs ?? 0) > 0 && (d.avgLatencyMs ?? 9999) < 500">
+        <div class="stat__head">
+          <span class="stat__label">Avg Latency</span>
+          @if ((d.avgLatencyMs ?? 9999) < 500) {
+            <span class="stat__pulse"></span>
+          }
+        </div>
+        @if (d.avgLatencyMs != null) {
+          <span class="stat__value">
+            {{ d.avgLatencyMs | number:'1.0-0' }}<em class="stat__unit">ms</em>
+          </span>
+        } @else {
+          <span class="stat__value stat__value--muted">—</span>
+        }
+        <span class="stat__sub">Active proxies only</span>
+      </div>
+      <div class="stat stat--gauge">
+        <div class="stat__head">
+          <span class="stat__label">Anti-Bot Coverage</span>
+        </div>
+        <div class="gauge">
+          <svg viewBox="0 0 120 120" class="gauge__svg">
+            <circle cx="60" cy="60" r="48" fill="none" class="gauge__track" stroke-width="9"/>
+            <circle cx="60" cy="60" r="48" fill="none"
+                    class="gauge__ring gauge__ring--success"
+                    stroke-width="9" stroke-linecap="round"
+                    [attr.stroke-dasharray]="(coveragePct() * 301.6 / 100) + ' 301.6'"
+                    transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="gauge__center">
+            <span class="gauge__num">{{ coveragePct() }}<em>%</em></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pool Health -->
+      <div class="stat">
+        <div class="stat__head">
+          <span class="stat__label">Pool Health</span>
+          <span class="stat__health-badge stat__health-badge--{{ poolHealthTier() }}">
+            {{ poolHealthLabel() }}
+          </span>
+        </div>
+        <span class="stat__value">{{ d.antiBotTestedCount }}</span>
+        <span class="stat__sub">{{ d.antiBotTestedCount }} / {{ d.total }} tested</span>
+      </div>
+
+    </div>
+    <div class="main-grid">
+      <div class="panel panel--chart">
+        <div class="panel__head">
+          <div class="panel__title-group">
+            <span class="panel__title">Latency Distribution</span>
+            <span class="panel__sub">Active proxies grouped by speed</span>
+          </div>
+          <div class="panel__meta">
+            <span class="panel__stat">{{ latencyTotal() }} total</span>
+          </div>
+        </div>
+
+        <div class="bar-chart">
+          @for (b of latencyBars(); track b.tone) {
+            <div class="bar-col" [class]="'bar-col--' + b.tone">
+              <div class="bar-col__track">
+                <div class="bar-col__fill"
+                     [style.height.%]="barH(b.count, maxLatencyCount())">
+                  <span class="bar-col__tip">
+                    {{ b.count }} ({{ b.pct | number:'1.0-0' }}%)
+                  </span>
+                </div>
+              </div>
+              <span class="bar-col__label">{{ b.label }}</span>
+              <span class="bar-col__count">{{ b.count }}</span>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="panel panel--donut">
+        <div class="panel__head">
+          <div class="panel__title-group">
+            <span class="panel__title">Status</span>
+            <span class="panel__sub">Pool composition</span>
+          </div>
+        </div>
+
+        @if (statusDonut().length === 0) {
+          <div class="panel__empty">No data</div>
+        } @else {
+          <div class="donut-block">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 42 42" class="donut-svg">
+                <circle cx="21" cy="21" r="16" fill="none"
+                        stroke="var(--color-border-light)" stroke-width="3.5"/>
+                @for (seg of statusDonut(); track seg.label) {
+                  <circle cx="21" cy="21" r="16" fill="none"
+                          [attr.stroke]="seg.color" stroke-width="3.5"
+                          [attr.stroke-dasharray]="seg.pct + ' ' + (100 - seg.pct)"
+                          [attr.stroke-dashoffset]="100 - seg.offset + 25"
+                          stroke-linecap="round" class="donut-seg"/>
+                }
+              </svg>
+              <div class="donut-center">
+                <span class="donut-center__val">{{ d.total }}</span>
+                <span class="donut-center__label">proxies</span>
+              </div>
+            </div>
+
+            <div class="donut-legend">
+              @for (s of statusDonut(); track s.label) {
+                <div class="donut-row">
+                  <span class="donut-row__dot" [style.background]="s.color"></span>
+                  <span class="donut-row__label">{{ s.label }}</span>
+                  <span class="donut-row__count">{{ s.count }}</span>
+                  <span class="donut-row__pct">{{ s.pct | number:'1.0-0' }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="panel panel--breakdown">
+        <div class="panel__head">
+          <div class="panel__title-group">
+            <span class="panel__title">Source Mix</span>
+            <span class="panel__sub">Origin &amp; protocol</span>
+          </div>
+        </div>
+
+        @if (sourceDonut().length === 0) {
+          <div class="panel__empty">No source data</div>
+        } @else {
+          <div class="donut-block donut-block--compact">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 42 42" class="donut-svg">
+                <circle cx="21" cy="21" r="16" fill="none"
+                        stroke="var(--color-border-light)" stroke-width="3.5"/>
+                @for (seg of sourceDonut(); track seg.label) {
+                  <circle cx="21" cy="21" r="16" fill="none"
+                          [attr.stroke]="seg.color" stroke-width="3.5"
+                          [attr.stroke-dasharray]="seg.pct + ' ' + (100 - seg.pct)"
+                          [attr.stroke-dashoffset]="100 - seg.offset + 25"
+                          stroke-linecap="round" class="donut-seg"/>
+                }
+              </svg>
+              <div class="donut-center">
+                <span class="donut-center__val">{{ sourceTotal() }}</span>
+                <span class="donut-center__label">sources</span>
+              </div>
+            </div>
+
+            <div class="donut-legend">
+              @for (s of sourceDonut(); track s.label) {
+                <div class="donut-row">
+                  <span class="donut-row__dot" [style.background]="s.color"></span>
+                  <span class="donut-row__label">{{ s.label }}</span>
+                  <span class="donut-row__count">{{ s.count }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          @if (protocolBars().length > 0) {
+            <div class="proto-strip">
+              @for (p of protocolBars(); track p.label) {
+                <div class="proto-pill proto-pill--{{ p.label.toLowerCase() }}">
+                  {{ p.label }}<strong>{{ p.count }}</strong>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+      <div class="panel panel--activity">
+        <div class="panel__head">
+          <div class="panel__title-group">
+            <span class="panel__title">Recent Health Checks</span>
+            <span class="panel__sub">Latest {{ d.recentHealthChecks.length }} checks across the pool</span>
+          </div>
+          <button class="panel__link" (click)="goToList()">
+            All proxies
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+
+        @if (d.recentHealthChecks.length === 0) {
+          <div class="panel__empty">No recent activity</div>
+        } @else {
+          <div class="feed feed--two-col">
+            @for (h of d.recentHealthChecks; track h.proxyId + h.checkedAt) {
+              <div class="feed__item">
+                <div class="feed__rail">
+                  <span class="feed__dot feed__dot--{{ h.success ? 'completed' : 'failed' }}"></span>
+                </div>
+                <div class="feed__body">
+                  <div class="feed__top">
+                    <span class="feed__name">
+                      {{ h.host }}@if (h.port) {
+                      <span class="feed__port">:{{ h.port }}</span>
+                    }
+                    </span>
+                    <span class="feed__when">{{ relativeTime(h.checkedAt) }}</span>
+                  </div>
+                  <div class="feed__meta">
+                    <span class="feed__pill feed__pill--{{ h.success ? 'completed' : 'failed' }}">
+                      <span class="feed__pill-dot"></span>
+                      {{ h.success ? 'Success' : 'Failed' }}
+                    </span>
+                    @if (h.latencyMs != null) {
+                      <span class="feed__type">{{ h.latencyMs }}ms</span>
+                    }
+                    @if (h.httpStatusCode) {
+                      <span class="feed__type">HTTP {{ h.httpStatusCode }}</span>
+                    }
+                    @if (h.errorMessage) {
+                      <span class="feed__url" [title]="h.errorMessage">{{ h.errorMessage }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <div class="sec-grid">
+      <div class="panel panel--countries">
+        <div class="panel__head">
+          <div class="panel__title-group">
+            <span class="panel__title">Geographic Distribution</span>
+            <span class="panel__sub">Proxy locations across the world</span>
+          </div>
+          @if (topCountriesArray().length > 0) {
+            <span class="panel__badge">{{ topCountriesArray().length }} countries</span>
+          }
+        </div>
+
+        @if (topCountriesArray().length === 0) {
+          <div class="panel__empty">No country data</div>
+        } @else {
+          <div class="geo-block">
+            <div class="geo-map">
+              <div class="geo-map__svg" #mapHost [innerHTML]="svgContent()"></div>
+              <div class="geo-legend">
+                <span class="geo-legend__label">Less</span>
+                <div class="geo-legend__scale">
+                  <span class="geo-legend__step" style="--step: 0.15"></span>
+                  <span class="geo-legend__step" style="--step: 0.35"></span>
+                  <span class="geo-legend__step" style="--step: 0.55"></span>
+                  <span class="geo-legend__step" style="--step: 0.75"></span>
+                  <span class="geo-legend__step" style="--step: 1"></span>
+                </div>
+                <span class="geo-legend__label">More</span>
+              </div>
+            </div>
+            <div class="geo-leaderboard">
+              <div class="geo-leaderboard__title">
+                Top {{ topCountriesArray().length > 5 ? 5 : topCountriesArray().length }}
+              </div>
+              @for (c of topCountriesArray().slice(0, 5); track c.code; let i = $index) {
+                <div class="country-row"
+                     [class.country-row--gold]="i === 0"
+                     [class.country-row--silver]="i === 1"
+                     [class.country-row--bronze]="i === 2"
+                     [class.country-row--hovered]="hoveredCountry()?.code === c.code"
+                     (mouseenter)="setHoveredCountry(c)"
+                     (mouseleave)="setHoveredCountry(null)">
+            <span class="country-row__rank">
+              @if (i < 3) {
+                <span class="country-row__medal">
+                  {{ i === 0 ? '★' : (i === 1 ? '◆' : '●') }}
+                </span>
+              } @else {
+                {{ i + 1 }}
+              }
+            </span>
+                  <span class="country-row__flag">{{ flagEmoji(c.code) }}</span>
+                  <div class="country-row__main">
+                    <div class="country-row__top">
+                      <span class="country-row__name">{{ countryName(c.code) }}</span>
+                      <span class="country-row__code">{{ c.code }}</span>
+                    </div>
+                    <div class="country-row__track">
+                      <div class="country-row__fill" [style.width.%]="c.pct"></div>
+                    </div>
+                  </div>
+                  <div class="country-row__stats">
+                    <span class="country-row__count">{{ c.count }}</span>
+                    <span class="country-row__pct">{{ c.pct | number:'1.0-0' }}%</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+      <div class="panel panel--matrix">
+        <div class="panel__head">
+          <div class="panel__title-group">
+            <span class="panel__title">Anti-Bot Matrix</span>
+            <span class="panel__sub">Outcomes per protection provider</span>
+          </div>
+          <span class="panel__badge">{{ d.antiBotTestedCount }} of {{ d.total }} tested</span>
+        </div>
+
+        @if (matrixRows().length === 0) {
+          <div class="panel__empty">
+            No proxy has been tested yet — run a check from the Pool page.
+          </div>
+        } @else {
+          <div class="matrix-wrap">
+            <table class="matrix">
+              <thead>
+              <tr>
+                <th class="matrix__provider-col">Provider</th>
+                @for (s of matrixStatuses; track s) {
+                  <th class="matrix__status-col matrix__status-col--{{ cellTone(s) }}">{{ s }}</th>
+                }
+                <th class="matrix__total-col">Σ</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (row of matrixRows(); track row.provider) {
+                  <tr>
+                    <td class="matrix__provider">
+                      <span class="matrix__provider-name">{{ formatProvider(row.provider) }}</span>
+                    </td>
+                    @for (cell of row.cells; track cell.status) {
+                      <td class="matrix__cell matrix__cell--{{ cellTone(cell.status) }}"
+                          [class.matrix__cell--zero]="cell.count === 0"
+                          [style.--cell-intensity]="cell.pct / 100">
+                        <span class="matrix__cell-value">{{ cell.count }}</span>
+                        @if (cell.count > 0) {
+                          <span class="matrix__cell-pct">{{ cell.pct | number:'1.0-0' }}%</span>
+                        }
+                      </td>
+                    }
+                    <td class="matrix__total">{{ row.total }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

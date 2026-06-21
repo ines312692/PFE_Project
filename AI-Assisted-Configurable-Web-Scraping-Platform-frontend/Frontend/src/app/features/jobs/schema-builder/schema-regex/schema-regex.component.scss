@@ -1,0 +1,72 @@
+.schema-regex {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.regex-field {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.regex-label {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  letter-spacing: .02em;
+}
+
+.regex-required {
+  color: var(--elyadata-pink);
+  margin-left: .2rem;
+}
+
+.regex-optional {
+  color: var(--color-text-faint);
+  font-weight: 400;
+  margin-left: .25rem;
+}
+
+.regex-input {
+  height: 40px;
+  padding: 0 .9rem;
+  width: 100%;
+  background: var(--color-bg-soft);
+  border: 1.5px solid var(--color-border-medium);
+  border-radius: 10px;
+  font-size: .88rem;
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+
+  &:focus {
+    border-color: var(--elyadata-blue);
+    box-shadow: 0 0 0 3px rgba(var(--elyadata-blue-rgb), .08);
+    background: var(--elyadata-white);
+  }
+
+  &::placeholder {
+    color: var(--color-dot-off);
+  }
+
+  &--mono {
+    font-family: 'Courier New', monospace;
+    font-size: .82rem;
+    color: var(--color-text-code);
+  }
+}
+
+.regex-hint {
+  font-size: .73rem;
+  color: var(--color-text-faint);
+  line-height: 1.5;
+
+  code {
+    font-family: 'Courier New', monospace;
+    background: var(--color-bg-chip);
+    padding: .1rem .35rem;
+    border-radius: 4px;
+    color: var(--color-text-code);
+  }
+}

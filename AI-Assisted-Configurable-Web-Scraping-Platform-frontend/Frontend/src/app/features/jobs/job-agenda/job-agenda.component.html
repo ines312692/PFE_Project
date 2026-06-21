@@ -1,0 +1,203 @@
+<div class="agenda">
+
+  <div class="topbar">
+    <button class="back-btn" (click)="goBack()" type="button">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back to Jobs
+    </button>
+  </div>
+
+  <!-- ── Header ── -->
+  <header class="agenda__head">
+    <div class="agenda__head-left">
+      <div class="agenda__eyebrow">
+        <span class="agenda__eyebrow-dot"></span>
+        Scraping Platform
+      </div>
+      <h1 class="agenda__title">Job Schedule</h1>
+      <p class="agenda__desc">Upcoming scheduled runs across your jobs</p>
+    </div>
+
+    <div class="seg" role="tablist">
+      <button
+        class="seg__btn"
+        [class.seg__btn--active]="view() === 'month'"
+        (click)="setView('month')"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Calendar
+      </button>
+      <button
+        class="seg__btn"
+        [class.seg__btn--active]="view() === 'list'"
+        (click)="setView('list')"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        List
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Toolbar : month navigation + counter ── -->
+  <div class="agenda__bar">
+    <div class="navmonth">
+      <button class="navmonth__arrow" (click)="prevMonth()" aria-label="Previous month">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <h3 class="navmonth__label">{{ monthLabel() }}</h3>
+      <button class="navmonth__arrow" (click)="nextMonth()" aria-label="Next month">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+      <span class="navmonth__sep"></span>
+      <button class="navmonth__today" (click)="today()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="9"/>
+          <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>
+        </svg>
+        Today
+      </button>
+    </div>
+
+    <span class="agenda__total">
+      <span class="agenda__total-dot"></span>
+      {{ runs().length }} run{{ runs().length === 1 ? '' : 's' }} scheduled
+    </span>
+  </div>
+
+  @if (loading()) {
+    <div class="agenda__loader"><span class="loader"></span></div>
+
+  } @else if (view() === 'month') {
+
+    <!-- ── Calendar view (calendar + side panel) ── -->
+    <div class="agenda__body" [class.agenda__body--split]="selectedDay()">
+
+      <div class="cal">
+        <div class="cal__weekdays">
+          @for (w of weekdays; track w) {
+            <div class="cal__weekday">{{ w }}</div>
+          }
+        </div>
+
+        <div class="cal__grid">
+          @for (cell of cells(); track cell.date.getTime(); let i = $index) {
+            <button
+              class="cal__cell"
+              [class.cal__cell--out]="!cell.inMonth"
+              [class.cal__cell--today]="cell.isToday"
+              [class.cal__cell--has]="cell.runs.length > 0"
+              [class.cal__cell--selected]="selectedDay()?.getTime() === cell.date.getTime()"
+              [disabled]="cell.runs.length === 0"
+              [style.animation-delay]="(i * 8) + 'ms'"
+              (click)="selectDay(cell)"
+            >
+              <span class="cal__daynum">{{ cell.date.getDate() }}</span>
+
+              @if (cell.runs.length > 0) {
+                <span class="cal__count">{{ cell.runs.length }}</span>
+
+                <div class="cal__runs">
+                  @for (r of cell.runs.slice(0, 2); track r.fireAt + r.jobId) {
+                    <span class="cal__run">
+                      <span class="cal__run-time">{{ r.fireAt | date:'HH:mm' }}</span>
+                      <span class="cal__run-name">{{ r.jobName }}</span>
+                    </span>
+                  }
+                  @if (cell.runs.length > 2) {
+                    <span class="cal__more">+{{ cell.runs.length - 2 }} more</span>
+                  }
+                </div>
+              }
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- ── Selected-day panel ── -->
+      @if (selectedDay()) {
+        <aside class="panel">
+          <div class="panel__head">
+            <div class="panel__head-text">
+              <span class="panel__eyebrow">Selected day</span>
+              <h3 class="panel__title">{{ selectedDay() | date:'EEEE, MMMM d' }}</h3>
+            </div>
+            <span class="panel__badge">{{ selectedRuns().length }}</span>
+            <button class="panel__close" (click)="selectedDay.set(null)" aria-label="Close panel">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <ul class="panel__list">
+            @for (r of selectedRuns(); track r.fireAt + r.jobId) {
+              <li class="row" (click)="openJob(r.jobId)">
+                <span class="row__time">{{ r.fireAt | date:'HH:mm' }}</span>
+                <span class="row__name">{{ r.jobName }}</span>
+                <svg class="row__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </li>
+            }
+          </ul>
+        </aside>
+      }
+    </div>
+
+  } @else {
+
+    <!-- ── List view ── -->
+    <div class="list">
+      @for (group of groupedRuns(); track group.key) {
+        <section class="list__group">
+          <header class="list__date">
+            <span class="list__date-dot"></span>
+            {{ group.date | date:'EEEE, MMMM d' }}
+            <span class="list__date-count">{{ group.items.length }}</span>
+          </header>
+          @for (r of group.items; track r.fireAt + r.jobId) {
+            <button class="row row--list" (click)="openJob(r.jobId)">
+              <span class="row__time">{{ r.fireAt | date:'HH:mm' }}</span>
+              <span class="row__name">{{ r.jobName }}</span>
+              <svg class="row__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          }
+        </section>
+      } @empty {
+        <div class="list__empty">
+          <div class="list__empty-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <h3>Nothing scheduled</h3>
+          <p>No scheduled runs in this period. Try a different month.</p>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,2199 @@
+<div class="docs-shell">
+  <header class="docs-header">
+    <div class="docs-header__left">
+      <a class="docs-brand" href="/">
+        <img [src]="theme.isDark() ? 'assets/ElyadataLogoWhite.svg' : 'assets/elyadata.svg'"
+             alt="Elyadata" class="docs-brand__logo"/>
+      </a>
+    </div>
+
+    <div class="docs-header__center">
+      <div class="docs-nav-tabs">
+        <a class="docs-nav-tab docs-nav-tab--active">Docs</a>
+        <a class="docs-nav-tab" href="#">API Reference</a>
+        <a class="docs-nav-tab" href="#">Changelog</a>
+      </div>
+    </div>
+
+    <div class="docs-header__right">
+      <div class="docs-search-wrap">
+        <svg class="docs-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="docs-search" type="text" placeholder="Search..." [value]="searchQuery()"
+               (input)="onSearch($event)"/>
+        <span class="docs-search-kbd">⌘K</span>
+      </div>
+      <a class="docs-header-btn docs-header-btn--ghost" href="https://github.com/yourusername/yourrepo" target="_blank"
+         rel="noopener noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+      </a>
+      <button class="docs-header-btn docs-header-btn--ghost docs-theme-toggle" (click)="toggleDarkMode()"
+              [title]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+        @if (!theme.isDark()) {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        } @else {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        }
+      </button>
+      <a class="docs-header-btn docs-header-btn--primary" href="/register">Get Started</a>
+    </div>
+  </header>
+
+  <div class="docs-body">
+    <aside class="docs-sidebar">
+      <div class="sidebar-scroll">
+        @for (section of filteredSections(); track section.title) {
+          <div class="sidebar-group">
+            <div class="sidebar-group__title">{{ section.title }}</div>
+            @for (page of section.pages; track page.id) {
+              <button class="sidebar-item" [class.sidebar-item--active]="activePage() === page.id"
+                      (click)="navigate(page.id)">
+                {{ page.label }}
+              </button>
+            }
+          </div>
+        }
+
+        @if (filteredSections().length === 0) {
+          <p class="sidebar-empty">No results for "{{ searchQuery() }}"</p>
+        }
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <article class="docs-article">
+
+        <!-- ════════════════ GETTING STARTED ════════════════ -->
+
+        @if (activePage() === 'introduction') {
+          <div class="doc-page-label">Introduction</div>
+          <h1 class="doc-h1">Welcome to ElyaScrape</h1>
+          <p class="doc-subtitle">AI-assisted web scraping platform: configurable jobs, anti-bot bypass, schema-driven
+            extraction, and multi-format export.</p>
+
+          <div class="doc-cta-banner">
+            <div class="doc-cta-banner__text">
+              <strong>Get started</strong> Create your first scraping job in under 5 minutes.
+            </div>
+            <a class="doc-cta-banner__btn" href="/register">Start now</a>
+          </div>
+
+          <p class="doc-p">ElyaScrape is a configurable, AI-assisted web scraping platform. Define targets, configure
+            extraction schemas, and let the platform handle rendering, anti-bot evasion, retries, and data cleaning
+            automatically.</p>
+
+          <h2 class="doc-h2" id="what-is-elyascraper">What is ElyaScrape?</h2>
+          <p class="doc-p">ElyaScrape lets you create scraping <strong>jobs</strong> through a web interface without
+            writing code. Each job targets one or more URLs, defines what data to extract, and runs on a schedule or on
+            demand.</p>
+          <p class="doc-p">The platform automatically selects the right browser engine based on the target site's
+            protection level Playwright for standard sites, Selenium with stealth mode for Cloudflare-protected
+            ones.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>You never choose between Playwright and Selenium. The platform probes the target site and selects the
+              engine automatically before each run.
+            </div>
+          </div>
+
+          <h2 class="doc-h2" id="platform-overview">Platform overview</h2>
+
+          <div class="product-cards">
+            <a class="product-card" (click)="navigate('jobs')">
+              <div class="product-card__icon product-card__icon--blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="2" y="7" width="20" height="14" rx="2"/>
+                  <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                </svg>
+              </div>
+              <div class="product-card__body">
+                <h3>Jobs &amp; Pipelines</h3>
+                <p>The core unit of work. Define a target URL, extraction schema, browser settings, and schedule. Run on
+                  demand or via cron.</p>
+              </div>
+              <svg class="product-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+
+            <a class="product-card" (click)="navigate('extraction')">
+              <div class="product-card__icon product-card__icon--purple">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+              </div>
+              <div class="product-card__body">
+                <h3>Extraction Engine</h3>
+                <p>Four modes: CSS selectors, XPath, LLM-assisted, and regex. Configured per job via the visual schema
+                  builder.</p>
+              </div>
+              <svg class="product-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+
+            <a class="product-card" (click)="navigate('anti-bot')">
+              <div class="product-card__icon product-card__icon--pink">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <div class="product-card__body">
+                <h3>Anti-Bot &amp; Stealth</h3>
+                <p>Automatic engine selection, stealth scripts, random delay margins, fingerprint rotation, and
+                  Cloudflare bypass.</p>
+              </div>
+              <svg class="product-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+
+            <a class="product-card" (click)="navigate('export-etl')">
+              <div class="product-card__icon product-card__icon--green">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+              </div>
+              <div class="product-card__body">
+                <h3>Export &amp; ETL</h3>
+                <p>Push clean structured data to PostgreSQL, MongoDB, CSV/JSON/Parquet files, REST APIs, or webhooks in
+                  real time.</p>
+              </div>
+              <svg class="product-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+          </div>
+
+          <h2 class="doc-h2" id="extraction-modes">Extraction modes</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Description</th>
+                <th>Best for</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>CSS_SELECTOR</code></td>
+                <td>Extract fields via CSS selectors</td>
+                <td>Structured pages</td>
+              </tr>
+              <tr>
+                <td><code>XPATH</code></td>
+                <td>Extract fields via XPath expressions</td>
+                <td>Complex DOM paths</td>
+              </tr>
+              <tr>
+                <td><code>LLM</code></td>
+                <td>AI-assisted extraction via prompt</td>
+                <td>Unstructured content</td>
+              </tr>
+              <tr>
+                <td><code>REGEX</code></td>
+                <td>Pattern matching on raw HTML/text</td>
+                <td>Simple patterns</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @if (activePage() === 'quick-start') {
+          <div class="doc-page-label">Getting started</div>
+          <h1 class="doc-h1">Quick start</h1>
+          <p class="doc-subtitle">Get your first scraping job running in under 5 minutes.</p>
+
+          <div class="doc-steps">
+            <div class="doc-step">
+              <div class="doc-step__num">1</div>
+              <div class="doc-step__body">
+                <h3>Create an account</h3>
+                <p>Sign up at the registration page. No credit card required.</p>
+              </div>
+            </div>
+            <div class="doc-step">
+              <div class="doc-step__num">2</div>
+              <div class="doc-step__body">
+                <h3>Create a project</h3>
+                <p>Projects group related scraping jobs. Navigate to the dashboard and click "New Project".</p>
+              </div>
+            </div>
+            <div class="doc-step">
+              <div class="doc-step__num">3</div>
+              <div class="doc-step__body">
+                <h3>Configure a job</h3>
+                <p>Set your target URL, choose extraction mode, define your schema fields, and hit "Run".</p>
+              </div>
+            </div>
+            <div class="doc-step">
+              <div class="doc-step__num">4</div>
+              <div class="doc-step__body">
+                <h3>Validate with a dry run</h3>
+                <p>Run on a limited sample of pages to confirm your schema returns the right fields before launching the
+                  full job.</p>
+              </div>
+            </div>
+            <div class="doc-step">
+              <div class="doc-step__num">5</div>
+              <div class="doc-step__body">
+                <h3>Export your data</h3>
+                <p>Pick a format and a destination database, file, REST API, or webhook and the ETL pipeline delivers
+                  clean records automatically.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>In a hurry? Start from a sector template (e-commerce, listings, news) to skip schema configuration
+              entirely see the job templates library.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'authentication') {
+          <div class="doc-page-label">Getting started</div>
+          <h1 class="doc-h1">Authentication</h1>
+          <p class="doc-subtitle">ElyaScrape secures every request with JWT access tokens and refresh tokens. The web
+            client authenticates through a Backend-for-Frontend (BFF) token layer.</p>
+
+          <h2 class="doc-h2" id="sign-in">Signing in</h2>
+          <p class="doc-p">New users register from the <code>/register</code> page; existing users sign in from <code>/login</code>.
+            After a successful login the backend issues a short-lived <strong>access token</strong> and a longer-lived
+            <strong>refresh token</strong>. The frontend never stores raw tokens in JavaScript memory the BFF layer
+            manages them through secure cookies.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>The auth interceptor automatically attaches the session and silently refreshes the access token when it
+              expires you don't need to handle token renewal manually.
+            </div>
+          </div>
+
+          <h2 class="doc-h2" id="oauth">OAuth sign-in</h2>
+          <p class="doc-p">In addition to email and password, ElyaScrape supports OAuth2 providers. The provider
+            redirects back to the <code>/callback</code> route, which exchanges the authorization code for a session
+            through the BFF token service.</p>
+
+          <h2 class="doc-h2" id="roles">Roles &amp; access</h2>
+          <p class="doc-p">Access is controlled with role-based permissions (RBAC). Routes are protected by the auth
+            guard and the role guard, so each user only sees the features their role allows.</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Role</th>
+                <th>Can do</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>ADMIN</code></td>
+                <td>Full access manage users, proxies, audit logs, and all projects.</td>
+              </tr>
+              <tr>
+                <td><code>OPERATOR</code></td>
+                <td>Create and run jobs, configure schemas, manage their own projects.</td>
+              </tr>
+              <tr>
+                <td><code>VIEWER</code></td>
+                <td>Read-only access to dashboards, results, and job history.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="project-roles">Project-level roles</h2>
+          <p class="doc-p">On top of the global account role, each project carries its own membership. When you invite
+            someone to a project, you assign them a project role that scopes what they can do <em>inside that project
+              only</em>, independent of their account-wide role.</p>
+
+          <div class="doc-callout doc-callout--warn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>Role names above reflect the <code>UserRole</code> and <code>ProjectRole</code> enums. Adjust the labels
+              here if your enum values differ.
+            </div>
+          </div>
+        }
+
+        <!-- ════════════════ CORE CONCEPTS ════════════════ -->
+
+        @if (activePage() === 'jobs') {
+          <div class="doc-page-label">Core concepts</div>
+          <h1 class="doc-h1">Jobs &amp; pipelines</h1>
+          <p class="doc-subtitle">A job is the core unit of work in ElyaScrape. It bundles a target, an extraction
+            schema, browser settings, and a schedule into one runnable configuration.</p>
+
+          <h2 class="doc-h2" id="job-anatomy">Anatomy of a job</h2>
+          <p class="doc-p">Every job belongs to a <strong>project</strong> and is built from a few configuration blocks.
+            You set them up once in the job creation wizard, then reuse or duplicate the job as needed.</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Block</th>
+                <th>Purpose</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Target</td>
+                <td>The starting URL (or list of URLs) to scrape.</td>
+              </tr>
+              <tr>
+                <td>Extraction schema</td>
+                <td>The fields to extract and the mode used (CSS, XPath, LLM, regex).</td>
+              </tr>
+              <tr>
+                <td>Browser config</td>
+                <td>JS rendering, stealth mode, delays, timeouts, user agent.</td>
+              </tr>
+              <tr>
+                <td>Crawler config</td>
+                <td>Crawl depth, page limits, URL include/exclude patterns, pagination.</td>
+              </tr>
+              <tr>
+                <td>Retry policy</td>
+                <td>How failed requests are retried before the job is marked failed.</td>
+              </tr>
+              <tr>
+                <td>Schedule</td>
+                <td>Manual, cron-based, or webhook-triggered execution.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="job-lifecycle">Job lifecycle</h2>
+          <p class="doc-p">A job moves through a controlled set of states. Every transition is recorded so you can audit
+            exactly when a job ran and what happened.</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>State</th>
+                <th>Meaning</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>CREATED</code></td>
+                <td>Configured but not yet scheduled or run.</td>
+              </tr>
+              <tr>
+                <td><code>QUEUED</code></td>
+                <td>Waiting for an available worker.</td>
+              </tr>
+              <tr>
+                <td><code>RUNNING</code></td>
+                <td>Actively scraping pages.</td>
+              </tr>
+              <tr>
+                <td><code>PAUSED</code></td>
+                <td>Temporarily suspended; can be resumed.</td>
+              </tr>
+              <tr>
+                <td><code>WAITING_FOR_HUMAN</code></td>
+                <td>Paused on a CAPTCHA or challenge that needs manual intervention.</td>
+              </tr>
+              <tr>
+                <td><code>COMPLETED</code></td>
+                <td>Finished successfully results are available.</td>
+              </tr>
+              <tr>
+                <td><code>FAILED</code></td>
+                <td>Stopped after exhausting the retry policy.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="job-priority">Priority</h2>
+          <p class="doc-p">Each job carries a priority (<code>LOW</code>, <code>NORMAL</code>, <code>HIGH</code>) that
+            determines how it is ordered in the worker queue when several jobs are waiting at once.</p>
+
+          <h2 class="doc-h2" id="dry-run">Dry-run / test mode</h2>
+          <p class="doc-p">Before committing to a full run, you can execute a job against a limited sample of pages. The
+            dry run applies your full extraction schema and returns a preview, so you can confirm the configuration is
+            correct without spending a full crawl budget.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Use templates to skip configuration. Saving a job as a template lets you spin up new jobs for similar
+              sites in seconds see the job templates library.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'job-types') {
+          <div class="doc-page-label">Core concepts</div>
+          <h1 class="doc-h1">Scraper vs Crawler</h1>
+          <p class="doc-subtitle">ElyaScrape supports two job types. The right choice depends on whether you already
+            know the URLs you want, or you need the platform to discover them for you.</p>
+
+          <div class="doc-compare">
+            <div class="doc-compare__card">
+              <div class="doc-compare__label doc-compare__label--blue">Scraper</div>
+              <p>Targets a known URL or an explicit list of URLs. The platform fetches each page, applies your
+                extraction schema, and returns structured data. No link discovery best when you know exactly what to
+                extract.</p>
+            </div>
+            <div class="doc-compare__card">
+              <div class="doc-compare__label doc-compare__label--pink">Crawler</div>
+              <p>Starts from a seed URL and follows internal links using a URL frontier. It handles pagination, depth
+                limits, and <code>include</code>/<code>exclude</code> filters automatically best for collecting many
+                pages from one site.</p>
+            </div>
+          </div>
+
+          <h2 class="doc-h2" id="when-scraper">When to use a Scraper</h2>
+          <p class="doc-p">Choose a Scraper job when you have a fixed set of pages product detail pages, a list of
+            article URLs, or a single dashboard. Extraction runs once per URL with no navigation overhead.</p>
+
+          <h2 class="doc-h2" id="when-crawler">When to use a Crawler</h2>
+          <p class="doc-p">Choose a Crawler job when the pages you want are not known in advance. The crawler discovers
+            links from the seed page, deduplicates URLs, respects <code>robots.txt</code>, and walks paginations
+            (numbered, infinite scroll, or "load more").</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Both job types share the same extraction schema, browser config, and ETL pipeline only the navigation
+              behaviour differs.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'extraction') {
+          <div class="doc-page-label">Core concepts</div>
+          <h1 class="doc-h1">Extraction modes</h1>
+          <p class="doc-subtitle">ElyaScrape offers four extraction modes. You pick one per schema in the visual schema
+            builder, and you can combine approaches within a single job.</p>
+
+          <h2 class="doc-h2" id="four-modes">The four modes</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Mode</th>
+                <th>How it works</th>
+                <th>Best for</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>CSS_SELECTOR</code></td>
+                <td>Maps each field to a CSS selector.</td>
+                <td>Well-structured pages</td>
+              </tr>
+              <tr>
+                <td><code>XPATH</code></td>
+                <td>Maps each field to an XPath expression.</td>
+                <td>Deep or irregular DOM paths</td>
+              </tr>
+              <tr>
+                <td><code>LLM</code></td>
+                <td>You describe the data in plain language; an LLM returns structured JSON.</td>
+                <td>Unstructured or variable markup</td>
+              </tr>
+              <tr>
+                <td><code>REGEX</code></td>
+                <td>Pattern matching applied to the raw HTML or text.</td>
+                <td>Simple, repetitive patterns</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="picking-a-mode">Picking a mode</h2>
+          <p class="doc-p">Use <strong>CSS or XPath</strong> when the page has a stable structure and you want fast,
+            deterministic extraction. Switch to <strong>LLM</strong> mode when the layout varies from page to page or
+            there are no reliable selectors. <strong>Regex</strong> is a lightweight option for values embedded in raw
+            text.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>When a CSS or XPath selector breaks after a site layout change, the AI selector healer detects the
+              rupture and proposes a corrected selector automatically.
+            </div>
+          </div>
+
+          <h2 class="doc-h2" id="schema-builder">The schema builder</h2>
+          <p class="doc-p">All modes are configured through the visual schema builder, which provides a dedicated panel
+            per mode a fields editor for CSS/XPath, a regex editor, and a prompt-driven panel for LLM extraction with a
+            built-in prompt assistant.</p>
+        }
+
+        @if (activePage() === 'browser-engine') {
+          <div class="doc-page-label">Core concepts</div>
+          <h1 class="doc-h1">Browser engine</h1>
+          <p class="doc-subtitle">ElyaScrape uses two browser engines internally Playwright and Selenium. The selection
+            is automatic and transparent.</p>
+
+          <h2 class="doc-h2" id="auto-engine">Automatic engine selection</h2>
+          <p class="doc-p">Before each job run, the platform probes the target URL and detects anti-bot signals:</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Detected signal</th>
+                <th>Engine</th>
+                <th>Stealth</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>None</td>
+                <td>Playwright</td>
+                <td>User setting</td>
+              </tr>
+              <tr>
+                <td><code>CLOUDFLARE</code></td>
+                <td>Selenium</td>
+                <td><span class="doc-badge doc-badge--pink">Forced ON</span></td>
+              </tr>
+              <tr>
+                <td><code>DATADOME</code></td>
+                <td>Selenium</td>
+                <td><span class="doc-badge doc-badge--pink">Forced ON</span></td>
+              </tr>
+              <tr>
+                <td><code>AKAMAI</code></td>
+                <td>Selenium</td>
+                <td><span class="doc-badge doc-badge--pink">Forced ON</span></td>
+              </tr>
+              <tr>
+                <td><code>LIKELY_BLOCKED</code></td>
+                <td>Selenium</td>
+                <td><span class="doc-badge doc-badge--pink">Forced ON</span></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="doc-callout doc-callout--warn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>When Selenium is auto-selected, stealth mode is <strong>always forced ON</strong> regardless of user
+              configuration. Scraping Cloudflare without stealth would fail systematically.
+            </div>
+          </div>
+
+          <h2 class="doc-h2" id="js-vs-stealth">JS Rendering vs Stealth Mode</h2>
+          <p class="doc-p">These two toggles solve different problems:</p>
+
+          <div class="doc-compare">
+            <div class="doc-compare__card">
+              <div class="doc-compare__label doc-compare__label--blue">JS Rendering</div>
+              <p>Launches a real browser to execute JavaScript. Required for SPAs (React, Angular, Vue) where content is
+                rendered client-side. Without it, the platform fetches raw HTML fast but incomplete for dynamic
+                pages.</p>
+            </div>
+            <div class="doc-compare__card">
+              <div class="doc-compare__label doc-compare__label--pink">Stealth Mode</div>
+              <p>Injects scripts that hide browser automation signals: masks <code>navigator.webdriver</code>,
+                randomises canvas fingerprint, injects fake plugins. Prevents detection even when JS Rendering is
+                enabled.</p>
+            </div>
+          </div>
+
+          <h2 class="doc-h2" id="humanizer">Human behaviour simulation</h2>
+          <p class="doc-p">On top of stealth patches, the engine can mimic human interaction generated mouse paths,
+            variable scrolling, and typing rhythm so that behaviour-based detection systems see realistic activity
+            rather than instant, mechanical actions.</p>
+        }
+
+        <!-- ════════════════ CRAWLING & SITE ANALYSIS ════════════════ -->
+
+        @if (activePage() === 'site-analysis') {
+          <div class="doc-page-label">Crawling &amp; site analysis</div>
+          <h1 class="doc-h1">Site analysis</h1>
+          <p class="doc-subtitle">Before a job runs, ElyaScrape probes the target site to detect protections, estimate
+            difficulty, and recommend the right scraping strategy.</p>
+
+          <h2 class="doc-h2" id="site-probe">The site probe</h2>
+          <p class="doc-p">The site probe inspects the target URL and produces a diagnostic report. It detects which
+            anti-bot vendor is in front of the site, whether JavaScript rendering is required, how pagination behaves,
+            and how the DOM is structured all before a single page of data is scraped.</p>
+
+          <h2 class="doc-h2" id="detected-protections">Detected protections</h2>
+          <p class="doc-p">Dedicated detectors run against the response to identify the protection layer in place:</p>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Detector</th>
+                <th>Identifies</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>CLOUDFLARE</code></td>
+                <td>Cloudflare IUAM, Turnstile, WAF, JS challenges.</td>
+              </tr>
+              <tr>
+                <td><code>DATADOME</code></td>
+                <td>DataDome device-fingerprint protection.</td>
+              </tr>
+              <tr>
+                <td><code>AKAMAI</code></td>
+                <td>Akamai Bot Manager.</td>
+              </tr>
+              <tr>
+                <td><code>PERIMETERX</code></td>
+                <td>PerimeterX / HUMAN bot defence.</td>
+              </tr>
+              <tr>
+                <td><code>CAPTCHA</code></td>
+                <td>hCaptcha, reCAPTCHA, and similar challenge widgets.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="difficulty-score">Scraping difficulty score</h2>
+          <p class="doc-p">The probe combines several factors detected protections, required JS rendering, pagination
+            complexity, and DOM structure into a single difficulty score. The score is surfaced as an easy / medium /
+            hard rating so you know what to expect before committing resources.</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Factor</th>
+                <th>Effect on score</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Anti-bot protection</td>
+                <td>Strongest driver Cloudflare or DataDome push the score toward "hard".</td>
+              </tr>
+              <tr>
+                <td>JavaScript rendering</td>
+                <td>Client-rendered SPAs raise difficulty over static HTML.</td>
+              </tr>
+              <tr>
+                <td>Pagination</td>
+                <td>Infinite scroll and "load more" are harder than numbered pages.</td>
+              </tr>
+              <tr>
+                <td>DOM structure</td>
+                <td>Irregular or unstable markup increases difficulty.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="origin-ip">Origin IP discovery</h2>
+          <p class="doc-p">For sites hidden behind a CDN, the probe can look up historical DNS records to find a
+            candidate origin IP. Where validated, this lets the platform reach the origin server directly and sidestep
+            the edge protection layer.</p>
+
+          <div class="doc-callout doc-callout--warn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>The probe also reads <code>robots.txt</code>. If the target pages are disallowed, you'll see an alert
+              before the job starts see the Crawling page for how rules are enforced.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'crawling') {
+          <div class="doc-page-label">Crawling &amp; site analysis</div>
+          <h1 class="doc-h1">Crawling</h1>
+          <p class="doc-subtitle">A Crawler job discovers pages by following links from a seed URL, managing a URL
+            frontier, deduplicating links, and respecting site rules along the way.</p>
+
+          <h2 class="doc-h2" id="frontier">The URL frontier</h2>
+          <p class="doc-p">Crawling is driven by a <strong>URL frontier</strong> the queue of URLs still to visit. Each
+            discovered link becomes a crawl node carrying its depth and parent. The frontier feeds the pipeline one node
+            at a time, applying depth and page limits as it goes.</p>
+
+          <h2 class="doc-h2" id="link-discovery">Link discovery &amp; normalisation</h2>
+          <p class="doc-p">As each page is fetched, links are harvested, normalised to a canonical form, and filtered
+            against your include/exclude patterns. Normalisation prevents the same page from being visited twice under
+            slightly different URLs (trailing slashes, query order, fragments).</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Crawler control</th>
+                <th>Purpose</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Max pages</td>
+                <td>Hard cap on how many pages the crawl visits.</td>
+              </tr>
+              <tr>
+                <td>Max depth</td>
+                <td>How many link-hops from the seed the crawl is allowed to go.</td>
+              </tr>
+              <tr>
+                <td>Include patterns</td>
+                <td>Only URLs matching these patterns are followed.</td>
+              </tr>
+              <tr>
+                <td>Exclude patterns</td>
+                <td>URLs matching these are skipped entirely.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="seeding">Sitemap seeding &amp; file discovery</h2>
+          <p class="doc-p">The crawler can seed the frontier from a site's sitemap to reach pages faster, and can
+            discover linked files (documents, feeds) encountered during navigation.</p>
+
+          <h2 class="doc-h2" id="robots">robots.txt compliance</h2>
+          <p class="doc-p">A robots gate reads the site's <code>robots.txt</code> and, by default, skips disallowed
+            paths. Crawl-delay and rate guidance are honoured so the crawl stays polite toward the target server.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Pagination is handled as part of crawling but configured separately see the Pagination page for the
+              detection strategies.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'pagination') {
+          <div class="doc-page-label">Crawling &amp; site analysis</div>
+          <h1 class="doc-h1">Pagination</h1>
+          <p class="doc-subtitle">ElyaScrape detects and walks paginated listings automatically, whether they use
+            numbered pages, infinite scroll, or a "load more" button.</p>
+
+          <h2 class="doc-h2" id="strategies">Pagination strategies</h2>
+          <p class="doc-p">A registry of strategies is tried against the page; the one that matches drives navigation
+            through the result set.</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>Handles</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>NUMBERED</code></td>
+                <td>Classic page-number links (1, 2, 3 …).</td>
+              </tr>
+              <tr>
+                <td><code>NEXT_BUTTON</code></td>
+                <td>A "next" link or arrow advancing one page at a time.</td>
+              </tr>
+              <tr>
+                <td><code>LOAD_MORE</code></td>
+                <td>A button that appends more results in place.</td>
+              </tr>
+              <tr>
+                <td><code>INFINITE_SCROLL</code></td>
+                <td>Content that loads as the page is scrolled.</td>
+              </tr>
+              <tr>
+                <td><code>URL_PARAM</code></td>
+                <td>Page driven by a query parameter (e.g. <code>?page=2</code>).</td>
+              </tr>
+              <tr>
+                <td><code>AUTO</code></td>
+                <td>Let the platform detect the right strategy automatically.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="auto-detection">Automatic detection</h2>
+          <p class="doc-p">In <code>AUTO</code> mode, the platform samples the page markup and infers the pagination
+            type. When the structure is ambiguous, an LLM-assisted detector inspects the sample and proposes the most
+            likely strategy.</p>
+
+          <h2 class="doc-h2" id="spa">SPA hydration</h2>
+          <p class="doc-p">Single-page applications often load their list content after an initial hydration step. A
+            hydration analyzer waits for client-side rendering to settle before pagination is evaluated, so dynamically
+            injected items aren't missed.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Infinite scroll and "load more" require JS rendering to be enabled they depend on a real browser to
+              trigger the additional loads.
+            </div>
+          </div>
+        }
+
+        <!-- ════════════════ ANTI-BOT & STEALTH ════════════════ -->
+
+        @if (activePage() === 'anti-bot') {
+          <div class="doc-page-label">Anti-bot &amp; stealth</div>
+          <h1 class="doc-h1">Anti-bot &amp; stealth</h1>
+          <p class="doc-subtitle">Progressive anti-bot strategy that automatically escalates based on the site's
+            resistance level.</p>
+
+          <h2 class="doc-h2" id="delay-margin">Delay margin</h2>
+          <p class="doc-p">The <code>requestDelayMs</code> field is a <strong>margin</strong>, not a fixed delay. The
+            actual inter-request delay is randomised:</p>
+
+          <div class="doc-code">
+            <div class="doc-code__header">
+              <span class="doc-code__lang">Formula</span>
+              <button class="doc-code__copy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <pre class="doc-code__body">actual_delay = 500ms + random(0, requestDelayMs)
+
+Example: requestDelayMs = 2000
+&#8594; actual delay between 500ms and 2500ms per request</pre>
+          </div>
+          <p class="doc-p">This breaks the fixed-interval pattern that anti-bot systems use to detect automated
+            scraping.</p>
+
+          <h2 class="doc-h2" id="stealth-patches">Stealth patches applied</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Patch</th>
+                <th>What it does</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>navigator.webdriver</code></td>
+                <td>Set to <code>undefined</code> instead of <code>true</code></td>
+              </tr>
+              <tr>
+                <td>Canvas fingerprint</td>
+                <td>XOR applied to first pixel on every <code>toDataURL()</code> call</td>
+              </tr>
+              <tr>
+                <td>Plugins list</td>
+                <td>Fake Chrome PDF Plugin injected</td>
+              </tr>
+              <tr>
+                <td>Languages</td>
+                <td>Set to <code>['fr-FR', 'fr', 'en-US', 'en']</code></td>
+              </tr>
+              <tr>
+                <td>Launch args</td>
+                <td><code>--disable-blink-features=AutomationControlled</code></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="humanizer">Human behaviour simulation</h2>
+          <p class="doc-p">Beyond static fingerprint patches, the platform can simulate human interaction generated
+            mouse paths along bezier curves, natural scrolling, and variable typing rhythm. This defeats behavioural
+            detection that looks for instant, perfectly mechanical actions.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Stealth, proxies, and CAPTCHA solving are layered. The platform applies the lightest measure that works
+              and escalates only when a site resists.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'proxy') {
+          <div class="doc-page-label">Anti-bot &amp; stealth</div>
+          <h1 class="doc-h1">Proxy rotation</h1>
+          <p class="doc-subtitle">For sites that block by IP, ElyaScrape routes requests through a managed pool of
+            health-checked proxies, rotated by a configurable strategy.</p>
+
+          <h2 class="doc-h2" id="strategies">Rotation strategies</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>Behaviour</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>ROUND_ROBIN</code></td>
+                <td>Cycles through proxies in order.</td>
+              </tr>
+              <tr>
+                <td><code>RANDOM</code></td>
+                <td>Picks a proxy at random for each request.</td>
+              </tr>
+              <tr>
+                <td><code>FASTEST</code></td>
+                <td>Prefers the proxy with the lowest measured latency.</td>
+              </tr>
+              <tr>
+                <td><code>LEAST_USED</code></td>
+                <td>Spreads load by picking the least-used proxy.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="pool">The proxy pool</h2>
+          <p class="doc-p">Proxies are gathered from multiple sources and registered in a managed pool. Each proxy
+            carries metadata protocol, anonymity level, country, and current status that the rotation strategies use
+            when selecting one.</p>
+
+          <h2 class="doc-h2" id="health">Health checking</h2>
+          <p class="doc-p">A background health checker continuously tests proxies and records their outcome. Failing
+            proxies are taken out of rotation automatically, so jobs only run through endpoints that are currently
+            responsive.</p>
+
+          <h2 class="doc-h2" id="geo">Geo-targeting</h2>
+          <p class="doc-p">Proxies can be filtered by country to access geo-restricted content. A strict-geo option
+            ensures requests only go out through proxies in the requested region.</p>
+
+          <h2 class="doc-h2" id="antibot-status">Per-proxy anti-bot status</h2>
+          <p class="doc-p">The platform tracks how each proxy fares against specific protections such as Cloudflare and
+            DataDome, so it can prefer proxies that are known to pass a given site's defences.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>The proxy dashboard (admin) shows pool health, country distribution, and anti-bot pass rates at a
+              glance.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'captcha') {
+          <div class="doc-page-label">Anti-bot &amp; stealth</div>
+          <h1 class="doc-h1">CAPTCHA solving</h1>
+          <p class="doc-subtitle">When a site presents a challenge, ElyaScrape detects the CAPTCHA type and routes it to
+            a solver. Difficult cases can fall back to a human.</p>
+
+          <h2 class="doc-h2" id="supported-types">Supported challenge types</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>reCAPTCHA</td>
+                <td>v2 image grids and v3 score-based detection.</td>
+              </tr>
+              <tr>
+                <td>hCaptcha</td>
+                <td>Image selection and drag challenges.</td>
+              </tr>
+              <tr>
+                <td>Turnstile</td>
+                <td>Cloudflare's challenge widget.</td>
+              </tr>
+              <tr>
+                <td>FunCaptcha</td>
+                <td>Rotation-based challenges.</td>
+              </tr>
+              <tr>
+                <td>GeeTest</td>
+                <td>Slider and image-analysis challenges.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="solver-pipeline">The solver pipeline</h2>
+          <p class="doc-p">Detection runs first to recognise that a challenge is present and which family it belongs to.
+            The challenge is then handed to a solver registry, which selects an appropriate solver. Solved tokens are
+            cached and re-injected so the same challenge doesn't have to be solved twice in a session.</p>
+
+          <h2 class="doc-h2" id="solver-options">Solver options</h2>
+          <p class="doc-p">The architecture is plugin-based. Challenges can be solved by an external CAPTCHA service, by
+            an LLM-vision solver for image challenges, or by a mock solver in testing. New solvers can be added without
+            touching the orchestration layer.</p>
+
+          <h2 class="doc-h2" id="human-intervention">Human intervention</h2>
+          <p class="doc-p">When automated solving isn't possible, the job transitions to
+            <code>WAITING_FOR_HUMAN</code> and surfaces the challenge for manual completion. Once a human solves it, the
+            job resumes from where it paused.</p>
+
+          <div class="doc-callout doc-callout--warn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>Solving CAPTCHAs may have legal and terms-of-service implications. Use this feature responsibly and
+              review the target site's policy first.
+            </div>
+          </div>
+        }
+
+        <!-- ════════════════ CONFIGURATION ════════════════ -->
+
+        @if (activePage() === 'browser-config') {
+          <div class="doc-page-label">Configuration</div>
+          <h1 class="doc-h1">Browser &amp; network</h1>
+          <p class="doc-subtitle">Configure how the browser behaves during each scraping job timing, timeouts, and
+            anti-bot toggles.</p>
+
+          <h2 class="doc-h2" id="browser-fields">BrowserConfig fields</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>javascriptEnabled</code> <span class="doc-badge doc-badge--muted">optional</span></td>
+                <td>boolean</td>
+                <td><code>true</code></td>
+                <td>Launches a headless browser for JS rendering. Disable for static HTML pages to improve speed.</td>
+              </tr>
+              <tr>
+                <td><code>stealthMode</code> <span class="doc-badge doc-badge--muted">optional</span></td>
+                <td>boolean</td>
+                <td><code>false</code></td>
+                <td>Applies stealth patches to hide browser automation signals.</td>
+              </tr>
+              <tr>
+                <td><code>requestDelayMs</code> <span class="doc-badge doc-badge--muted">optional</span></td>
+                <td>integer</td>
+                <td><code>1000</code></td>
+                <td>Delay margin in ms. Actual delay is randomised between 500ms and (500 + value)ms.</td>
+              </tr>
+              <tr>
+                <td><code>timeoutMs</code> <span class="doc-badge doc-badge--muted">optional</span></td>
+                <td>integer</td>
+                <td><code>30000</code></td>
+                <td>Max time to wait for a page to load before marking the request as failed.</td>
+              </tr>
+              <tr>
+                <td><code>userAgent</code> <span class="doc-badge doc-badge--muted">optional</span></td>
+                <td>string</td>
+                <td><code>Chrome 124</code></td>
+                <td>Custom User-Agent string. Overrides the default Chrome UA.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="sessions">Sessions &amp; authenticated scraping</h2>
+          <p class="doc-p">For sites that require login, the platform can maintain an authenticated session reusing
+            cookies and tokens across requests so protected pages can be reached. Session state is persisted and can be
+            restored on later runs.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>When a protected site is also Cloudflare-guarded, the engine auto-switches to Selenium with stealth
+              forced on see the Browser engine page.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'retry-policy') {
+          <div class="doc-page-label">Configuration</div>
+          <h1 class="doc-h1">Retry policy</h1>
+          <p class="doc-subtitle">When a request fails, ElyaScrape retries it according to a configurable policy before
+            marking the job as failed.</p>
+
+          <h2 class="doc-h2" id="retry-fields">RetryPolicy fields</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>maxRetries</code></td>
+                <td>integer</td>
+                <td>Number of retry attempts after the first failure.</td>
+              </tr>
+              <tr>
+                <td><code>backoffMultiplier</code></td>
+                <td>number</td>
+                <td>Factor the delay is multiplied by on each successive attempt.</td>
+              </tr>
+              <tr>
+                <td><code>baseDelayMs</code></td>
+                <td>integer</td>
+                <td>Starting delay before the first retry.</td>
+              </tr>
+              <tr>
+                <td><code>jitterMs</code></td>
+                <td>integer</td>
+                <td>Random extra delay added to each retry to avoid synchronised retries.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="backoff">Exponential backoff</h2>
+          <p class="doc-p">Delays grow exponentially with each attempt, plus a random jitter:</p>
+
+          <div class="doc-code">
+            <div class="doc-code__header">
+              <span class="doc-code__lang">Formula</span>
+              <button class="doc-code__copy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <pre class="doc-code__body">delay(attempt) = baseDelayMs * (backoffMultiplier ^ attempt) + random(0, jitterMs)
+
+Example: baseDelayMs=1000, backoffMultiplier=2, jitterMs=500
+attempt 1 &#8594; 1000-1500ms
+attempt 2 &#8594; 2000-2500ms
+attempt 3 &#8594; 4000-4500ms</pre>
+          </div>
+
+          <h2 class="doc-h2" id="circuit-breaker">Circuit breaker</h2>
+          <p class="doc-p">On top of retries, a per-domain circuit breaker tracks the error rate. If a domain keeps
+            failing, the breaker opens and temporarily stops requests to that domain, then re-enables it progressively.
+            This protects both your job and the target server.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Field names above mirror the <code>RetryPolicy</code> model adjust them here if your implementation
+              uses different names.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'scheduling') {
+          <div class="doc-page-label">Configuration</div>
+          <h1 class="doc-h1">Scheduling</h1>
+          <p class="doc-subtitle">Jobs can run on demand, on a recurring schedule, or in response to an external
+            event.</p>
+
+          <h2 class="doc-h2" id="trigger-types">Trigger types</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Trigger</th>
+                <th>Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>MANUAL</code></td>
+                <td>You start the job yourself from the dashboard.</td>
+              </tr>
+              <tr>
+                <td><code>SCHEDULED</code></td>
+                <td>The job runs automatically on a cron expression.</td>
+              </tr>
+              <tr>
+                <td><code>WEBHOOK</code></td>
+                <td>An external event hits a webhook URL and triggers the job.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="cron">Cron expressions</h2>
+          <p class="doc-p">Scheduled jobs are managed by an internal Quartz-based scheduler. You can enter a cron
+            expression directly, or use the visual calendar for common recurrences.</p>
+
+          <div class="doc-code">
+            <div class="doc-code__header">
+              <span class="doc-code__lang">Cron examples</span>
+              <button class="doc-code__copy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <pre class="doc-code__body">0 0 * * *      every day at midnight
+0 */6 * * *    every 6 hours
+0 9 * * MON    every Monday at 09:00
+0 0 1 * *      first day of every month</pre>
+          </div>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Non-technical users don't need to write cron the visual planner lets you pick daily, weekly, or monthly
+              schedules with a calendar.
+            </div>
+          </div>
+        }
+
+        <!-- ════════════════ DATA PIPELINE ════════════════ -->
+
+        @if (activePage() === 'schemas') {
+          <div class="doc-page-label">Data pipeline</div>
+          <h1 class="doc-h1">Extraction schemas</h1>
+          <p class="doc-subtitle">A schema declares what data a job extracts. It is a list of typed fields, each bound
+            to a selector or described in natural language.</p>
+
+          <h2 class="doc-h2" id="schema-structure">Structure</h2>
+          <p class="doc-p">An <code>ExtractionSchema</code> has an extraction <strong>mode</strong> and a list of
+            <strong>fields</strong>. Each field has a name, a data type, and the rule used to locate its value.</p>
+
+          <div class="doc-code">
+            <div class="doc-code__header">
+              <span class="doc-code__lang">Example schema</span>
+              <button class="doc-code__copy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <pre class="doc-code__body">&#123;
+  "mode": "CSS_SELECTOR",
+  "fields": [
+    &#123; "name": "title",   "type": "STRING",  "selector": "h1.product-title", "required": true  &#125;,
+    &#123; "name": "price",   "type": "NUMBER",  "selector": "span.price",       "required": true  &#125;,
+    &#123; "name": "inStock", "type": "BOOLEAN", "selector": ".availability",    "required": false &#125;
+  ]
+&#125;</pre>
+          </div>
+
+          <h2 class="doc-h2" id="field-types">Field types</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>STRING</code></td>
+                <td>Plain text value.</td>
+              </tr>
+              <tr>
+                <td><code>NUMBER</code></td>
+                <td>Numeric value parsed and normalised.</td>
+              </tr>
+              <tr>
+                <td><code>BOOLEAN</code></td>
+                <td>True/false, derived from presence or text.</td>
+              </tr>
+              <tr>
+                <td><code>DATE</code></td>
+                <td>Date value, normalised to ISO 8601.</td>
+              </tr>
+              <tr>
+                <td><code>URL</code></td>
+                <td>Absolute or resolved link.</td>
+              </tr>
+              <tr>
+                <td><code>LIST</code></td>
+                <td>Repeated values matched by the same selector.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>The type list reflects the <code>SchemaFieldType</code> enum. Update this table to match the exact
+              values your enum defines.
+            </div>
+          </div>
+
+          <h2 class="doc-h2" id="presets">Schema presets</h2>
+          <p class="doc-p">For common use cases e-commerce, listings, news the schema builder ships ready-made presets
+            so you don't start from scratch.</p>
+
+          <h2 class="doc-h2" id="validation">Schema validation</h2>
+          <p class="doc-p">Before a schema is saved, a validator service checks it for consistency missing field names,
+            invalid selectors, type mismatches and surfaces issues so you can fix them up front rather than discovering
+            them mid-run.</p>
+        }
+
+        @if (activePage() === 'css-xpath') {
+          <div class="doc-page-label">Data pipeline</div>
+          <h1 class="doc-h1">CSS / XPath selectors</h1>
+          <p class="doc-subtitle">The developer-oriented extraction modes. Bind each schema field to a precise selector
+            with the integrated editor.</p>
+
+          <div class="doc-compare">
+            <div class="doc-compare__card">
+              <div class="doc-compare__label doc-compare__label--blue">CSS selectors</div>
+              <p>Concise and readable. Ideal for class- and id-based targeting, e.g. <code>div.product &gt;
+                span.price</code>. The fastest option for well-structured pages.</p>
+            </div>
+            <div class="doc-compare__card">
+              <div class="doc-compare__label doc-compare__label--pink">XPath</div>
+              <p>More expressive. Can navigate up the tree, match by text content, and reach nodes CSS can't, e.g.
+                <code>//div[&#64;class='item']//a/&#64;href</code>.</p>
+            </div>
+          </div>
+
+          <h2 class="doc-h2" id="examples">Selector examples</h2>
+          <div class="doc-code">
+            <div class="doc-code__header">
+              <span class="doc-code__lang">Selectors</span>
+              <button class="doc-code__copy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <pre class="doc-code__body">CSS    h1.title
+CSS    ul.results &gt; li a
+XPath  //h1[contains(&#64;class,'title')]
+XPath  //li[&#64;class='result']//a/&#64;href</pre>
+          </div>
+
+          <h2 class="doc-h2" id="healing">Selector auto-healing</h2>
+          <p class="doc-p">Sites change their layout, and selectors break. When that happens, the AI selector healer
+            compares the new DOM against the expected fields and suggests a corrected selector so the job keeps running
+            without manual edits see the dedicated Selector auto-healing page.</p>
+
+          <div class="doc-callout doc-callout--warn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>Prefer stable, semantic selectors (ids, data attributes) over deep positional paths they survive layout
+              changes far better.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'selector-healing') {
+          <div class="doc-page-label">Data pipeline</div>
+          <h1 class="doc-h1">Selector auto-healing</h1>
+          <p class="doc-subtitle">When a CSS or XPath selector stops matching after a site changes its layout, the
+            platform detects the break and proposes a corrected selector automatically.</p>
+
+          <h2 class="doc-h2" id="why">Why selectors break</h2>
+          <p class="doc-p">Selectors are tied to a page's structure. When a site is redesigned class names change,
+            elements move, wrappers are added a previously reliable selector can suddenly return nothing. Without
+            healing, the job would silently produce empty fields or fail outright.</p>
+
+          <h2 class="doc-h2" id="how">How healing works</h2>
+          <p class="doc-p">When an expected field comes back empty, the selector healer takes the current DOM and the
+            field's description and asks an LLM to locate the most likely replacement element. It returns a candidate
+            selector that maps back to the field you originally defined.</p>
+
+          <div class="doc-steps">
+            <div class="doc-step">
+              <div class="doc-step__num">1</div>
+              <div class="doc-step__body">
+                <h3>Detect the break</h3>
+                <p>A required field returns no value while the page loaded successfully.</p>
+              </div>
+            </div>
+            <div class="doc-step">
+              <div class="doc-step__num">2</div>
+              <div class="doc-step__body">
+                <h3>Analyse the DOM</h3>
+                <p>The healer samples the current markup and reasons about where the field's value now lives.</p>
+              </div>
+            </div>
+            <div class="doc-step">
+              <div class="doc-step__num">3</div>
+              <div class="doc-step__body">
+                <h3>Propose a fix</h3>
+                <p>A corrected selector is suggested so extraction can continue.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Healing is also surfaced by the site structure-change monitoring, which can alert you proactively when a
+              layout shift threatens your existing selectors.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'llm-extraction') {
+          <div class="doc-page-label">Data pipeline</div>
+          <h1 class="doc-h1">LLM extraction</h1>
+          <p class="doc-subtitle">Describe the data you want in plain language. A language model reads the page and
+            returns structured JSON no selectors required.</p>
+
+          <h2 class="doc-h2" id="how-it-works">How it works</h2>
+          <p class="doc-p">In <code>LLM</code> mode you write a short prompt such as "extract every product name and its
+            price". The platform samples the page HTML, sends it to the model, and parses the response back into your
+            schema fields. This works even on pages with irregular markup where CSS and XPath would be brittle.</p>
+
+          <div class="doc-code">
+            <div class="doc-code__header">
+              <span class="doc-code__lang">Prompt example</span>
+              <button class="doc-code__copy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <pre class="doc-code__body">Extract all job listings from this page.
+For each one return: job title, company, location, and salary.
+Return null for any field that is missing.</pre>
+          </div>
+
+          <h2 class="doc-h2" id="prompt-assistant">Prompt assistant</h2>
+          <p class="doc-p">The schema builder includes a prompt assistant that helps you refine your description,
+            suggests fields, and previews the structured output before you commit the schema.</p>
+
+          <h2 class="doc-h2" id="security">Prompt injection protection</h2>
+          <p class="doc-p">Because page content is fed to a model, malicious pages could try to hijack the prompt.
+            ElyaScrape runs a security guard that sanitises sampled HTML and blocks instruction-injection attempts
+            before the content reaches the model.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>LLM mode is the most flexible but also the slowest and most costly per page. For high-volume jobs on
+              stable sites, prefer CSS or XPath.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'data-cleaning') {
+          <div class="doc-page-label">Data pipeline</div>
+          <h1 class="doc-h1">Data cleaning</h1>
+          <p class="doc-subtitle">Raw extracted data is rarely clean. ElyaScrape runs it through a chain of
+            normalisation and validation steps before export.</p>
+
+          <h2 class="doc-h2" id="cleaning-steps">Cleaning &amp; normalisation steps</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Step</th>
+                <th>What it does</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Trim whitespace</td>
+                <td>Removes leading, trailing, and duplicate spaces.</td>
+              </tr>
+              <tr>
+                <td>HTML stripper</td>
+                <td>Strips residual HTML tags from text values.</td>
+              </tr>
+              <tr>
+                <td>Date normalizer</td>
+                <td>Converts dates to ISO 8601.</td>
+              </tr>
+              <tr>
+                <td>Price normalizer</td>
+                <td>Parses prices handling thousands separators, decimals, and currency symbols.</td>
+              </tr>
+              <tr>
+                <td>Enum normalizer</td>
+                <td>Maps raw values to canonical ones (e.g. "Red", "RD" &#8594; "Rouge").</td>
+              </tr>
+              <tr>
+                <td>Deduplicate</td>
+                <td>Removes duplicate records by a configurable key.</td>
+              </tr>
+              <tr>
+                <td>Missing value handler</td>
+                <td>Applies a strategy for empty fields: ignore, default, or flag for review.</td>
+              </tr>
+              <tr>
+                <td>Capitalize</td>
+                <td>Normalises text casing.</td>
+              </tr>
+              <tr>
+                <td>Validate fields</td>
+                <td>Checks each field against type, range, and format rules.</td>
+              </tr>
+              <tr>
+                <td>PII anonymization</td>
+                <td>Masks detected personal data for GDPR compliance.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="ai-steps">AI enrichment steps</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Step</th>
+                <th>What it does</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>AI enrichment</td>
+                <td>Adds derived fields and KPIs using an LLM.</td>
+              </tr>
+              <tr>
+                <td>Classification</td>
+                <td>Categorises records (product type, sector, language).</td>
+              </tr>
+              <tr>
+                <td>NER</td>
+                <td>Extracts named entities people, organisations, places, amounts.</td>
+              </tr>
+              <tr>
+                <td>Summarization</td>
+                <td>Generates short summaries of long text fields.</td>
+              </tr>
+              <tr>
+                <td>Anomaly detection</td>
+                <td>Flags outliers such as negative prices or future dates.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Each run produces a quality report completeness, consistency, and validation results so you can track
+              data quality over time.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'export-etl') {
+          <div class="doc-page-label">Data pipeline</div>
+          <h1 class="doc-h1">Export &amp; ETL</h1>
+          <p class="doc-subtitle">Chain transformation steps into a pipeline, then deliver clean data to the destination
+            of your choice.</p>
+
+          <h2 class="doc-h2" id="pipeline">The ETL pipeline</h2>
+          <p class="doc-p">An ETL pipeline is an ordered list of steps run after extraction. The pipeline runner
+            executes each step in sequence cleaning, normalisation, validation, AI enrichment and produces a
+            step-by-step report. New step types can be added through a plugin mechanism without touching the core.</p>
+
+          <h2 class="doc-h2" id="formats">Export formats</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Format</th>
+                <th>Use case</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>JSON</code></td>
+                <td>APIs and downstream processing.</td>
+              </tr>
+              <tr>
+                <td><code>CSV</code></td>
+                <td>Spreadsheets and quick review.</td>
+              </tr>
+              <tr>
+                <td><code>XML</code></td>
+                <td>Legacy system integration.</td>
+              </tr>
+              <tr>
+                <td><code>PARQUET</code></td>
+                <td>Analytics and large datasets.</td>
+              </tr>
+              <tr>
+                <td><code>EXCEL</code></td>
+                <td>Business reporting.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="destinations">Export destinations</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Destination</th>
+                <th>Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>POSTGRESQL</code></td>
+                <td>Relational storage for structured data.</td>
+              </tr>
+              <tr>
+                <td><code>MONGODB</code></td>
+                <td>Document storage for flexible schemas.</td>
+              </tr>
+              <tr>
+                <td><code>FILE</code></td>
+                <td>Downloadable file in any supported format.</td>
+              </tr>
+              <tr>
+                <td><code>REST_API</code></td>
+                <td>Pushes results to an external HTTP endpoint.</td>
+              </tr>
+              <tr>
+                <td><code>WEBHOOK</code></td>
+                <td>Notifies a subscribed URL when data is ready.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="versioning">Versioning &amp; rollback</h2>
+          <p class="doc-p">Every export is versioned. You can compare two versions of the same job's output to spot what
+            changed, and roll back to an earlier version if needed see the Data versioning page.</p>
+        }
+
+        @if (activePage() === 'data-versioning') {
+          <div class="doc-page-label">Data pipeline</div>
+          <h1 class="doc-h1">Data versioning</h1>
+          <p class="doc-subtitle">Every run's output is stored as a version, so you can track how a dataset evolves,
+            compare runs, and roll back when something goes wrong.</p>
+
+          <h2 class="doc-h2" id="why">Why version your data</h2>
+          <p class="doc-p">Scraped sites change. A run today may return different records than last week new products,
+            updated prices, removed listings. Versioning keeps a history of each run so changes are observable rather
+            than silently overwritten.</p>
+
+          <h2 class="doc-h2" id="what-stored">What a version captures</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Captured</th>
+                <th>Why it matters</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Run output</td>
+                <td>The full set of records produced by that run.</td>
+              </tr>
+              <tr>
+                <td>Timestamp</td>
+                <td>When the version was created, for chronological tracking.</td>
+              </tr>
+              <tr>
+                <td>Quality report</td>
+                <td>Completeness and consistency metrics attached to the version.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="doc-h2" id="diff">Comparing versions</h2>
+          <p class="doc-p">You can diff two versions of the same job's output to see exactly what changed which records
+            were added, removed, or modified. This is the foundation for change-monitoring use cases such as price
+            tracking or catalogue monitoring.</p>
+
+          <h2 class="doc-h2" id="rollback">Rollback</h2>
+          <p class="doc-p">If a run produces bad data after a site change broke a selector, for example you can roll
+            back to a previous version while you fix the configuration.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Version diffs pair naturally with notifications you can be alerted when a new version differs
+              significantly from the last.
+            </div>
+          </div>
+        }
+
+        <!-- ════════════════ MONITORING ════════════════ -->
+
+        @if (activePage() === 'monitoring') {
+          <div class="doc-page-label">Monitoring</div>
+          <h1 class="doc-h1">Dashboard &amp; logs</h1>
+          <p class="doc-subtitle">Track running, completed, and failed jobs in real time, with detailed logs and an
+            audit trail of every action.</p>
+
+          <h2 class="doc-h2" id="dashboard">Real-time dashboard</h2>
+          <p class="doc-p">The monitoring dashboard gives an overview of job activity what's running, what's finished,
+            and what failed along with key metrics such as pages scraped, success rate, and volume of data extracted.</p>
+
+          <h2 class="doc-h2" id="logs">Logs &amp; traceability</h2>
+          <p class="doc-p">Each run produces structured logs with severity levels (debug, info, warning, error). Logs
+            are correlated per job so you can trace exactly what happened on a given run and filter to the events that
+            matter.</p>
+
+          <h2 class="doc-h2" id="results">Results preview</h2>
+          <p class="doc-p">Extracted records can be previewed in a table with filtering, sorting, and search, so you can
+            sanity-check output without exporting first.</p>
+
+          <h2 class="doc-h2" id="audit">Audit trail</h2>
+          <p class="doc-p">Every significant user and system action is recorded in an audit log capturing who did what,
+            on which resource, and the outcome. Sensitive data in captured request bodies is masked before storage.</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Audit field</th>
+                <th>Meaning</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Action</td>
+                <td>The operation performed (create, update, delete, run …).</td>
+              </tr>
+              <tr>
+                <td>Resource</td>
+                <td>The entity acted upon (job, project, proxy, user …).</td>
+              </tr>
+              <tr>
+                <td>Outcome</td>
+                <td>Whether the action succeeded or failed.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Quality monitoring is tracked separately each run's quality report feeds a dedicated view of data
+              quality over time.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'notifications') {
+          <div class="doc-page-label">Monitoring</div>
+          <h1 class="doc-h1">Notifications</h1>
+          <p class="doc-subtitle">Stay informed about job outcomes and important events through real-time, in-app
+            notifications.</p>
+
+          <h2 class="doc-h2" id="how">How notifications work</h2>
+          <p class="doc-p">The platform pushes notifications to the client in real time over a server-sent events (SSE)
+            stream, so you see updates as they happen without refreshing. Notifications are also persisted, so you can
+            review what you missed.</p>
+
+          <h2 class="doc-h2" id="events">What triggers a notification</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Event</th>
+                <th>Example</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Job completed</td>
+                <td>A run finished and results are ready.</td>
+              </tr>
+              <tr>
+                <td>Job failed</td>
+                <td>A run stopped after exhausting retries.</td>
+              </tr>
+              <tr>
+                <td>Human intervention needed</td>
+                <td>A CAPTCHA or challenge is waiting for manual action.</td>
+              </tr>
+              <tr>
+                <td>Project invitation</td>
+                <td>You were invited to collaborate on a project.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Notification types mirror the <code>NotificationType</code> enum adjust this list to match the exact
+              events your implementation emits.
+            </div>
+          </div>
+        }
+
+        <!-- ════════════════ API REFERENCE ════════════════ -->
+
+        @if (activePage() === 'rest-api') {
+          <div class="doc-page-label">API reference</div>
+          <h1 class="doc-h1">REST API</h1>
+          <p class="doc-subtitle">Every action in the UI is backed by a REST endpoint. Authenticated requests return a
+            consistent response envelope.</p>
+
+          <h2 class="doc-h2" id="response-envelope">Response envelope</h2>
+          <p class="doc-p">All responses share the same <code>ApiResponse</code> structure a success flag, the payload,
+            optional pagination metadata, and an error block.</p>
+
+          <div class="doc-code">
+            <div class="doc-code__header">
+              <span class="doc-code__lang">Success response</span>
+              <button class="doc-code__copy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <pre class="doc-code__body">&#123;
+  "success": true,
+  "data": &#123; "id": "job_123", "status": "RUNNING" &#125;,
+  "meta":  &#123; "page": 0, "size": 20, "totalElements": 134 &#125;,
+  "error": null
+&#125;</pre>
+          </div>
+
+          <h2 class="doc-h2" id="pagination">Pagination</h2>
+          <p class="doc-p">List endpoints accept <code>page</code> and <code>size</code> query parameters and return a
+            <code>meta</code> block describing the current page, page size, and total element count.</p>
+
+          <h2 class="doc-h2" id="auth-header">Authentication</h2>
+          <p class="doc-p">Requests are authenticated through the session established at sign-in. See the <strong>Authentication</strong>
+            page for the token model.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>The envelope above reflects the <code>ApiResponse</code> and <code>PageMeta</code> classes. Fill in the
+              exact endpoint paths and request bodies once you finalise them.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'webhooks') {
+          <div class="doc-page-label">API reference</div>
+          <h1 class="doc-h1">Webhooks</h1>
+          <p class="doc-subtitle">Webhooks let ElyaScrape react to external events and notify other systems when
+            scraping data is ready.</p>
+
+          <h2 class="doc-h2" id="two-roles">Two roles</h2>
+          <div class="doc-compare">
+            <div class="doc-compare__card">
+              <div class="doc-compare__label doc-compare__label--blue">Inbound</div>
+              <p>An external system calls a webhook URL to trigger a job. Useful for event-driven scraping run a job
+                whenever an upstream change happens.</p>
+            </div>
+            <div class="doc-compare__card">
+              <div class="doc-compare__label doc-compare__label--pink">Outbound</div>
+              <p>ElyaScrape calls your endpoint when a job finishes, delivering the result or a status update as a JSON
+                payload.</p>
+            </div>
+          </div>
+
+          <h2 class="doc-h2" id="security">Signature verification</h2>
+          <p class="doc-p">Each webhook is issued credentials and every outbound delivery is signed. Your receiver
+            should verify the signature to confirm the payload genuinely came from ElyaScrape and was not tampered
+            with.</p>
+
+          <h2 class="doc-h2" id="delivery-status">Delivery status</h2>
+          <p class="doc-p">Outbound deliveries track a status so you can see whether a notification was sent, succeeded,
+            or failed and needs a retry.</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Status</th>
+                <th>Meaning</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><code>PENDING</code></td>
+                <td>Queued, not yet sent.</td>
+              </tr>
+              <tr>
+                <td><code>DELIVERED</code></td>
+                <td>Receiver responded successfully.</td>
+              </tr>
+              <tr>
+                <td><code>FAILED</code></td>
+                <td>Delivery failed after retries.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="doc-callout doc-callout--warn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>Status values mirror the <code>WebhookDeliveryStatus</code> enum adjust them to match your exact
+              definitions.
+            </div>
+          </div>
+        }
+
+        @if (activePage() === 'error-codes') {
+          <div class="doc-page-label">API reference</div>
+          <h1 class="doc-h1">Error codes</h1>
+          <p class="doc-subtitle">When a request fails, ElyaScrape returns a structured error so you can react
+            programmatically.</p>
+
+          <h2 class="doc-h2" id="error-shape">Error response shape</h2>
+          <div class="doc-code">
+            <div class="doc-code__header">
+              <span class="doc-code__lang">Error response</span>
+              <button class="doc-code__copy">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </button>
+            </div>
+            <pre class="doc-code__body">&#123;
+  "success": false,
+  "data": null,
+  "error": &#123;
+    "code": "JOB_NOT_FOUND",
+    "message": "No job found with the given id",
+    "subErrors": []
+  &#125;
+&#125;</pre>
+          </div>
+
+          <h2 class="doc-h2" id="error-categories">Error categories</h2>
+          <p class="doc-p">Errors fall into two families. <strong>Domain errors</strong> describe a business rule
+            violation (the request was understood but rejected). <strong>Infrastructure errors</strong> describe a
+            technical failure split into client-side <code>4xx</code> and server-side <code>5xx</code>.</p>
+
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+              <tr>
+                <th>Category</th>
+                <th>HTTP range</th>
+                <th>Meaning</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Domain error</td>
+                <td><code>400</code> / <code>409</code></td>
+                <td>Validation or business rule violation.</td>
+              </tr>
+              <tr>
+                <td>Infrastructure 4xx</td>
+                <td><code>401</code> / <code>403</code> / <code>404</code></td>
+                <td>Auth, permission, or missing resource.</td>
+              </tr>
+              <tr>
+                <td>Infrastructure 5xx</td>
+                <td><code>500</code> / <code>503</code></td>
+                <td>Unexpected failure or unavailable dependency.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>The <code>code</code> values come from your <code>DomainErrorType</code> enum. List the full set of
+              codes here once finalised so integrators can handle each case.
+            </div>
+          </div>
+        }
+
+        <!-- ── Fallback for any page without dedicated content ── -->
+        @if (!['introduction', 'quick-start', 'authentication', 'jobs', 'job-types', 'extraction', 'browser-engine', 'site-analysis', 'crawling', 'pagination', 'anti-bot', 'proxy', 'captcha', 'browser-config', 'retry-policy', 'scheduling', 'schemas', 'css-xpath', 'selector-healing', 'llm-extraction', 'data-cleaning', 'export-etl', 'data-versioning', 'monitoring', 'notifications', 'rest-api', 'webhooks', 'error-codes'].includes(activePage())) {
+          <div class="doc-page-label">{{ currentPage()?.section }}</div>
+          <h1 class="doc-h1">{{ currentPage()?.label }}</h1>
+          <p class="doc-subtitle">This page is being written. Check back soon.</p>
+
+          <div class="doc-callout doc-callout--info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>Documentation is updated continuously. Each completed feature gets its own page.</div>
+          </div>
+        }
+
+        <div class="doc-feedback">
+          <span class="doc-feedback__label">Was this page helpful?</span>
+          <div class="doc-feedback__actions">
+            <button class="doc-feedback__btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+              </svg>
+              Yes
+            </button>
+            <button class="doc-feedback__btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 15V19a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/>
+                <path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/>
+              </svg>
+              No
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Page navigation ── -->
+        <div class="doc-pager">
+          @if (prevPage()) {
+            <button class="doc-pager__btn doc-pager__btn--prev" (click)="navigate(prevPage()!.id)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              <span>{{ prevPage()!.label }}</span>
+            </button>
+          }
+          @if (nextPage()) {
+            <button class="doc-pager__btn doc-pager__btn--next" (click)="navigate(nextPage()!.id)">
+              <span>{{ nextPage()!.label }}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          }
+        </div>
+
+      </article>
+    </main>
+  </div>
+  <footer class="docs-footer">
+    <div class="docs-footer__inner">
+      <div class="docs-footer__copy">
+        <a class="docs-footer__github" href="https://github.com/yourusername/yourrepo" target="_blank"
+           rel="noopener noreferrer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </a>
+        <span>&copy; 2026 Elyadata</span>
+      </div>
+    </div>
+  </footer>
+</div>

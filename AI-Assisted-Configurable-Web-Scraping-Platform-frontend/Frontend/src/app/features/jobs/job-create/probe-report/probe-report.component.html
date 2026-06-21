@@ -1,0 +1,245 @@
+<div class="pr-backdrop" (click)="onBackdropClick($event)">
+  <div class="pr-modal" role="dialog" aria-modal="true" aria-labelledby="pr-title">
+
+    <button type="button" class="pr-close" (click)="onClose()" aria-label="Close report">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="pr-header">
+      <h3 class="pr-header__title" id="pr-title">
+
+        Scraping Difficulty Report
+      </h3>
+      <a class="pr-header__url" [href]="probe().url" target="_blank" rel="noopener noreferrer">
+        {{ probe().url }}
+      </a>
+    </div>
+
+    <div class="pr-body">
+
+      @if (hasDifficulty(); ) {
+        <section class="pr-score-section pr-score-section--{{ difficultyConfig[probe().difficulty!.level].color }}">
+
+          <div class="pr-score-ring">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle
+                cx="60" cy="60" r="52"
+                class="pr-score-ring__track"
+              />
+              <circle
+                cx="60" cy="60" r="52"
+                class="pr-score-ring__fill"
+                [attr.stroke-dasharray]="scoreCirclePath().circumference"
+                [attr.stroke-dashoffset]="scoreCirclePath().offset"
+                transform="rotate(-90 60 60)"
+              />
+            </svg>
+            <div class="pr-score-ring__center">
+              <span class="pr-score-ring__number">{{ probe().difficulty!.score }}</span>
+              <span class="pr-score-ring__unit">/ 100</span>
+            </div>
+          </div>
+
+          <div class="pr-score-meta">
+            <span class="pr-score-meta__level">
+              {{ difficultyConfig[probe().difficulty!.level].label }}
+            </span>
+            <p class="pr-score-meta__description">
+              {{ difficultyConfig[probe().difficulty!.level].description }}
+            </p>
+            <p class="pr-score-meta__recommendation">
+              <strong>Recommendation:</strong>
+              {{ probe().difficulty!.recommendation }}
+            </p>
+          </div>
+
+        </section>
+      }
+
+      @if (hasProtections()) {
+        <section class="pr-section">
+          <h4 class="pr-section__title">
+            Detected Anti-Bot Protections
+            <span class="pr-section__count">{{ probe().protections!.length }}</span>
+          </h4>
+
+          <div class="pr-protections">
+            @for (p of probe().protections!; track p.provider) {
+              <div class="pr-protection">
+                <div class="pr-protection__head">
+                  <span class="pr-protection__name">{{ providerLabels[p.provider] }}</span>
+                  <span class="pr-protection__confidence">
+                    {{ (p.confidence * 100) | number:'1.0-0' }}%
+                  </span>
+                </div>
+                <p class="pr-protection__evidence">{{ p.evidence }}</p>
+              </div>
+            }
+          </div>
+        </section>
+      }
+      @if (hasOriginCandidates()) {
+        <section class="pr-section">
+          <h4 class="pr-section__title">
+            Origin IP Candidates
+            @if (usableOriginCount() > 0) {
+              <span class="pr-section__badge-success">
+          {{ usableOriginCount() }} usable
+        </span>
+            }
+          </h4>
+
+          <p class="pr-section__lead">
+            Historical IPs that may host the real origin behind the CDN.
+            Each candidate is tested by direct HTTPS connection with the target's
+            <code>Host</code> header reachable ones bypass the CDN entirely.
+          </p>
+
+          <div class="pr-origins">
+            @for (c of probe().originCandidates!; track c.ip) {
+              <div
+                class="pr-origin pr-origin--{{ originValidationConfig[c.validationStatus].level }}"
+                [class.pr-origin--usable]="c.usable"
+              >
+                <div class="pr-origin__head">
+                  <code class="pr-origin__ip">{{ c.ip }}</code>
+
+                  <span
+                    class="pr-origin__status pr-origin__status--{{ originValidationConfig[c.validationStatus].level }}"
+                  >
+              {{ originValidationConfig[c.validationStatus].label }}
+            </span>
+
+                  <span class="pr-origin__confidence">
+              {{ (c.confidence * 100) | number:'1.0-0' }}%
+            </span>
+                </div>
+
+                <div class="pr-origin__meta">
+            <span class="pr-origin__meta-item">
+              <span class="pr-origin__meta-label">Source</span>
+              <code>{{ c.discoverySource }}</code>
+            </span>
+
+                  @if (c.validationHttpStatus !== null) {
+                    <span class="pr-origin__meta-item">
+                <span class="pr-origin__meta-label">HTTP</span>
+                <span>{{ c.validationHttpStatus }}</span>
+              </span>
+                  }
+
+                  @if (c.validationLatencyMs !== null) {
+                    <span class="pr-origin__meta-item">
+                <span class="pr-origin__meta-label">Latency</span>
+                <span>{{ c.validationLatencyMs }}<em>ms</em></span>
+              </span>
+                  }
+                </div>
+
+                <p class="pr-origin__hint">
+                  {{ originValidationConfig[c.validationStatus].description }}
+                </p>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      @if (hasDifficulty() && probe().difficulty!.factors.length > 0) {
+        <section class="pr-section">
+          <h4 class="pr-section__title">
+
+            Score Breakdown
+            <span class="pr-section__count">{{ probe().difficulty!.factors.length }}</span>
+          </h4>
+
+          <ul class="pr-factors">
+            @for (f of probe().difficulty!.factors; track f.code) {
+              <li class="pr-factor">
+                <div class="pr-factor__head">
+                  <span class="pr-factor__label">{{ f.label }}</span>
+                  <span class="pr-factor__points">+{{ f.points }}</span>
+                </div>
+                <p class="pr-factor__desc">{{ f.description }}</p>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <section class="pr-section pr-section--meta">
+        <h4 class="pr-section__title">
+          Probe Details
+        </h4>
+
+        <div class="pr-meta-grid">
+
+          <div class="pr-meta-cell">
+            <span class="pr-meta-cell__label">HTTP Status</span>
+            <span
+              class="pr-meta-cell__value"
+              [class.pr-meta-cell__value--ok]="probe().httpStatus >= 200 && probe().httpStatus < 300"
+              [class.pr-meta-cell__value--warn]="probe().httpStatus >= 400 && probe().httpStatus < 500"
+              [class.pr-meta-cell__value--err]="probe().httpStatus >= 500"
+            >
+              {{ probe().httpStatus || '' }}
+            </span>
+          </div>
+
+          <div class="pr-meta-cell">
+            <span class="pr-meta-cell__label">Reachable</span>
+            <span
+              class="pr-meta-cell__value"
+              [class.pr-meta-cell__value--ok]="probe().reachable"
+              [class.pr-meta-cell__value--err]="!probe().reachable"
+            >
+              {{ probe().reachable ? 'Yes' : 'No' }}
+            </span>
+          </div>
+
+          @if (probe().robotsStrict !== null && probe().robotsStrict !== undefined) {
+            <div class="pr-meta-cell">
+              <span class="pr-meta-cell__label">robots.txt</span>
+              <span
+                class="pr-meta-cell__value"
+                [class.pr-meta-cell__value--ok]="!probe().robotsStrict"
+                [class.pr-meta-cell__value--warn]="probe().robotsStrict"
+              >
+                {{ probe().robotsStrict ? 'Disallows path' : 'Allows path' }}
+              </span>
+            </div>
+          }
+
+          @if (probe().detectedPagination) {
+            <div class="pr-meta-cell">
+              <span class="pr-meta-cell__label">Pagination</span>
+              <span class="pr-meta-cell__value">
+                {{ probe().detectedPagination!.type }}
+              </span>
+            </div>
+          }
+        </div>
+
+        @if (hasSignals()) {
+          <div class="pr-signals">
+            <span class="pr-signals__label">Raw signals:</span>
+            @for (s of probe().signals; track s) {
+              <code class="pr-signals__chip">{{ s }}</code>
+            }
+          </div>
+        }
+      </section>
+
+    </div>
+
+    <div class="pr-footer">
+      <button type="button" class="pr-btn pr-btn--secondary" (click)="onClose()">
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,151 @@
+<div class="drp" [class.drp--open]="isOpen()">
+  <button class="drp__trigger" (click)="toggle()" [class.drp__trigger--active]="isOpen() || hasSelection()">
+    <svg class="drp__trigger-icon" width="13" height="13" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+    <span class="drp__trigger-text">
+      @if (hasSelection()) {
+        {{ formatDate(startDate()!) }} — {{ formatDate(endDate()!) }}
+      } @else {
+        Date range
+      }
+    </span>
+    @if (hasSelection()) {
+      <button class="drp__trigger-clear" (click)="clearSelection($event)" title="Clear date filter">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    } @else {
+      <svg class="drp__trigger-chevron" width="10" height="10" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    }
+  </button>
+  @if (isOpen()) {
+    <div class="drp__backdrop" (click)="close()"></div>
+
+    <div class="drp__panel">
+      <div class="drp__presets">
+        <span class="drp__presets-label">Quick select</span>
+        @for (preset of presets; track preset.label) {
+          <button class="drp__preset"
+                  [class.drp__preset--active]="activePreset() === preset.label"
+                  (click)="applyPreset(preset)">
+            {{ preset.label }}
+          </button>
+        }
+      </div>
+
+      <div class="drp__calendars">
+
+        <div class="drp__cal-header">
+          <span class="drp__cal-range-preview">
+            @if (tempStart() && tempEnd()) {
+              {{ formatDate(tempStart()!) }} — {{ formatDate(tempEnd()!) }}
+            } @else if (tempStart()) {
+              {{ formatDate(tempStart()!) }} select end date
+            } @else {
+              Select a date range
+            }
+          </span>
+        </div>
+
+        <div class="drp__cal-grid">
+
+          <div class="drp__cal">
+            <div class="drp__cal-nav">
+              <button class="drp__cal-nav-btn" (click)="prevMonth()" title="Previous month">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </button>
+              <span class="drp__cal-month">{{ monthName(viewMonth()) }} {{ viewYear() }}</span>
+              <span></span>
+            </div>
+
+            <div class="drp__cal-weekdays">
+              @for (d of weekdays; track d) {
+                <span class="drp__cal-wd">{{ d }}</span>
+              }
+            </div>
+
+            <div class="drp__cal-days">
+              @for (day of leftCalendarDays(); track $index) {
+                @if (day === 0) {
+                  <span class="drp__cal-day drp__cal-day--empty"></span>
+                } @else {
+                  <button class="drp__cal-day"
+                          [class.drp__cal-day--today]="isToday(day, viewYear(), viewMonth())"
+                          [class.drp__cal-day--selected]="isDaySelected(day, viewYear(), viewMonth())"
+                          [class.drp__cal-day--in-range]="isDayInRange(day, viewYear(), viewMonth())"
+                          [class.drp__cal-day--range-start]="isRangeStart(day, viewYear(), viewMonth())"
+                          [class.drp__cal-day--range-end]="isRangeEnd(day, viewYear(), viewMonth())"
+                          [class.drp__cal-day--disabled]="isFutureDay(day, viewYear(), viewMonth())"
+                          (click)="selectDay(day, viewYear(), viewMonth())"
+                          (mouseenter)="onDayHover(day, viewYear(), viewMonth())">
+                    {{ day }}
+                  </button>
+                }
+              }
+            </div>
+          </div>
+
+          <div class="drp__cal">
+            <div class="drp__cal-nav">
+              <span></span>
+              <span class="drp__cal-month">{{ monthName(nextViewMonth()) }} {{ nextViewYear() }}</span>
+              <button class="drp__cal-nav-btn" (click)="nextMonth()" title="Next month">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="drp__cal-weekdays">
+              @for (d of weekdays; track d) {
+                <span class="drp__cal-wd">{{ d }}</span>
+              }
+            </div>
+
+            <div class="drp__cal-days">
+              @for (day of rightCalendarDays(); track $index) {
+                @if (day === 0) {
+                  <span class="drp__cal-day drp__cal-day--empty"></span>
+                } @else {
+                  <button class="drp__cal-day"
+                          [class.drp__cal-day--today]="isToday(day, nextViewYear(), nextViewMonth())"
+                          [class.drp__cal-day--selected]="isDaySelected(day, nextViewYear(), nextViewMonth())"
+                          [class.drp__cal-day--in-range]="isDayInRange(day, nextViewYear(), nextViewMonth())"
+                          [class.drp__cal-day--range-start]="isRangeStart(day, nextViewYear(), nextViewMonth())"
+                          [class.drp__cal-day--range-end]="isRangeEnd(day, nextViewYear(), nextViewMonth())"
+                          [class.drp__cal-day--disabled]="isFutureDay(day, nextViewYear(), nextViewMonth())"
+                          (click)="selectDay(day, nextViewYear(), nextViewMonth())"
+                          (mouseenter)="onDayHover(day, nextViewYear(), nextViewMonth())">
+                    {{ day }}
+                  </button>
+                }
+              }
+            </div>
+          </div>
+
+        </div>
+        <div class="drp__footer">
+          <button class="drp__footer-btn drp__footer-btn--cancel" (click)="close()">Cancel</button>
+          <button class="drp__footer-btn drp__footer-btn--apply"
+                  [disabled]="!tempStart() || !tempEnd()"
+                  (click)="apply()">
+            Apply
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

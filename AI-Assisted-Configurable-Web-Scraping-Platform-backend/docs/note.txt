@@ -1,0 +1,126 @@
+let data = {
+  title: document.querySelector('.product-title__head')?.textContent?.trim()
+      || document.querySelector('h1')?.textContent?.trim()
+      || document.querySelector('[class*="product-title"]')?.textContent?.trim(),
+  price: document.querySelector('[class*="product-price"]')?.textContent?.trim()
+      || document.querySelector('[data-testid*="price"]')?.textContent?.trim(),
+  image: document.querySelector('.product-zoom__img-container img')?.src
+      || document.querySelector('[id*="data-product-image"] img')?.src,
+  brand: document.querySelector('[class*="product-title__brand"]')?.textContent?.trim(),
+  description: document.querySelector('[class*="product-description"]')?.textContent?.trim()?.substring(0, 200),
+  rating: document.querySelector('[class*="c-rating"]')?.textContent?.trim(),
+  allClasses: [...new Set([...document.querySelectorAll('[class*="product"]')].map(el => el.className.split(' ').filter(c => c.includes('product')).join(' ')))].slice(0, 20)
+};
+console.log(JSON.stringify(data, null, 2));
+
+
+
+// Trouve le prix
+let prices = document.querySelectorAll('[class*="price"]');
+prices.forEach((p, i) => {
+    if (p.textContent.trim().includes('€')) {
+        console.log(i, p.tagName, p.className, '→', p.textContent.trim().substring(0, 30));
+    }
+});
+
+
+curl -X POST http://localhost:8000/scrape/sync \
+  -H "Content-Type: application/json" \
+  -d '{
+    "job_id": "carrefour-005",
+    "target_url": "https://www.carrefour.fr/p/thon-entier-albacore-au-naturel-carrefour-classic-3560070811762",
+    "stealth_mode": true,
+    "fields": [
+      {"name": "title", "selector": "h1", "type": "TEXT"},
+      {"name": "price", "selector": ".delivery-choice__price", "type": "TEXT"},
+      {"name": "image", "selector": ".product-zoom__img-container img", "type": "ATTRIBUTE", "attribute": "src"},
+      {"name": "rating", "selector": ".product-title__customer-reviews", "type": "TEXT"},
+      {"name": "packaging", "selector": ".product-title__packaging", "type": "TEXT"}
+    ]
+  }'
+
+
+
+docker exec -it scraping-postgres psql -U postgres -d scraping_db -c "SELECT * FROM scrape_results;"
+
+
+
+
+ines@ines-Latitude-5410:~$ curl -X POST http://localhost:8000/scrape/sync \ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "job_id": "carrefour-final",
+    "target_url": "https://www.carrefour.fr/p/thon-entier-albacore-au-naturel-carrefour-classic-3560070811762",
+    "stealth_mode": true,
+    "fields": [
+      {"name": "title", "selector": ".product-details__left .product-title__title", "type": "TEXT"},
+      {"name": "price", "selector": ".delivery-choice__price .product-price__amount--main", "type": "TEXT"},
+      {"name": "packaging", "selector": ".product-details__left .product-title__packaging", "type": "TEXT"},
+      {"name": "image", "selector": ".product-zoom__img-container img", "type": "ATTRIBUTE", "attribute": "src"},
+      {"name": "rating", "selector": ".product-details__left .product-title__customer-reviews", "type": "TEXT"},
+      {"name": "origin", "selector": ".product-ingredients-origins__table", "type": "TEXT"},
+      {"name": "instructions", "selector": ".product-informations .product-content__content", "type": "TEXT"},
+      {"name": "promo", "selector": ".delivery-choice .product-card-badge-new-container", "type": "TEXT"}
+    ]
+  }'
+{"job_id":"carrefour-final","status":"completed","records":[{"title":"Thon Entier Albacore au Naturel CARREFOUR CLASSIC'","price":"5  ,95  €","packaging":"les 3 boîtes de 140g","image":"https://media.carrefour.fr/medias/4145c89538e43fb2bed552919336c09b/p_1500x1500/3560070811762-0.jpg","rating":"(338)","origin":"Thon albacore  Océan Altantique ou Pacifique","instructions":"Préparation : Égouttez avant consommation.","promo":"Ouvrir description de la promotion  Le 2ème à -30%"}],"pages_crawled":1,"errors":[],"duration_ms":27995,"engine_used":"selenium"}ines@ines-Latitude-5410:~$ ^C
+ines@ines-Latitude-5410:~$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+┌─────┬────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ID  │                                         Fichier(s)                                         │                                                    Ce qui a été fait                                                     │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ A11 │ ScrapeResultStatus.java (nouveau), ScrapeResult, ScrapeResultResponse,                     │ status: String remplacé par l'enum ScrapeResultStatus (COMPLETED/FAILED/PARTIAL) avec conversion lowercase↔uppercase en  │
+  │     │ ScrapeResultEntityMapper                                                                   │ mapper                                                                                                                   │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ S3  │ ScrapeCallbackController                                                                   │ Callback sécurisé par header X-Scraping-Secret vérifié contre scraping.callback.secret                                   │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Q14 │ ScrapeCallbackRequest.java (nouveau), ScrapeCallbackController                             │ Map<String,Object> remplacé par un vrai DTO typé avec @JsonProperty                                                      │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ A4  │ BffTokenService, JobController, AccountController                                          │ resolveUserId() extrait dans BffTokenService.resolveUserId(UserPort) — dupliqué supprimé des deux controllers            │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Q11 │ UserPort, UserRepository, UserAdapter, JobController                                       │ findByIds(Set<UUID>) ajouté — withUsernames() fait désormais 1 requête batch au lieu de N                                │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Q18 │ UserAdapter                                                                                │ @Transactional(TxType.SUPPORTS) ajouté sur toutes les méthodes de lecture                                                │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ C2  │ application.yml                                                                            │ Section app.cors (jamais lue) supprimée — seul quarkus.http.cors subsiste                                                │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ C1  │ application.yml                                                                            │ Credentials dev référencent ${DB_USERNAME:postgres} / ${DB_PASSWORD:postgres} au lieu d'être hardcodés                   │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Q15 │ application.yml                                                                            │ clean-on-validation-error: true et clean-disabled: false supprimés du profil dev                                         │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ S3  │ application.yml                                                                            │ scraping.callback.secret ajouté (obligatoire en prod, défaut dev uniquement)                                             │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ C4  │ application.yml, ScrapeResultEntity, ExtractionSchemaEntity                                │ columnDefinition = "jsonb" → "json" + dialecte H2 + NON_KEYWORDS=VALUE pour compatibilité tests                          │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ A8  │ V3__add_users_updated_at_trigger.sql (nouveau)                                             │ Migration manquante créée — ajoute le trigger updated_at sur la table users                                              │
+  ├─────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Q7  │ JobServiceImpl                                                                             │ Log calls utilisent LogsConstant.Job.CREATED/UPDATED/DELETED/LAUNCHED/PAUSED                                             │
+  └─────┴────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘

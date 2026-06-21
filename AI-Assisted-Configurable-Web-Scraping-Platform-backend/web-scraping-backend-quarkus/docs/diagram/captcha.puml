@@ -1,0 +1,70 @@
+@startuml
+title Flux de résolution CAPTCHA Collaboration OpenCV + LLM
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName Helvetica
+
+actor "ScrapeEngine" as Engine
+participant "CaptchaHandler" as Handler
+participant "Détecteurs\n(Live/Image/LLM)" as Detector
+participant "Solver spécifique\n(GeeTest/reCAPTCHA/Rotate)" as Solver
+participant "OpenCV\n(Vision déterministe)" as CV
+participant "VisionLlmClient\n(LLM)" as LLM
+participant "CaptchaTokenInjector" as Injector
+
+== Détection ==
+Engine -> Handler : tryHandleIfPresent(snapshot, jobId)
+Handler -> Detector : detect(snapshot)
+Detector --> Handler : CaptchaChallenge (type)
+
+alt forceHuman = true
+    Handler -> Handler : escalateToHuman()
+else type sandboxé sans solver codé
+    Handler -> Handler : escalateToHuman()
+else résolution automatique
+    Handler -> Solver : solve(page, jobId)
+
+    == Tentative OpenCV (CV-first) ==
+    Solver -> CV : analyse image\n(decode, gris, Canny, matchTemplate)
+    note right of CV
+      GeeTest : localise le trou (offset px)
+      reCAPTCHA : découpe la grille en tuiles
+      Rotate : détecte les flèches + améliore image
+    end note
+
+    alt OpenCV réussit (géométrie trouvée)
+        CV --> Solver : position / offset / tuiles
+        Solver -> Solver : action déterministe\n(drag, clic flèche)
+        opt drag raté
+            Solver -> Solver : micro-corrections (±3..±35 px)
+        end
+    else OpenCV échoue ou indisponible (LLM-fallback)
+        CV --> Solver : Optional.empty()
+        Solver -> LLM : analyzeImage(prompt, image_b64)
+        note right of LLM
+          GeeTest : estime distance en %
+          reCAPTCHA : classe chaque tuile (oui/non)
+          Rotate : estime angle de rotation
+        end note
+        LLM --> Solver : réponse (% / indices / degrés)
+        Solver -> Solver : vote / scan multi-positions\n+ action
+    end
+
+    == Vérification ==
+    Solver -> Solver : checkSuccess(page)
+    alt succès
+        Solver --> Handler : token / true
+        Handler -> Injector : inject(snapshot, token)
+        Injector --> Handler : injected = true
+        Handler -> Handler : cacheToken (TTL)
+    else échec
+        Solver --> Handler : false
+        Handler -> LLM : runLlmPilot() (boucle vision-action)
+        opt pilote LLM échoue
+            Handler -> Handler : escalateToHuman()
+        end
+    end
+end
+
+Handler --> Engine : bypass réussi (true/false)
+@enduml

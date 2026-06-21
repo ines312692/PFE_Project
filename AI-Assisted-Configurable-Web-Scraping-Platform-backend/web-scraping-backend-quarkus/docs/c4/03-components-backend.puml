@@ -1,0 +1,75 @@
+@startuml C4_L3_QuarkusComponents
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+Container(frontend, "Frontend SPA", "Angular")
+ContainerDb(db, "PostgreSQL", "Flyway V1..V19")
+System_Ext(keycloak, "Keycloak", "OIDC")
+System_Ext(targets, "Target Websites")
+
+Container_Boundary(backend, "Backend (Quarkus)") {
+
+    ' --- Application layer : REST controllers ---
+    Component(authCtrl,       "AuthController",         " BffTokenService", "BFF login, callback, token refresh")
+    Component(jobCtrl,        "JobController",          "",                   "CRUD jobs, launch, pause, duplicate")
+    Component(resultCtrl,     "ScrapeResultController", "",                   "Expose scrape results to the UI")
+
+    ' --- Domain layer : services ---
+    Component(jobSvc,         "JobServiceImpl",         " @ApplicationScoped",   "Orchestrates job lifecycle, builds InternalScrapeRequest, submits async")
+    Component(probeSvc,       "SiteProbeService",       "",                      "Probe target site (robots, sitemap, signals)")
+    Component(llmSvc,         "LlmExtractionService",   "",                      "LLM prompt orchestration + LlmSecurityGuard")
+
+    ' --- Scraping engine (feature scraper) ---
+    Component(engine,         "ScrapeEngine",           "",                      "Entry point of the scraping pipeline")
+    Component(scrapePipe,     "ScrapePipeline",         "",                      "Single-page scraping path")
+    Component(crawlPipe,      "CrawlPipeline",          "",                      "Multi-page crawling: UrlFrontier, pagination strategies, robots gate")
+    Component(browserPool,    "Browser pool",           "",                      "")
+    Component(extractors,     "ExtractorRegistry",      "",                      "CSS, XPath, LLM, regex, Auto extractors")
+    Component(resilience,     "Resilience",             "",                      "RetryExecutor + DomainCircuitBreaker")
+
+    ' --- Infrastructure layer : adapters / JPA ---
+    Component(jobAdapter,     "JobAdapter",             "",            "Persists JobEntity + related config entities")
+    Component(resultAdapter,  "ScrapeResultAdapter",    "",            "Persists ScrapeResultEntity with logs")
+    Component(schemaAdapter,  "ExtractionSchemaAdapter","",            "Persists ExtractionSchemaEntity")
+
+    ' --- Cross-cutting ---
+    Component(security,       "SecurityFilter",         "",            "JWT validation, BFF cookie extraction")
+    Component(executor,       "ManagedExecutor",        "MicroProfile Context",     "Thread pool for async job execution")
+}
+
+' --- Relations ---
+Rel(frontend, security,    "")
+Rel(security, authCtrl,    "Cookie + OIDC code")
+Rel(security, jobCtrl,     "JWT-protected calls")
+Rel(security, resultCtrl,  "JWT-protected calls")
+
+Rel(authCtrl, keycloak,    "Authorization Code + PKCE", "HTTPS")
+
+Rel(jobCtrl, jobSvc,       "create, update, launch, pause")
+Rel(jobCtrl, probeSvc,     "probe site")
+Rel(resultCtrl, resultAdapter, "read results")
+
+Rel(jobSvc, jobAdapter,    "save, update status")
+Rel(jobSvc, schemaAdapter, "save extraction schema")
+Rel(jobSvc, executor,      "runAsync(runScrape)")
+Rel(executor, engine,      "invoke in worker thread")
+
+Rel(engine, scrapePipe,    "if SCRAPER")
+Rel(engine, crawlPipe,     "if CRAWLER")
+Rel(scrapePipe, browserPool, "render page")
+Rel(crawlPipe,  browserPool, "render pages")
+Rel(scrapePipe, extractors,  "extract records")
+Rel(browserPool, targets,    "HTTPS requests")
+Rel(scrapePipe, resilience,  "wrap calls")
+Rel(crawlPipe,  resilience,  "wrap calls")
+
+Rel(engine,    resultAdapter, "persist final ScrapeResult")
+Rel(llmSvc,    extractors,    "provide prompts")
+
+Rel(jobAdapter,    db, "SQL")
+Rel(resultAdapter, db, "SQL")
+Rel(schemaAdapter, db, "SQL")
+
+
+
+@enduml

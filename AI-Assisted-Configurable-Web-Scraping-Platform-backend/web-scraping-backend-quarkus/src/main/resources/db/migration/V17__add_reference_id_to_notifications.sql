@@ -1,0 +1,1 @@
+ALTER TABLE notifications ADD COLUMN reference_id VARCHAR(255);

@@ -1,0 +1,142 @@
+<div class="vs">
+
+  <div class="vs-toolbar">
+    <div class="vs-toolbar__url">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      </svg>
+      <span>{{ targetUrl || 'No target URL set' }}</span>
+    </div>
+
+    <div class="vs-toolbar__actions">
+      <button type="button" class="vs-chip" [class.vs-chip--on]="expectList()" (click)="toggleExpectList()">
+        {{ expectList() ? 'List (all matches)' : 'Single element' }}
+      </button>
+      <button type="button" class="vs-chip" [class.vs-chip--on]="stealthMode()" (click)="toggleStealth()">
+        Stealth {{ stealthMode() ? 'on' : 'off' }}
+      </button>
+      <button type="button" class="vs-btn vs-btn--primary" (click)="loadSnapshot()" [disabled]="loadingSnapshot()">
+        @if (loadingSnapshot()) {
+          <span class="vs-spinner"></span> Rendering…
+        } @else {
+          {{ snapshotReady() ? 'Reload page' : 'Load page' }}
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (snapshotError()) {
+    <div class="vs-alert">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ snapshotError() }}
+    </div>
+  }
+
+  <div class="vs-stage">
+    <div class="vs-frame-wrap" [class.vs-frame-wrap--empty]="!snapshotReady()">
+      @if (!snapshotReady() && !loadingSnapshot()) {
+        <div class="vs-empty">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>
+          </svg>
+          <p>Load the page, then click any element to capture its selector.</p>
+        </div>
+      }
+      <iframe
+        #frame
+        class="vs-frame"
+        [class.vs-frame--ready]="snapshotReady()"
+        sandbox="allow-scripts"
+        title="Visual selection preview"
+      ></iframe>
+
+      @if (hardening()) {
+        <div class="vs-frame-loading">
+          <span class="vs-spinner"></span> Analysing selector…
+        </div>
+      }
+    </div>
+
+    <aside class="vs-panel">
+
+      @if (pending(); as p) {
+        <div class="vs-pending">
+          <div class="vs-pending__head">
+            <span class="vs-pending__title">Captured element</span>
+            <span class="vs-badge" [class.vs-badge--ok]="p.unique" [class.vs-badge--warn]="!p.unique">
+              {{ p.matchCount }} match{{ p.matchCount === 1 ? '' : 'es' }}
+            </span>
+          </div>
+
+          <label class="vs-field-label">Field name</label>
+          <input
+            type="text"
+            class="vs-input"
+            [ngModel]="pendingName()"
+            (ngModelChange)="pendingName.set($event)"
+            placeholder="e.g. price"
+          />
+
+          <label class="vs-field-label">CSS selector</label>
+          <code class="vs-code">{{ p.cssSelector }}</code>
+
+          <label class="vs-field-label">XPath</label>
+          <code class="vs-code">{{ p.xpath }}</code>
+
+          @if (p.previewValues.length) {
+            <label class="vs-field-label">Preview</label>
+            <ul class="vs-preview">
+              @for (v of p.previewValues; track v) {
+                <li>{{ v }}</li>
+              }
+            </ul>
+          }
+
+          @if (p.warning) {
+            <div class="vs-warning">{{ p.warning }}</div>
+          }
+
+          <div class="vs-pending__actions">
+            <button type="button" class="vs-btn vs-btn--ghost" (click)="cancelPending()">Discard</button>
+            <button type="button" class="vs-btn vs-btn--primary" (click)="confirmPending()" [disabled]="!pendingName().trim()">
+              Add field
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="vs-panel__hint">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          Click an element in the preview to capture it.
+        </div>
+      }
+
+      @if (fields.length) {
+        <div class="vs-fields">
+          <span class="vs-fields__label">{{ fields.length }} field{{ fields.length === 1 ? '' : 's' }}</span>
+          @for (f of fields; track f.name; let i = $index) {
+            <div class="vs-field-row">
+              <span class="vs-field-row__name">{{ f.name }}</span>
+              <code class="vs-field-row__sel">{{ f.selector }}</code>
+              <button type="button" class="vs-field-row__remove" (click)="removeField(i)" aria-label="Remove">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+    </aside>
+  </div>
+</div>

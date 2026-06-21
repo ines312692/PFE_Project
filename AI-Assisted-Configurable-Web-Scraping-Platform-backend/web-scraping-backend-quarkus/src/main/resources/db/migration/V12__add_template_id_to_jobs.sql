@@ -1,0 +1,1 @@
+ALTER TABLE jobs ADD COLUMN template_id UUID REFERENCES job_templates(id) ON DELETE SET NULL;

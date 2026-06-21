@@ -1,0 +1,59 @@
+<div class="preset-section">
+
+  <div class="preset-section__head">
+    <div class="preset-section__head-left">
+      <span class="preset-section__label">Quick Start Templates</span>
+    </div>
+    @if (activePresetId) {
+      <button class="preset-clear" type="button" (click)="presetClear.emit()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Clear preset
+      </button>
+    }
+  </div>
+
+  <div class="preset-grid">
+    @for (preset of presets; track trackById($index, preset)) {
+      <button
+        type="button"
+        class="preset-card"
+        [class.preset-card--active]="activePresetId === preset.id"
+        [class.preset-card--blue]="preset.color === 'blue'"
+        [class.preset-card--green]="preset.color === 'green'"
+        [class.preset-card--pink]="preset.color === 'pink'"
+        [class.preset-card--orange]="preset.color === 'orange'"
+        [class.preset-card--purple]="preset.color === 'purple'"
+        [class.preset-card--teal]="preset.color === 'teal'"
+        (mouseenter)="hoveredId.set(preset.id)"
+        (mouseleave)="hoveredId.set(null)"
+        (click)="select(preset)">
+
+        <div class="preset-card__icon" [innerHTML]="safeIcon(preset)"></div>
+
+        <div class="preset-card__body">
+          <span class="preset-card__name">{{ preset.label }}</span>
+          <span class="preset-card__desc">{{ preset.desc }}</span>
+        </div>
+
+        <div class="preset-card__fields-count">
+          <span>{{ preset.fields.length }}</span>
+          <span class="preset-card__fields-label">fields</span>
+        </div>
+
+        @if (activePresetId === preset.id) {
+          <div class="preset-card__check">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        }
+
+      </button>
+    }
+  </div>
+
+
+</div>
