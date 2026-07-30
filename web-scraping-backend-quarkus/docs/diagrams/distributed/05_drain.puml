@@ -1,0 +1,135 @@
+@startuml 05_drain
+' ============================================================
+' Phase 6 : boucle de drain (claim / reclaim / process / complete)
+' Commune au PRINCIPAL et au RENFORT
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam sequenceArrowColor #333333
+skinparam sequenceLifeLineBorderColor #666666
+skinparam participantBorderColor #333333
+skinparam noteBorderColor #999999
+skinparam noteBackgroundColor #F4F4F4
+title Phase 6 — Boucle de drain (claim / reclaim / process / complete)
+
+participant "Coordinator\n(consumerId)" as COORD
+participant "DistributedCrawl\nFrontier" as FRONT
+participant "Navigateur\n(ABrowser)" as BR
+participant "Extractor" as EX
+participant "CircuitBreaker" as CB
+database "Redis" as REDIS
+
+COORD -> BR : start()
+activate COORD
+
+loop tant que shouldContinueDraining
+  note over COORD : condition =\nfrontier existe (EXISTS ready)\nET pages < maxPages
+
+  group reclaim périodique (toutes reclaim-every-ms)
+    opt ready existe && délai écoulé
+      COORD -> FRONT : reclaim(consumer, minIdle, batch)
+      activate FRONT
+      alt ready absent (nettoyé)
+        FRONT --> COORD : liste vide
+        note right : garde anti-résurrection :\npas de XAUTOCLAIM sur\nstream disparu
+      else
+        FRONT -> REDIS : XAUTOCLAIM ready "crawlers"\nconsumer minIdle
+        FRONT --> COORD : entrées PEL trop vieilles
+      end
+      deactivate FRONT
+      note over COORD : chaque entrée reprise\npasse par processOne
+    end
+  end
+
+  COORD -> FRONT : claim(consumer, batchSize)
+  activate FRONT
+  FRONT -> REDIS : XREADGROUP "crawlers" consumer\nready > (count = batchSize)
+  FRONT --> COORD : batch d'URLs
+  deactivate FRONT
+
+  alt batch vide
+    alt ready absent
+      note over COORD : frontier finalisée ailleurs -> stop
+    else isQuiescent (SCARD done >= SCARD seen)
+      note over COORD : plus rien à faire -> stop
+    else
+      COORD -> COORD : sleep(poll-delay-ms)
+    end
+  else batch présent
+    loop chaque FrontierEntry
+      alt ready absent OU cap atteint
+        note over COORD : arrêt mid-batch
+      else
+        COORD -> COORD : processOne(entry)
+        activate COORD
+
+        COORD -> COORD : pré-checks robots.txt + SSRF
+
+        opt circuit breaker activé
+          COORD -> CB : allowRequest()
+          alt CB OPEN
+            COORD -> FRONT : recordUrlAttempt(url)\n(HINCRBY attempts)
+            alt attempts >= maxCbRetries
+              note over COORD : abandon de l'URL
+            else
+              note over COORD #EEEEEE : shouldComplete = false\nURL laissée en PEL\n(pas de XACK)
+            end
+          end
+        end
+
+        opt CB fermé / absent
+          COORD -> BR : navigate(url) + snapshot\n(via RetryExecutor)
+          activate BR
+          alt Infrastructure5xx
+            BR --> COORD : throw
+            COORD -> CB : recordFailure()
+            note over COORD : erreur enregistrée,\nsnapshot = null
+          else ok
+            BR --> COORD : PageSnapshot
+            COORD -> CB : recordSuccess()
+          end
+          deactivate BR
+
+          opt snapshot non null
+            COORD -> EX : extract(snapshot, request)
+            EX --> COORD : records
+            opt records non vides
+              COORD -> FRONT : saveRecords(url, json)
+              FRONT -> REDIS : HSET crawl:{job}:records url json
+            end
+            COORD -> FRONT : incrementPages()
+            FRONT -> REDIS : INCR crawl:{job}:pages
+
+            group expansion des liens enfants
+              opt depth < maxDepth && sous le cap
+                loop chaque lien récolté
+                  opt filtre accepte && nouveau
+                    COORD -> FRONT : expand(child)
+                    FRONT -> REDIS : SADD seen + XADD ready
+                  end
+                end
+              end
+            end
+          end
+        end
+
+        alt shouldComplete
+          COORD -> FRONT : complete(url, messageId)
+          activate FRONT
+          FRONT -> REDIS : SADD crawl:{job}:done url
+          FRONT -> REDIS : XACK ready "crawlers" messageId
+          FRONT --> COORD : isQuiescent ?
+          deactivate FRONT
+        else
+          note over COORD : laissé en PEL pour reprise\n(XAUTOCLAIM ultérieur)
+        end
+        deactivate COORD
+      end
+    end
+  end
+end
+
+COORD -> BR : close()
+deactivate COORD
+
+@enduml

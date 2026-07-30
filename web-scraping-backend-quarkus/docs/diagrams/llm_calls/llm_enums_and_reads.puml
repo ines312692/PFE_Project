@@ -1,0 +1,81 @@
+@startuml llm_enums_and_reads
+title Valeurs des colonnes et chemins de lecture
+
+allowmixing
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+package "Valeurs applicatives (Java vers VARCHAR)" {
+
+  enum LlmFeature <<colonne feature>> {
+    EXTRACTION
+    SCHEMA_ASSIST
+    SCHEMA_VALIDATE
+    SELECTOR_HEAL
+    PAGINATION
+    ACTION_PLANNER
+    ACTION_RESOLVE
+    VISION_CAPTCHA
+    CAPTCHA_CLASSIFY
+    ETL_ENRICHMENT
+    UNKNOWN
+  }
+
+  enum LlmCallOutcome <<colonne outcome>> {
+    SUCCESS
+    RATE_LIMITED
+    UNAVAILABLE
+    ERROR
+  }
+
+  note bottom of LlmCallOutcome
+    Stocke en VARCHAR sans contrainte CHECK.
+    Dette identifiee : une valeur hors enum
+    passerait sans erreur cote base.
+  end note
+}
+
+package "Producteurs" {
+  component "GroqLlmChatClient" as chat
+  component "GroqVisionLlmClient" as vision
+  component "LlmCallRecorder" as rec
+}
+
+database "llm_calls" as tbl
+
+package "Consommateurs" {
+  component "LlmCallRepository (SQL natif)" as repo
+  component "ProjectLlmUsageAdapter (SQL natif, port hexagonal)" as adapter
+  component "LlmUsageController GET /v1/llm-usage" as ctrl1
+  component "ProjectLlmUsageController GET /v1/projects/{id}/llm-usage" as ctrl2
+  component "Micrometer /q/metrics" as metrics
+}
+
+chat --> rec
+vision --> rec
+rec --> tbl : "INSERT (transaction independante)"
+rec --> metrics : "compteurs + timers"
+
+tbl <-- repo : "summary, byFeature, byModel,\nbyProject, dailyTokens, recent"
+tbl <-- adapter : "agregat projet + percentile_cont p50/p95"
+
+repo <-- ctrl1
+adapter <-- ctrl2
+
+note right of ctrl1
+  Injecte le repository directement,
+  court-circuitant la couche domaine.
+  Incoherent avec l'architecture
+  hexagonale du reste du projet.
+end note
+
+note right of adapter
+  percentile_cont et COUNT(*) FILTER
+  sont specifiques PostgreSQL,
+  non testable sous H2 en profil test.
+end note
+
+@enduml

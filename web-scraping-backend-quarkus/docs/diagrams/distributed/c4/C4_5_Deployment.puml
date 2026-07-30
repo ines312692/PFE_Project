@@ -1,0 +1,61 @@
+@startuml C4_5_Deployment
+' ============================================================
+' C4 - Deployment diagram : multi-nœuds / Docker
+' ============================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+title C4 Deployment — Déploiement distribué (multi-nœuds)
+
+Deployment_Node(client, "Poste utilisateur", "Navigateur web") {
+  Container(spa, "Frontend SPA", "React / Angular")
+}
+
+Deployment_Node(cluster, "Cluster applicatif", "Docker / Kubernetes") {
+
+  Deployment_Node(nodeA, "Nœud applicatif A", "Conteneur Docker") {
+    Container(backendA, "Backend de scraping", "Quarkus", "Workers job/join/ETL actifs — souvent PRINCIPAL")
+    Container(browserA, "Navigateur headless", "Playwright")
+  }
+
+  Deployment_Node(nodeB, "Nœud applicatif B", "Conteneur Docker") {
+    Container(backendB, "Backend de scraping", "Quarkus", "Mêmes workers — souvent RENFORT")
+    Container(browserB, "Navigateur headless", "Playwright")
+  }
+
+  Deployment_Node(redisNode, "Nœud Redis", "Conteneur Docker") {
+    ContainerDb(redis, "Redis", "Streams + état", "Bus de messages + frontier + leases")
+  }
+
+  Deployment_Node(pgNode, "Nœud base de données", "Conteneur Docker") {
+    ContainerDb(postgres, "PostgreSQL", "SGBD relationnel")
+  }
+}
+
+Deployment_Node(idp, "Identity Provider", "Service") {
+  Container(keycloak, "Keycloak", "OIDC")
+}
+
+Rel(spa, backendA, "API + SSE", "HTTPS")
+Rel(spa, backendB, "API + SSE (load-balancé)", "HTTPS")
+
+Rel(backendA, redis, "Streams / frontier / leases", "Redis protocol")
+Rel(backendB, redis, "Streams / frontier / leases", "Redis protocol")
+Rel(backendA, postgres, "État métier", "JDBC")
+Rel(backendB, postgres, "État métier", "JDBC")
+
+Rel(backendA, browserA, "Pilote", "CDP")
+Rel(backendB, browserB, "Pilote", "CDP")
+
+Rel(backendA, keycloak, "OIDC")
+Rel(backendB, keycloak, "OIDC")
+
+note right of redis
+  Redis est le point de coordination :
+  - consumer groups (job.run, crawl.join, etl.process)
+  - frontier partagée (crawl:{job}:*)
+  - leases (job:lease:{job}) et verrou finalizer (SETNX)
+  C'est ce qui permet à A et B de coopérer
+  sur le même job sans double traitement.
+end note
+
+@enduml

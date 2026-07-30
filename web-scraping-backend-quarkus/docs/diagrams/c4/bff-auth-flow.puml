@@ -1,0 +1,183 @@
+@startuml
+
+actor       "Utilisateur"                 as USER
+participant "Angular :4200"               as ANGULAR
+participant "Quarkus BFF :8080"           as BFF
+participant "Keycloak :8180"              as KEYCLOAK
+database    "scraping_db_keycloak\n:5433" as KCDB
+database    "scraping_db\n:5432"          as APPDB
+
+== 1. Demarrage de l application ==
+
+ANGULAR -> BFF : GET /v1/auth/me\n(withCredentials: true)
+note over BFF
+  Aucun cookie access_token present
+  Retourne 401 { authenticated: false }
+end note
+BFF --> ANGULAR : 401 { authenticated: false }
+
+ANGULAR -> ANGULAR : authGuard detecte non authentifie
+ANGULAR -> ANGULAR : authService.login() appele
+
+== 2. Initiation du flux BFF ==
+
+ANGULAR -> BFF : GET /v1/auth/login?theme=light
+note over BFF
+  AuthController genere un state aleatoire (CSRF)
+  Construit l URL Keycloak avec :
+    client_id = scraping-bff (confidentiel)
+    redirect_uri = /v1/auth/callback
+    scope = openid profile email roles
+end note
+BFF --> ANGULAR : 302 Redirect vers Keycloak\n+ Set-Cookie: oauth_state=XyZ... (HttpOnly)
+
+note over ANGULAR
+  Le cookie oauth_state est HttpOnly
+  JavaScript ne peut pas le lire
+  Il sera renvoy automatiquement par le browser
+end note
+
+== 3. Authentification utilisateur sur Keycloak ==
+
+ANGULAR -> KEYCLOAK : GET /realms/elyadata/protocol/openid-connect/auth\n?client_id=scraping-bff\n&redirect_uri=http://localhost:4200/v1/auth/callback\n&response_type=code\n&state=XyZ...
+
+KEYCLOAK -> KCDB : Verifie client scraping-bff
+KCDB --> KEYCLOAK : client valide (confidentiel, secret connu)
+
+KEYCLOAK --> ANGULAR : Affiche page login theme elyadata
+
+USER -> KEYCLOAK : Saisit username + password
+KEYCLOAK -> KCDB : SELECT user WHERE username = 'admin'
+KCDB --> KEYCLOAK : user { id, credential_hache }
+KEYCLOAK -> KCDB : Verifie bcrypt(password)
+KCDB --> KEYCLOAK : OK
+KEYCLOAK -> KCDB : SELECT roles WHERE user_id = '...'
+KCDB --> KEYCLOAK : roles = [ ADMIN ]
+
+== 4. Retour du code autorisation ==
+
+KEYCLOAK --> ANGULAR : 302 Redirect\nhttp://localhost:4200/v1/auth/callback\n?code=CODE123&state=XyZ...
+
+note over ANGULAR
+  Le browser redirige vers /v1/auth/callback
+  Le proxy Angular forward vers Quarkus :8080
+  Le cookie oauth_state est envoye automatiquement
+end note
+
+== 5. Echange du code par le BFF (serveur a serveur) ==
+
+ANGULAR -> BFF : GET /v1/auth/callback?code=CODE123&state=XyZ...\n+ Cookie: oauth_state=XyZ...
+
+note over BFF
+  CSRF check : state du cookie == state de l URL
+  Si mismatch -> 400 Invalid state parameter
+end note
+
+BFF -> KEYCLOAK : POST /token (serveur a serveur)\ngrant_type=authorization_code\n&code=CODE123\n&client_id=scraping-bff\n&client_secret=••••••••\n&redirect_uri=http://localhost:4200/v1/auth/callback
+
+note over KEYCLOAK
+  Verifie code valide et non expire
+  Verifie client_secret
+  Signe les tokens avec cle privee RSA
+end note
+
+KEYCLOAK --> BFF : 200 OK\n{\n  access_token: eyJhbG...  (15 min)\n  refresh_token: eyJhbG... (30 min)\n  expires_in: 900\n}
+
+note over BFF
+  Le client_secret n est JAMAIS expose au browser
+  L echange token/token se fait 100% cote serveur
+  C est le coeur du pattern BFF
+end note
+
+== 6. Stockage securise en cookies HttpOnly ==
+
+BFF --> ANGULAR : 302 Redirect vers /jobs\n+ Set-Cookie: access_token=eyJhbG...  (HttpOnly, SameSite=LAX, path=/)\n+ Set-Cookie: refresh_token=eyJhbG... (HttpOnly, SameSite=LAX, path=/v1/auth)\n+ Set-Cookie: oauth_state=; max-age=0    (suppression state cookie)
+
+note over ANGULAR
+  Les tokens sont HttpOnly :
+    JavaScript ne peut JAMAIS les lire
+    document.cookie ne les expose pas
+    Protection totale contre XSS
+  SameSite=LAX : protection CSRF
+end note
+
+== 7. Chargement du profil utilisateur ==
+
+ANGULAR -> BFF : GET /v1/auth/me\n(withCredentials: true → envoie cookie automatiquement)
+note over BFF
+  BffTokenService lit le cookie access_token
+  Decode le payload JWT (Base64)
+  Extrait : sub, email, preferred_username, roles
+  Pas de validation cryptographique ici :
+  le token sera valide par Quarkus OIDC
+  sur chaque requete API
+end note
+BFF --> ANGULAR : 200 OK\n{\n  authenticated: true\n  id: f87b3fb1...\n  username: admin\n  email: admin@elyadata.com\n  role: ADMIN\n}
+
+ANGULAR -> ANGULAR : currentUser.set(user)
+ANGULAR --> USER : Redirige vers /jobs
+
+== 8. Requete API protegee ==
+
+USER -> ANGULAR : Consulte la liste des jobs
+ANGULAR -> BFF : GET /v1/jobs\n(withCredentials: true → Cookie: access_token=eyJhbG... envoye automatiquement)
+
+note over BFF
+  SecurityFilter intercepte la requete
+  Lit le cookie access_token
+  Valide format non vide -> passe
+  BffTokenService decode le JWT
+  Extrait email = admin@elyadata.com
+end note
+
+BFF -> APPDB : SELECT * FROM users WHERE email = 'admin@elyadata.com'
+APPDB --> BFF : { id: aaf7b2c5..., role: ADMIN, enabled: true }
+
+note over BFF
+  resolveUserId() dans JobController
+  Email est le pont entre Keycloak et scraping_db
+  Si user n existe pas encore : DomainNotFoundException
+  Solution future : auto-provisionning au premier login
+end note
+
+BFF -> APPDB : SELECT * FROM jobs (ADMIN voit tous les jobs)
+APPDB --> BFF : Liste des jobs
+BFF --> ANGULAR : 200 OK { data: [...jobs] }
+ANGULAR --> USER : Affiche la liste des jobs
+
+== 9. Renouvellement du token ==
+
+ANGULAR -> ANGULAR : Token expire detecte (erreur 401)
+ANGULAR -> BFF : POST /v1/auth/refresh\n(withCredentials: true → Cookie: refresh_token=eyJhbG... envoye)
+
+BFF -> KEYCLOAK : POST /token\ngrant_type=refresh_token\n&refresh_token=eyJhbG...\n&client_id=scraping-bff\n&client_secret=••••••••
+KEYCLOAK --> BFF : 200 OK { access_token: eyJhbG... (nouveau) }
+
+BFF --> ANGULAR : 200 OK { refreshed: true }\n+ Set-Cookie: access_token=eyJhbG... (nouveau, HttpOnly)\n+ Set-Cookie: refresh_token=eyJhbG... (nouveau, HttpOnly)
+
+note over ANGULAR
+  Utilisateur reste connecte
+  sans re-saisir son mot de passe
+  Les nouveaux tokens remplacent les anciens cookies
+end note
+
+== 10. Deconnexion ==
+
+USER -> ANGULAR : Clique Sign Out
+ANGULAR -> BFF : POST /v1/auth/logout\n(withCredentials: true → envoie cookies)
+
+BFF -> KEYCLOAK : POST /logout\ngrant_type=refresh_token\n&client_secret=••••••••\n(revocation serveur a serveur)
+KEYCLOAK --> BFF : 204 OK (session invalide cote Keycloak)
+
+BFF --> ANGULAR : 200 OK { loggedOut: true }\n+ Set-Cookie: access_token=;  max-age=0  (suppression)\n+ Set-Cookie: refresh_token=; max-age=0 (suppression)
+
+note over ANGULAR
+  Les cookies sont supprimes par le BFF
+  Le browser ne possede plus aucun token
+  L utilisateur est completement deconnecte
+end note
+
+ANGULAR -> ANGULAR : currentUser.set(null)
+ANGULAR --> USER : Redirige vers page accueil
+
+@enduml

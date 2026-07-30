@@ -1,0 +1,61 @@
+@startuml pool_simplifie
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam sequenceArrowColor #333333
+skinparam sequenceGroupBackgroundColor #F0F0F0
+title Pool de navigateurs
+
+participant "Job" as JOB
+participant "Pool\n(3 places)" as POOL
+participant "Place" as PLACE
+participant "Chrome" as CHROME
+participant "Session\n(cookies, historique)" as SESSION
+
+group Au demarrage de l'application
+  POOL -> POOL : cree 3 places vides
+  note right of POOL : aucun Chrome lance
+end
+
+group 1 — Le job prend une place
+  JOB -> POOL : donne-moi une place
+  alt une place est libre
+    POOL --> JOB : place 0
+  else les 3 places sont occupees
+    note over POOL : le job ATTEND\non n'ouvre jamais un 4e Chrome
+  end
+end
+
+group 2 — La place fournit un Chrome
+  JOB -> PLACE : ouvre-moi une session
+  alt Chrome deja ouvert
+    note over PLACE : on reutilise — 0 seconde
+  else pas de Chrome
+    PLACE -> CHROME : lancer
+    note over CHROME : 2 secondes, 300 Mo
+  end
+  PLACE -> SESSION : creer une session vide
+  note over SESSION : 50 ms — comme une fenetre privee
+  PLACE --> JOB : session prete
+end
+
+group 3 — Le job travaille
+  loop pour chaque page a scraper
+    JOB -> SESSION : aller sur l'URL
+    SESSION --> JOB : contenu de la page
+  end
+  note over JOB : la meme session sert\ntoutes les pages du crawl
+end
+
+group 4 — Le job rend la place
+  JOB -> SESSION : effacer
+  note over SESSION : cookies et historique supprimes
+  alt cas normal
+    note over CHROME : Chrome RESTE OUVERT\npour le job suivant
+  else Chrome a servi 20 fois, ou job connecte a un compte
+    PLACE -> CHROME : fermer et remplacer
+  end
+  JOB -> POOL : je rends la place
+  POOL -> POOL : place 0 de nouveau libre
+end
+
+@enduml

@@ -1,0 +1,170 @@
+@startuml llm_call_recording
+title Enregistrement d'un appel LLM - de l'appel metier a la table llm_calls
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ConditionEndStyle hline
+
+|Service metier|
+start
+:Service metier declenche un besoin LLM
+(extraction, validation schema, reparation
+selecteur, planification action, assistant
+prompt, pagination, CAPTCHA vision);
+
+if (llm.isAvailable() ?) then (non)
+  :Log WARN + degradation gracieuse
+  (retourne liste vide / Optional.empty);
+  stop
+else (oui)
+endif
+
+:context.open(feature, jobId, projectId, userId)
+pose un Scope dans le ThreadLocal
+(try-with-resources : fermeture garantie);
+
+:Appel llm.completeWithUsage(system, user, options)
+options = LlmCallOptions(model, temperature, timeout);
+
+|GroqLlmChatClient|
+:Calcule promptChars = len(system) + len(user);
+:t0 = System.nanoTime();
+
+partition "Resolution du modele (cache)" {
+  :cacheKey = model + temperature + timeoutSeconds;
+  if (Instance OpenAiChatModel en cache ?) then (oui)
+    :Reutilise l'instance existante
+    (pas d'allocation de client HTTP);
+  else (non)
+    :Construit OpenAiChatModel une seule fois
+    (pool connexions + threads + TLS)
+    et le met en cache;
+  endif
+}
+
+:POST https://api.groq.com/openai/v1/chat/completions;
+
+|API Groq|
+:Traite la requete;
+if (Reponse HTTP) then (200 OK)
+  :Retourne choices + usage
+  (prompt_tokens, completion_tokens,
+  total_tokens);
+else (4xx / 5xx)
+  :Retourne une erreur;
+endif
+
+|GroqLlmChatClient|
+if (Issue de l'appel ?) then (succes)
+  :latencyMs = (nanoTime - t0) / 1e6;
+  :Lit ChatResponse.tokenUsage()
+  SOURCE DES TOKENS
+  (valeurs du fournisseur, jamais estimees);
+  :outcome = SUCCESS;
+  :responseChars = len(texte reponse);
+elseif (OpenAiHttpException) then (rate limit)
+  :Parse "try again in Xs" du corps d'erreur;
+  :outcome = RATE_LIMITED
+  tokens = null
+  responseChars = 0;
+elseif (OpenAiHttpException) then (autre HTTP)
+  :outcome = UNAVAILABLE
+  tokens = null;
+else (RuntimeException)
+  :outcome = ERROR
+  tokens = null;
+endif
+
+:recorder.record(provider, model, latencyMs,
+outcome, promptTokens, completionTokens,
+totalTokens, promptChars, responseChars, error);
+
+|LlmCallRecorder|
+partition "Resolution de l'attribution" {
+  :Lit le Scope courant du ThreadLocal;
+  if (Scope present ?) then (oui)
+    :feature = scope.feature()
+    jobId = scope.jobId()
+    projectId = scope.projectId()
+    userId = scope.userId();
+  else (non)
+    :feature = UNKNOWN;
+  endif
+  if (jobId ou userId manquant ?) then (oui)
+    :Repli sur le MDC
+    (LogsConstant.Keys.JOB_ID / USER_ID);
+  else (non)
+  endif
+}
+
+partition "Calcul du cout" {
+  :Lit les tarifs llm.pricing
+  (modele.input / modele.output,
+  repli sur default);
+  :Tarifs parses une fois puis mis en cache
+  (rateCache : evite un new BigDecimal par appel);
+  :cost = (promptTokens x tarifIn
+  + complTokens x tarifOut) / 1000000
+  arrondi a 6 decimales;
+}
+
+fork
+  partition "1 - Metriques (in-memory)" {
+    :metrics.record(...);
+    :Incremente les compteurs Micrometer mis en cache
+    llm.calls.total, llm.tokens.total,
+    llm.cost.total, llm.call.latency;
+    note right
+      Exposees sur /q/metrics
+      Cardinalite bornee
+      Echec capture et ignore (log DEBUG)
+    end note
+  }
+fork again
+  partition "2 - Persistance (base de donnees)" {
+    :Construit LlmCallEntity (id UUID, createdAt,
+    provider, model, feature, outcome, jobId,
+    projectId, userId, tokens, chars, latencyMs,
+    estimatedCost, errorMessage tronque a 1000);
+    :QuarkusTransaction.requiringNew()
+    transaction INDEPENDANTE
+    de la transaction metier;
+    :em.persist(entity) donne INSERT INTO llm_calls;
+    if (INSERT reussi ?) then (oui)
+      :COMMIT;
+    else (non)
+      :Exception capturee + log DEBUG
+      l'appel metier N'EST PAS interrompu;
+      note right
+        Observabilite hors chemin critique
+        Si Postgres tombe, le scraping continue
+      end note
+    endif
+  }
+end fork
+
+|GroqLlmChatClient|
+if (outcome ?) then (SUCCESS)
+  :Retourne LlmResult(text, usage, model);
+else (echec)
+  :Propage LlmRateLimitException
+  ou LlmUnavailableException;
+endif
+
+|Service metier|
+:Fermeture automatique du Handle
+restaure le Scope precedent
+(ou nettoie le ThreadLocal);
+
+if (Appel reussi ?) then (oui)
+  :Parse et exploite la reponse;
+else (non)
+  :Degradation gracieuse
+  (log + valeur de repli);
+endif
+
+stop
+
+@enduml

@@ -1,0 +1,61 @@
+@startuml 01_dispatch
+' ============================================================
+' Phase 1 : mise en file (QUEUED) + dispatch dans le stream
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam sequenceArrowColor #333333
+skinparam sequenceLifeLineBorderColor #666666
+skinparam participantBorderColor #333333
+skinparam noteBorderColor #999999
+skinparam noteBackgroundColor #F4F4F4
+title Phase 1 — Enqueue & Dispatch (avec rollback transactionnel)
+
+actor Déclencheur as CALLER
+participant "JobEnqueueService" as ENQ
+participant "JobPort\n(PostgreSQL)" as DB
+participant "JobDispatchAdapter" as DISP
+database "Redis\nstream:job.run" as REDIS
+
+CALLER -> ENQ : enqueue(jobId, trigger)
+activate ENQ
+
+ENQ -> DB : findById(jobId)
+activate DB
+DB --> ENQ : Optional<Job>
+deactivate DB
+
+alt job introuvable
+  ENQ --> CALLER : false
+else statut non enfilable\n(pas dans CREATED/PAUSED/\nWAITING_FOR_HUMAN/COMPLETED/FAILED)
+  note over ENQ : log "pas re-enfilé"
+  ENQ --> CALLER : false
+else statut enfilable
+  ENQ -> DB : update(status = QUEUED)
+  activate DB
+  DB --> ENQ : ok
+  deactivate DB
+
+  group dispatch
+    ENQ -> DISP : dispatch(jobId)
+    activate DISP
+    DISP -> REDIS : XADD stream:job.run\n{ jobId, enqueuedAt }\nMAXLEN ~ maxlen
+    activate REDIS
+    REDIS --> DISP : messageId
+    deactivate REDIS
+    DISP --> ENQ : ok
+    deactivate DISP
+  end
+
+  alt XADD échoue
+    ENQ -> DB : update(job) — ROLLBACK statut
+    note right of ENQ : statut restauré\navant propagation
+    ENQ --> CALLER : throw
+  else succès
+    note over ENQ : log "QUEUED + dispatched"
+    ENQ --> CALLER : true
+  end
+end
+deactivate ENQ
+
+@enduml

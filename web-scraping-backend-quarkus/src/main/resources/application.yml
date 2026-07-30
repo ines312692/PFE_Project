@@ -1,0 +1,577 @@
+# =============================================================================
+# Application Custom Properties
+# =============================================================================
+app:
+  public-base-url: "${APP_PUBLIC_BASE_URL:http://localhost:8080}"
+
+  cors:
+    allowed-origins: "${CORS_ALLOWED_ORIGINS:http://localhost:4200}"
+    allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+    allowed-headers: "Accept,Authorization,Content-Type,X-Requested-With,X-Correlation-ID"
+    exposed-headers: "Location,Content-Disposition,X-Correlation-ID,Set-Cookie"
+    max-age-seconds: 86400
+    allow-credentials: true
+
+  security:
+    public-paths:
+      paths: "/q/health,/q/health/live,/q/health/ready,/q/metrics,/q/swagger-ui,/q/openapi,/v1/auth"
+
+
+# =============================================================================
+# Session encryption (AES-256-GCM) — credentials & storageState at rest
+# =============================================================================
+session:
+  encryption:
+    key: "${SESSION_ENCRYPTION_KEY}"
+
+# =============================================================================
+# BFF Authentication
+# =============================================================================
+bff:
+  keycloak:
+    base-url: "${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:elyadata}/protocol/openid-connect"
+    realm-url: "${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:elyadata}"
+  client:
+    id: "${BFF_CLIENT_ID:scraping-bff}"
+    secret: "${BFF_CLIENT_SECRET:bff-dev-secret-change-in-prod}"
+  callback-uri: "${BFF_CALLBACK_URI:http://localhost:4200/v1/auth/callback}"
+  frontend-url: "${FRONTEND_URL:http://localhost:4200}"
+  cookie:
+    secure: "${BFF_COOKIE_SECURE:false}"
+
+# =============================================================================
+# Scraper natif Quarkus (remplace le service Python)
+# =============================================================================
+scraper:
+  browser:
+    headless: false
+    default-timeout-ms: 120000
+    pool:
+      enabled: "${SCRAPER_BROWSER_POOL_ENABLED:true}"
+      max-browsers: "${SCRAPER_MAX_BROWSERS:3}"
+      max-context-reuse: "${SCRAPER_MAX_CONTEXT_REUSE:20}"
+      acquire-timeout-ms: "${SCRAPER_POOL_ACQUIRE_TIMEOUT_MS:120000}"
+
+  cloudflare-domains: "${SCRAPER_CF_DOMAINS:carrefour.fr,carrefour.com,auchan.fr}"
+  executor:
+    max-async: "${SCRAPER_MAX_ASYNC:4}"
+  security:
+    ssrf:
+      enabled: "${SCRAPER_SSRF_ENABLED:true}"
+      allow-private-networks: "${SCRAPER_SSRF_ALLOW_PRIVATE:false}"
+      blocked-ports: "${SCRAPER_SSRF_BLOCKED_PORTS:22,23,25,110,135,139,445,1433,3306,3389,5432,5900,6379,9200,11211,27017}"
+      dns-cache-ttl-seconds: "${SCRAPER_SSRF_DNS_TTL:300}"
+  stream:
+    enabled: "${SCRAPER_STREAM_ENABLED:true}"
+    job-run:
+      group: job-runners
+      concurrency: "${SCRAPER_MAX_ASYNC:2}"
+      poll-interval: 1s
+      max-deliveries: 3
+      maxlen: 100000
+    recovery:
+      scan-interval: 30s
+      claim-min-idle: 5m
+      count: 50
+    etl:
+      group: etl-runners
+      concurrency: 2
+      poll-interval: 1s
+      max-deliveries: 3
+      maxlen: 100000
+  reconciliation:
+    enabled: "${SCRAPER_RECONCILIATION_ENABLED:true}"
+    stale-after: 15m
+    scan-interval: 5m
+    batch-size: 100
+    marker-ttl: 30m
+
+  crawl:
+    distributed:
+      enabled: "${SCRAPER_DISTRIBUTED_CRAWL:true}"
+      batch-size: 5
+      poll-delay-ms: 500
+      reclaim-min-idle-ms: 120000
+      reclaim-every-ms: 30000
+
+# =============================================================================
+# Proxy pool & rotation
+# =============================================================================
+proxy:
+  max-rotations: "${PROXY_MAX_ROTATIONS:2}"
+  rotation-budget-ms: "${PROXY_ROTATION_BUDGET_MS:12000}"
+  lease:
+    minutes: "${PROXY_LEASE_MINUTES:5}"
+  health:
+    parallelism: "${PROXY_HEALTH_PARALLELISM:30}"
+  cloudflare:
+    timeout-ms: "${PROXY_CLOUDFLARE_TIMEOUT_MS:5000}"
+  scheduler:
+    health-batch-size: "${PROXY_HEALTH_BATCH_SIZE:100}"
+    health-check-history-days: "${PROXY_HEALTH_HISTORY_DAYS:7}"
+    cloudflare-batch-size: "${PROXY_CF_BATCH_SIZE:30}"
+    cloudflare-recheck-hours: "${PROXY_CF_RECHECK_HOURS:6}"
+    cleanup-inactive-days: "${PROXY_CLEANUP_INACTIVE_DAYS:3}"
+
+# =============================================================================
+# CAPTCHA — solving service & cache
+# =============================================================================
+captcha:
+  enabled: true
+  force-human: false
+  human-intervention:
+    enabled: false
+    timeout-minutes: 10
+  preferred-provider: TWO_CAPTCHA
+  prefer-llm-vision : true
+  fallback-provider: MOCK
+  two-captcha:
+    api-key: "${TWO_CAPTCHA_API_KEY:}"
+  cache:
+    ttl-minutes: 5
+  llm-fallback:
+    enabled: false
+    min-confidence: 0.7
+  llm-pilot:
+    enabled: false
+    max-iterations: 8
+  rotate:
+    debug-dump: true
+    step-degrees: 15
+
+# =============================================================================
+# DNS history (origin IP discovery behind CDNs)
+# =============================================================================
+dns-history:
+  hackertarget:
+    enabled: "${DNS_HISTORY_HACKERTARGET_ENABLED:true}"
+    timeout-ms: "${DNS_HISTORY_HACKERTARGET_TIMEOUT_MS:4000}"
+  resolver:
+    max-candidates: "${DNS_HISTORY_MAX_CANDIDATES:10}"
+    validation-parallelism: "${DNS_HISTORY_VALIDATION_PARALLELISM:5}"
+    validate: "${DNS_HISTORY_VALIDATE:true}"
+  validator:
+    timeout-ms: "${DNS_HISTORY_VALIDATOR_TIMEOUT_MS:5000}"
+
+# =============================================================================
+# LLM — Groq (free) via LangChain4j
+# =============================================================================
+llm:
+  groq:
+    api-key: "${GROQ_API_KEY:}"
+    model: "${GROQ_MODEL:llama-3.3-70b-versatile}"
+
+# =============================================================================
+# Quarkus Default Configuration
+# =============================================================================
+quarkus:
+  application:
+    name: web-scraping-backend-quarkus
+
+  naming:
+    enable-jndi: true
+
+  # ---------------------------------------------------------------------------
+  # OBSERVABILITÉ — Micrometer / Prometheus
+  #
+  # L'app tourne en LOCAL (localhost:8080), Prometheus tourne en DOCKER et
+  # vient scraper /q/metrics via host.docker.internal:8080.
+  #
+  # ignore-patterns : sans ça, chaque scrape de Prometheus crée lui-même une
+  # série http_server_requests pour /q/metrics → bruit + cardinalité inutile.
+  # ---------------------------------------------------------------------------
+  micrometer:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        path: /q/metrics
+    binder:
+      jvm: true
+      system: true
+      vertx:
+        enabled: true
+      http-server:
+        enabled: true
+        ignore-patterns: "/q/.*,/favicon.ico"
+      redis:
+        enabled: true
+
+  config:
+    locations: cloudflare-ips.yml
+
+  # ---------------------------------------------------------------------------
+  # Redis (Streams pour la distribution des jobs)
+  # Pas de 'hosts' ici : en test les Dev Services démarrent un Redis éphémère.
+  # 'hosts' est fixé dans %dev et %prod ci-dessous.
+  # ---------------------------------------------------------------------------
+  redis:
+    max-pool-size: "${REDIS_POOL:20}"   # ≥ scraper.stream.job-run.concurrency
+    timeout: 10s
+
+  quartz:
+    start-mode: forced
+    clustered: false
+    store-type: ram
+    thread-count: 5
+    misfire-policy:
+      default: smart-policy
+
+  http:
+    port: "${HTTP_PORT:8080}"
+    cors:
+      enabled: true
+      origins: "${CORS_ALLOWED_ORIGINS:http://localhost:4200}"
+      methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+      headers: "Accept,Authorization,Content-Type,X-Requested-With,X-Correlation-ID"
+      exposed-headers: "Location,Content-Disposition,X-Correlation-ID,Set-Cookie"
+      access-control-max-age: 86400
+      access-control-allow-credentials: true
+    auth:
+      proactive: false
+      permission:
+        permit-all:
+          paths: /*
+          policy: permit
+
+  oidc:
+    enabled: true
+    auth-server-url: "${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:elyadata}"
+    client-id: "${BFF_CLIENT_ID:scraping-bff}"
+    credentials:
+      secret: "${BFF_CLIENT_SECRET:bff-dev-secret-change-in-prod}"
+    application-type: service
+    token:
+      issuer: "${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:elyadata}"
+    tls:
+      verification: "${OIDC_TLS_VERIFICATION:none}"
+
+  datasource:
+    db-kind: postgresql
+    active: false
+
+  hibernate-orm:
+    active: false
+    mapping:
+      format:
+        global: ignore
+
+  flyway:
+    active: false
+
+  context-propagation:
+    enabled: true
+
+  smallrye-openapi:
+    info-title: AI-Assisted Web Scraping Platform API
+    info-version: 0.1.0
+    info-description: "REST API for the AI-Assisted Configurable Web Scraping Platform"
+    info-contact-name: Elyadata
+    info-contact-email: contact@elyadata.com
+
+  swagger-ui:
+    always-include: true
+    path: /q/swagger-ui
+
+  log:
+    level: INFO
+    category:
+      "com.elyadata":
+        level: DEBUG
+      # Trafic HTTP binaire Keycloak/OIDC — masqué globalement
+      "org.apache.hc.client5.http.wire":
+        level: "OFF"
+      "org.apache.hc":
+        level: WARN
+      "com.microsoft.playwright":
+        level: WARN
+      "org.openqa.selenium":
+        level: WARN
+      "io.github.bonigarcia":
+        level: WARN
+    console:
+      json:
+        enabled: false
+
+# =============================================================================
+# Dev Profile
+# =============================================================================
+"%dev":
+  scraper:
+    browser:
+      headless: false  # passer à true pour ne pas voir les fenêtres
+      default-timeout-ms: 120000
+      pool:
+        # Debug visuel : un seul Chrome, sinon N fenêtres s'ouvrent en parallèle.
+        # Passer à 2-3 pour tester le comportement du pool sous charge.
+        max-browsers: "${SCRAPER_MAX_BROWSERS:1}"
+        max-context-reuse: "${SCRAPER_MAX_CONTEXT_REUSE:10}"
+    executor:
+      max-async: 2
+
+  captcha:
+    debug:
+      dump-grids: true
+
+  quarkus:
+    # -------------------------------------------------------------------------
+    # IMPORTANT — binding réseau en mode dev
+    # -------------------------------------------------------------------------
+    http:
+      host: 0.0.0.0
+
+    micrometer:
+      export:
+        prometheus:
+          default-registry: true
+
+    redis:
+      hosts: redis://localhost:6379
+
+    datasource:
+      active: true
+      username: postgres
+      password: postgres
+      # Métriques du pool de connexions Agroal → agroal_active_count,
+      # agroal_awaiting_count, agroal_acquire_count...
+      metrics:
+        enabled: true
+      jdbc:
+        url: jdbc:postgresql://localhost:5432/scraping_db
+        enable-metrics: true
+
+    hibernate-orm:
+      active: true
+      database:
+        generation: none
+
+    flyway:
+      active: true
+      migrate-at-start: true
+      locations: db/migration
+      repair-at-start: true
+
+    log:
+      level: INFO
+
+      # -----------------------------------------------------------------------
+      # LOGS — fichier JSON consommé par Alloy (conteneur) puis Loki
+      #
+      # Deux sorties distinctes et volontairement asymétriques :
+      #   - console : texte coloré, INFO, pour toi pendant le développement
+      #   - fichier : JSON, DEBUG, pour Loki
+      #
+      # Le fichier peut être plus verbeux que la console : personne ne le lit
+      # directement, et c'est justement l'intérêt de Loki — garder du détail
+      # consultable sans saturer le terminal.
+      #
+      # PRÉREQUIS : le dossier logs/ doit appartenir à l'utilisateur qui lance
+      # Quarkus. S'il a été créé par Docker au montage du volume, il appartient
+      # à root et Quarkus ne peut pas y écrire (échec silencieux).
+      #   sudo rm -rf logs && mkdir logs
+      #
+      # Nécessite la dépendance io.quarkus:quarkus-logging-json.
+      # -----------------------------------------------------------------------
+      file:
+        enable: true
+        path: logs/application.log
+        level: DEBUG
+        json:
+          enabled: true
+          # Stack traces sur une seule ligne JSON : indispensable, sinon chaque
+          # ligne de la trace devient une entrée Loki séparée et illisible.
+          exception-output-type: formatted
+        rotation:
+          max-file-size: 10M
+          max-backup-index: 3
+
+      category:
+        # ===== Ce que tu VEUX voir en DEBUG =====
+        "com.elyadata.feature.proxy":
+          level: DEBUG
+        "com.elyadata.feature.scraper.pipeline":
+          level: DEBUG
+        "com.elyadata.feature.scraper.browser":
+          level: DEBUG
+
+        # ===== Streams en DEBUG (utile au démarrage) =====
+        "com.elyadata.feature.job.infrastructure.stream":
+          level: DEBUG
+
+        # ===== Observabilité LLM : DEBUG pour voir les échecs d'enregistrement
+        # des métriques, que LlmCallRecorder avale en log.debug =====
+        "com.elyadata.common.llm":
+          level: DEBUG
+
+        # ===== Le reste de ton code en INFO =====
+        "com.elyadata":
+          level: INFO
+
+        # ===== Bruit Hibernate : OFF =====
+        "org.hibernate.SQL":
+          level: "OFF"
+        "org.hibernate.orm.core":
+          level: "OFF"
+        "org.hibernate.orm.event":
+          level: "OFF"
+        "org.hibernate.engine":
+          level: "OFF"
+        "org.hibernate.resource.jdbc":
+          level: "OFF"
+        "org.hibernate.stat":
+          level: "OFF"
+        "org.hibernate":
+          level: WARN
+
+        # ===== Bruit Postgres JDBC : OFF =====
+        "org.postgresql":
+          level: WARN
+
+        # ===== Bruit HTTP request/response =====
+        "com.elyadata.common.logging.HttpLogInterceptor":
+          level: WARN
+
+        # ===== Trafic HTTP binaire (déjà chez toi) =====
+        "org.apache.hc.client5.http.wire":
+          level: "OFF"
+        "org.apache.hc":
+          level: WARN
+
+        # ===== Browsers en INFO (utile pour proxy errors) =====
+        "com.microsoft.playwright":
+          level: INFO
+        "org.openqa.selenium":
+          level: INFO
+        "io.github.bonigarcia":
+          level: WARN
+
+        # ===== Quarkus internals =====
+        "io.quarkus":
+          level: WARN
+        "org.aesh":
+          level: "OFF"
+        "jdk.event.security":
+          level: "OFF"
+
+        # ===== Alloy lit le fichier ; inutile de logger Loki côté app =====
+        "io.grpc":
+          level: WARN
+
+      console:
+        format: "%d{HH:mm:ss} %-5p [%c{2.}] (%t) %s%e%n"
+        color: true
+        # La console reste en texte lisible : seul le fichier est en JSON.
+        json:
+          enabled: false
+
+# =============================================================================
+# Prod Profile
+# =============================================================================
+"%prod":
+  bff:
+    cookie:
+      secure: "${BFF_COOKIE_SECURE:true}"
+
+  scraper:
+    browser:
+      headless: true
+      pool:
+        # 4 Go de conteneur, 1 Go de heap → (4096 - 1024 - 512) / 400 ≈ 6
+        # Rester conservateur : Chrome dépasse régulièrement son estimation.
+        max-browsers: "${SCRAPER_MAX_BROWSERS:3}"
+        max-context-reuse: "${SCRAPER_MAX_CONTEXT_REUSE:20}"
+        acquire-timeout-ms: "${SCRAPER_POOL_ACQUIRE_TIMEOUT_MS:120000}"
+    executor:
+      max-async: "${SCRAPER_MAX_ASYNC:8}"
+
+  quarkus:
+    redis:
+      hosts: "${REDIS_URL}"
+
+    oidc:
+      auth-server-url: "${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}"
+      tls:
+        verification: "${OIDC_TLS_VERIFICATION:required}"
+
+    datasource:
+      active: true
+      username: "${DB_USERNAME}"
+      password: "${DB_PASSWORD}"
+      metrics:
+        enabled: true
+      jdbc:
+        url: "${DB_URL}"
+        enable-metrics: true
+
+    hibernate-orm:
+      active: true
+      database:
+        generation: none
+
+    flyway:
+      active: true
+      migrate-at-start: true
+      locations: db/migration
+
+    log:
+      level: WARN
+      category:
+        "com.elyadata":
+          level: INFO
+      # En prod, la console est déjà en JSON et sera collectée par l'agent
+      # du cluster (sidecar, DaemonSet) : pas de fichier local à gérer.
+      console:
+        json:
+          enabled: true
+
+# =============================================================================
+# Test Profile
+# =============================================================================
+"%test":
+  scraper:
+    # Worker de stream coupé en test : pas de polling ni de threads pendant les tests
+    stream:
+      enabled: false
+    reconciliation:
+      enabled: false
+    browser:
+      headless: true
+      default-timeout-ms: 10000
+      pool:
+        # Pooling désactivé : un slot partagé entre deux tests produit des échecs
+        # intermittents pénibles à diagnostiquer. Mode standalone = isolation stricte.
+        enabled: false
+    security:
+      ssrf:
+        allow-private-networks: true
+    executor:
+      max-async: 1
+
+  quarkus:
+    # Micrometer coupé en test : chaque @QuarkusTest instancierait un registry
+    # Prometheus pour rien, et les compteurs fuiteraient entre classes de test.
+    micrometer:
+      enabled: false
+
+    oidc:
+      enabled: false
+
+    # Pas de fichier de log en test : chaque exécution polluerait logs/
+    # et Alloy enverrait des lignes de test dans Loki.
+    log:
+      file:
+        enable: false
+
+    datasource:
+      active: true
+      db-kind: h2
+      jdbc:
+        url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;NON_KEYWORDS=VALUE
+
+    hibernate-orm:
+      active: true
+      database:
+        generation: drop-and-create
+
+    flyway:
+      active: false

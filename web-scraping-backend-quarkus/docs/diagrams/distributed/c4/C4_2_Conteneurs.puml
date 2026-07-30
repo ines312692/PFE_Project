@@ -1,0 +1,38 @@
+@startuml C4_2_Conteneurs
+' ============================================================
+' C4 - Niveau 2 : Conteneurs
+' ============================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+title Niveau 2 (Conteneurs) — Plateforme de Web Scraping
+
+Person(user, "Utilisateur")
+
+System_Boundary(platform, "Plateforme de Web Scraping") {
+  Container(spa, "Frontend SPA", "React / Angular", "Interface de configuration, monitoring et visualisation des résultats")
+  Container(backend, "Backend de scraping", "Quarkus / Java", "API REST, orchestration des jobs, moteur de crawl distribué, workers de stream")
+  Container(browser, "Navigateur headless", "Playwright / Selenium", "Rendu JS, stealth, humanizer — lancé par le backend")
+  ContainerDb(postgres, "PostgreSQL", "SGBD relationnel", "Jobs, configs, schémas, résultats, proxies, audit")
+  ContainerDb(redis, "Redis", "Streams + structures", "Bus de messages (jobs, join, ETL), état du crawl (frontier), leases et verrous")
+}
+
+System_Ext(keycloak, "Keycloak", "OIDC")
+System_Ext(targets, "Sites web cibles")
+System_Ext(groq, "LLM Groq")
+System_Ext(proxies, "Fournisseurs de proxies")
+
+Rel(user, spa, "Utilise", "HTTPS")
+Rel(spa, backend, "Appels API + SSE (notifications)", "HTTPS/JSON")
+Rel(backend, keycloak, "Authentifie (BFF)", "OIDC")
+Rel(backend, postgres, "Lit/écrit l'état métier", "JDBC")
+
+Rel(backend, redis, "Publie/consomme les jobs, join, ETL", "Redis Streams (XADD/XREADGROUP)")
+Rel(backend, redis, "Maintient la frontier du crawl", "Streams + Sets + Hash + compteurs")
+Rel(backend, redis, "Pose des leases/verrous", "SET NX EX / SETNX")
+
+Rel(backend, browser, "Pilote la navigation", "CDP / WebDriver")
+Rel(browser, targets, "Charge les pages", "HTTP(S)")
+Rel(backend, groq, "Extraction IA", "HTTPS/API")
+Rel(backend, proxies, "Rotation de proxies", "HTTP(S)")
+
+@enduml

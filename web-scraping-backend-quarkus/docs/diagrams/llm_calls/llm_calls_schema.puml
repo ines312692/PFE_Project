@@ -1,0 +1,72 @@
+@startuml llm_calls_schema
+title Modele de donnees - observabilite LLM
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam linetype ortho
+
+hide circle
+
+entity "llm_calls" as llm {
+  * id : UUID <<PK>>
+  --
+  * created_at : TIMESTAMPTZ <<DEFAULT now()>>
+  == Identification de l'appel ==
+  * provider : VARCHAR(40)
+  * model : VARCHAR(120)
+  * feature : VARCHAR(60)
+  * outcome : VARCHAR(20)
+  == Attribution (nullable) ==
+  job_id : UUID
+  project_id : UUID
+  user_id : UUID
+  == Consommation - source API Groq ==
+  prompt_tokens : INTEGER
+  completion_tokens : INTEGER
+  total_tokens : INTEGER
+  == Mesure locale - repli si echec ==
+  * prompt_chars : INTEGER <<DEFAULT 0>>
+  * response_chars : INTEGER <<DEFAULT 0>>
+  == Performance et cout ==
+  * latency_ms : INTEGER <<DEFAULT 0>>
+  * estimated_cost : NUMERIC(12,6) <<DEFAULT 0>>
+  == Diagnostic ==
+  error_message : TEXT
+}
+
+entity "jobs" as jobs {
+  * id : UUID <<PK>>
+  --
+  project_id : UUID <<FK>>
+}
+
+entity "projects" as projects {
+  * id : UUID <<PK>>
+  --
+  name : VARCHAR
+}
+
+note right of llm
+  Pas de contrainte FK sur job_id.
+  Volontaire : une ligne d'observabilite
+  ne doit jamais bloquer ni cascader
+  sur la suppression d'un job.
+  La jointure se fait en lecture
+  via LEFT JOIN.
+end note
+
+note bottom of llm
+  Index (migration V44)
+  idx_llm_calls_created_at (created_at)
+  idx_llm_calls_project (project_id, created_at)
+  idx_llm_calls_job (job_id)
+  idx_llm_calls_feature (feature, created_at)
+  idx_llm_calls_model (model, created_at)
+end note
+
+llm }o..o| jobs : "job_id (jointure logique)"
+jobs }o--|| projects : project_id
+
+@enduml

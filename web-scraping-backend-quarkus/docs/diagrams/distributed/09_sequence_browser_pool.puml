@@ -1,0 +1,279 @@
+@startuml 09_sequence_browser_pool
+' ============================================================
+' SÉQUENCE — Pool de navigateurs pendant un crawl
+' Slot / thread propriétaire / Chrome / contexte
+' Emprunt, réutilisation, recyclage, restitution
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam maxMessageSize 220
+skinparam sequenceArrowColor #333333
+skinparam sequenceLifeLineBorderColor #666666
+skinparam sequenceGroupBorderColor #888888
+skinparam sequenceGroupBackgroundColor #F0F0F0
+skinparam participantBorderColor #333333
+skinparam participantBackgroundColor #F7F7F7
+skinparam databaseBorderColor #333333
+skinparam noteBorderColor #999999
+skinparam noteBackgroundColor #F4F4F4
+title Pool de navigateurs — cycle de vie d'un slot pendant un crawl (emprunt / reutilisation / recyclage)
+
+box "Nœud de scraping" #FBFBFB
+  participant "JobRunWorker\n/ CrawlJoinWorker" as CALLER
+  participant "BrowserFactory" as FACT
+  participant "Distributed\nCrawlCoordinator" as COORD
+  participant "PlaywrightBrowser" as PWB
+end box
+
+box "Pool — singleton @ApplicationScoped (1 par JVM)" #F2F2F2
+  participant "BrowserPool" as POOL
+  queue "available\nArrayBlockingQueue(3)" as QUEUE
+  participant "PooledContext\n(le ticket)" as TICKET
+  participant "BrowserPool\nMetrics" as MET
+end box
+
+box "Slot 0 — thread \"browser-slot-0\"" #FBFBFB
+  participant "BrowserSlot" as SLOT
+  participant "ownerThread\nsingle thread executor" as OWNER
+end box
+
+box "Processus systeme" #F2F2F2
+  participant "Driver Playwright\n(processus Node)" as DRV
+  participant "Chrome\n(processus)" as CHROME
+  participant "BrowserContext\n+ Page" as CTX
+end box
+
+note over POOL, QUEUE
+  Invariants du pool :
+  - au plus maxBrowsers Chrome vivants par JVM (plafond dur)
+  - un slot n'est jamais detenu par deux jobs a la fois
+  - un slot sorti de la file revient TOUJOURS en file
+  - toute operation Playwright passe par le thread proprietaire du slot
+end note
+
+' ================= PHASE 0 : INITIALISATION =================
+group Phase 0 — Initialisation du pool (@PostConstruct, une fois par JVM)
+  POOL -> POOL : lecture de BrowserPoolConfig
+  note right of POOL : maxBrowsers=3, maxContextReuse=20,\nacquireTimeoutMs=120000, enabled=true
+  alt pool desactive
+    note over POOL #EEEEEE : mode legacy : un Chrome dedie par job\n(startStandalone dans PlaywrightBrowser)
+  else pool actif
+    loop i de 0 a maxBrowsers - 1
+      POOL -> SLOT : new BrowserSlot(i, headless, maxContextReuse)
+      activate SLOT
+      SLOT -> OWNER : newSingleThreadExecutor("browser-slot-" + i)
+      note right of SLOT : AUCUN Chrome lance ici.\nLancement paresseux au premier emprunt.
+      deactivate SLOT
+      POOL -> QUEUE : add(slot)
+    end
+    POOL -> MET : registerCapacity(3)
+    note over POOL : allSlots conserve TOUS les slots,\nla file ne contient que les slots libres
+  end
+end
+
+' ================= PHASE 1 : CONSTRUCTION =================
+group Phase 1 — Construction du navigateur (aucun emprunt a ce stade)
+  CALLER -> FACT : create(request)
+  activate FACT
+  FACT -> FACT : withEngineDefaults : jsEnabled=true, timeout >= 90s
+  FACT -> FACT : resolveIsolation(request)
+  note right of FACT : sessionConfig utilisable\nou storageState restaure\ndonc isolatedBrowser = true
+  FACT -> FACT : consistencyProfileFactory.buildFor(proxy)
+  FACT -> PWB : new PlaywrightBrowser(request, stealth, profile, ..., browserPool)
+  FACT --> CALLER : ABrowser
+  deactivate FACT
+  CALLER -> COORD : run(...) / joinExistingCrawl(request, browser, extractor)
+  activate COORD
+  note over COORD : drainWithBrowser :\ntry (browser) { browser.start(); drain(...); }\nla restitution est garantie par le try-with-resources
+end
+
+' ================= PHASE 2 : EMPRUNT DU SLOT =================
+group Phase 2 — Emprunt d'un slot (PlaywrightBrowser.start)
+  COORD -> PWB : start()
+  activate PWB
+  PWB -> PWB : buildContextOptions()
+  note right of PWB : userAgent, viewport, locale, timezone,\nstorageState, options stealth\nce qui varie PAR JOB vit dans le contexte
+  PWB -> PWB : sidecarEnabled && sidecarReachable(/health) ?
+  PWB -> POOL : acquire(proxy, sidecarMode, sidecarUrl, ctxOptions, exclusive)
+  activate POOL
+  POOL -> POOL : waitStart = nanoTime()
+  POOL -> QUEUE : poll(acquireTimeoutMs = 120s)
+  alt aucun slot libre avant expiration
+    QUEUE --> POOL : null
+    POOL -> MET : acquireTimeout()
+    POOL --> PWB : IllegalStateException "aucun slot disponible"
+    note over POOL #EEEEEE : BACK-PRESSURE\nle job attend puis echoue proprement,\non ne lance JAMAIS un 4e Chrome
+  else slot obtenu
+    QUEUE --> POOL : slot 0 (retire de la file)
+    POOL -> MET : recordWait(nanoTime - waitStart)
+    POOL -> MET : slotAcquired()
+  end
+end
+
+' ================= PHASE 3 : OBTENTION DU CHROME =================
+group Phase 3 — Obtention du Chrome (tout passe par le thread proprietaire)
+  POOL -> SLOT : newContext(proxy, sidecarMode, sidecarUrl, ctxOptions)
+  activate SLOT
+  SLOT -> OWNER : ownerThread.submit(...).get(90s)
+  activate OWNER
+  note right of OWNER : Playwright Java n'est pas thread-safe :\nlaunch / newContext / close doivent tous\ns'executer sur le meme thread
+  OWNER -> OWNER : wantedKey = resolveProxyKey(proxy, sidecar, url)
+  note right of OWNER : "direct" | "proxy:ip:port" | "sidecar:url"
+
+  alt Chrome vivant ET wantedKey == launchedProxyKey
+    note over OWNER #EEEEEE : REUTILISATION — cas nominal\naucun lancement, gain de ~2 s et de 300 Mo
+  else premier usage du slot, ou sortie reseau differente
+    opt sortie reseau differente
+      OWNER -> CHROME : browser.close()
+      note right of CHROME : Chromium fixe son proxy au LANCEMENT.\nChanger d'IP impose donc une relance.
+    end
+    opt playwright == null (premier usage du slot)
+      OWNER -> DRV : Playwright.create()
+      note right of DRV : un driver Node par slot, cree UNE fois.\nIl survit a tous les recyclages de Chrome.
+    end
+    OWNER -> DRV : chromium().launch(headless, launchArgs)
+    note right of DRV : --disable-dev-shm-usage, --no-sandbox,\n--disable-blink-features=AutomationControlled,\npolitique WebRTC, proxy eventuel
+    DRV -> CHROME : demarrage du processus (~2 s, 200-500 Mo)
+    DRV --> OWNER : Browser
+    OWNER -> OWNER : launchedProxyKey = wantedKey ; contextsServed = 0
+  end
+
+  OWNER -> CHROME : browser.newContext(ctxOptions)
+  CHROME --> OWNER : BrowserContext (profil isole, ~50 ms)
+  OWNER -> OWNER : contextsServed++
+  note right of OWNER : log "context cree (n/20 avant recyclage)"
+  OWNER --> SLOT : BrowserContext
+  deactivate OWNER
+  SLOT --> POOL : BrowserContext
+  deactivate SLOT
+
+  alt newContext leve une RuntimeException
+    POOL -> SLOT : releaseContext(null, forceRecycle = true)
+    POOL -> QUEUE : offer(slot)
+    POOL -> MET : slotReleased()
+    POOL --> PWB : exception relancee
+    note over POOL #EEEEEE : rattrapage indispensable :\nsans lui le slot serait perdu et le pool\npasserait silencieusement de 3 a 2 a 1
+  else creation reussie
+    POOL -> TICKET : new PooledContext(ctx, slot, pool, exclusive)
+    POOL --> PWB : PooledContext
+    deactivate POOL
+  end
+end
+
+' ================= PHASE 4 : PREPARATION DE LA PAGE =================
+group Phase 4 — Preparation de la page
+  PWB -> PWB : context = pooled.getContext()
+  opt stealthMode active
+    PWB -> CTX : stealthProfile.applyInitScripts(context, consistencyProfile)
+    note right of CTX : navigator.webdriver, canvas, WebGL,\nplugins, permissions, WebRTC
+  end
+  PWB -> CTX : context.newPage()
+  PWB -> CTX : page.setDefaultTimeout(request.timeoutMs)
+  note over PWB : log "Started — pooled=true isolated=... stealth=..."
+  PWB --> COORD : navigateur pret
+  deactivate PWB
+end
+
+' ================= PHASE 5 : BOUCLE DE CRAWL =================
+group Phase 5 — Drain : la MEME page sert toutes les URLs du crawl
+  loop pour chaque URL claim depuis la frontier Redis
+    COORD -> PWB : navigate(url)
+    activate PWB
+    PWB -> PWB : applyRandomDelay()
+    PWB -> CTX : page.navigate(url, DOMCONTENTLOADED)
+    PWB -> CTX : page.waitForLoadState(NETWORKIDLE)
+    PWB -> PWB : humanizer.afterPageLoad(page)
+    deactivate PWB
+
+    COORD -> PWB : dismissCookies() / waitForSelector / scroll
+    COORD -> PWB : snapshot()
+    activate PWB
+    PWB -> CTX : page.content() + document.body.innerText
+    CTX --> PWB : html + texte
+    PWB --> COORD : PageSnapshot
+    deactivate PWB
+
+    COORD -> COORD : extractor.extract(snapshot, request)
+    COORD -> COORD : SADD done + XACK sur la frontier
+    note over COORD #EEEEEE : AUCUN emprunt de slot dans cette boucle.\nUn seul contexte et une seule page\npour la totalite du crawl.
+  end
+end
+
+' ================= PHASE 6 : INCIDENTS =================
+group Phase 6 — Incidents pendant le crawl
+  alt erreur navigateur (Infrastructure5xxException)
+    PWB --> COORD : exception
+    COORD -> COORD : RetryExecutor puis circuitBreaker.recordFailure()
+    note over COORD : URL laissee en PEL, reprise par XAUTOCLAIM
+  end
+  opt navigateur compromis (anti-bot declenche, fingerprint grille)
+    COORD -> PWB : markPoisoned()
+    PWB -> TICKET : poison()
+    note right of TICKET : le Chrome sera DETRUIT a la restitution,\nsans attendre le quota de 20 contextes
+  end
+end
+
+' ================= PHASE 7 : RESTITUTION =================
+group Phase 7 — Restitution du slot (sortie du try-with-resources)
+  COORD -> PWB : close()
+  activate PWB
+  alt mode pool
+    PWB -> TICKET : close()
+    activate TICKET
+    alt closed == true
+      note over TICKET : appel idempotent, on sort\n(sinon le slot serait rendu deux fois)
+    else premiere fermeture
+      TICKET -> TICKET : closed = true
+      TICKET -> POOL : release(this)
+      activate POOL
+      POOL -> POOL : recycle = isExclusive() || isPoisoned()
+      POOL -> SLOT : releaseContext(context, recycle)
+      activate SLOT
+      SLOT -> OWNER : ownerThread.submit(...)
+      activate OWNER
+      OWNER -> CTX : context.close()
+      note right of CTX : cookies, cache et localStorage\ndu job sont detruits ici
+      alt recycle == true OU contextsServed >= maxContextReuse
+        OWNER -> CHROME : browser.close()
+        OWNER -> OWNER : launchedProxyKey = null ; contextsServed = 0
+        note over OWNER #EEEEEE : 3 motifs de recyclage :\nquota atteint (fuite memoire Chromium),\nexclusive (job authentifie),\npoisoned (navigateur grille).\nLe driver Playwright est CONSERVE.
+      else
+        note over OWNER #EEEEEE : CAS NOMINAL\nChrome reste allume et pret\npour le job suivant
+      end
+      deactivate OWNER
+      deactivate SLOT
+      opt recycle effectue
+        POOL -> MET : recycled()
+      end
+      POOL -> QUEUE : offer(slot)
+      POOL -> MET : slotReleased()
+      note over POOL : offer place dans un finally :\nune erreur de fermeture ne fait\nJAMAIS perdre un slot
+      deactivate POOL
+    end
+    deactivate TICKET
+  else mode standalone (pool desactive)
+    PWB -> CTX : context.close()
+    PWB -> CHROME : browser.close()
+    PWB -> DRV : playwright.close()
+    note over PWB : tout est detruit, rien n'est amorti
+  end
+  deactivate PWB
+  COORD --> CALLER : PipelineResult
+  deactivate COORD
+end
+
+' ================= PHASE 8 : ARRET =================
+group Phase 8 — Arret de l'application (@PreDestroy)
+  POOL -> SLOT : shutdown() sur chaque slot de allSlots
+  activate SLOT
+  SLOT -> OWNER : submit(disposeBrowser + playwright.close())
+  activate OWNER
+  OWNER -> CHROME : browser.close()
+  OWNER -> DRV : playwright.close()
+  deactivate OWNER
+  SLOT -> OWNER : shutdown() puis awaitTermination(20s) sinon shutdownNow()
+  deactivate SLOT
+  note over POOL : on itere sur allSlots et non sur la file :\nles slots encore empruntes sont aussi fermes,\naucun Chrome ne survit a l'application
+end
+
+@enduml

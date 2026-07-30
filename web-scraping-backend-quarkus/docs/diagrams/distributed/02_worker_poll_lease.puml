@@ -1,0 +1,132 @@
+@startuml 02_worker_poll_lease
+' ============================================================
+' Phase 2 : détection du job par le worker (poll, lease, PEL, DLQ)
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam sequenceArrowColor #333333
+skinparam sequenceLifeLineBorderColor #666666
+skinparam participantBorderColor #333333
+skinparam noteBorderColor #999999
+skinparam noteBackgroundColor #F4F4F4
+title Phase 2 — Polling, Lease d'exclusion, PEL & DLQ
+
+participant "Scheduler\n(@Scheduled 1s)" as SCHED
+participant "JobRunWorker" as JRW
+participant "ScrapeWorkerPool" as POOL
+participant "StreamConsumerSupport" as SUP
+database "Redis\nstream:job.run" as REDIS
+participant "JobPort" as DB
+participant "JobService" as JSVC
+
+SCHED -> JRW : poll()
+activate JRW
+
+alt stream désactivé
+  JRW --> SCHED : return
+else
+  JRW -> POOL : freeSlots()
+  activate POOL
+  POOL --> JRW : free
+  deactivate POOL
+
+  alt free <= 0 (pool saturé)
+    note over JRW : on ne lit pas :\npas de slot pour traiter
+    JRW --> SCHED : return
+  else free > 0
+    JRW -> REDIS : XREADGROUP job-runners > (count = free)
+    activate REDIS
+    REDIS --> JRW : msgs (jamais distribués\nà ce groupe)
+    deactivate REDIS
+
+    alt NOGROUP
+      JRW -> SUP : ensureGroup(job.run, job-runners)
+      note right : groupe (re)créé,\nretour vide ce tick
+    else msgs vides
+      JRW --> SCHED : return
+    else msgs présents
+      loop pour chaque message
+        JRW -> POOL : submit(process(msg))
+        activate POOL
+        alt pool accepte
+          POOL --> JRW : true
+        else RejectedExecution
+          POOL --> JRW : false
+          note over JRW : stop la boucle,\nmessages restants repris\nau prochain tick
+        end
+        deactivate POOL
+      end
+    end
+  end
+end
+deactivate JRW
+
+== Traitement asynchrone d'un message (thread du pool) ==
+
+JRW -> JRW : process(msg)
+activate JRW
+
+alt jobId absent / invalide
+  JRW -> SUP : handleFailure(... maxDeliveries)
+  activate SUP
+  SUP -> REDIS : XADD stream:job.run.dlq\n{ payload, dlqReason }
+  SUP -> REDIS : XACK (retrait de la PEL)
+  deactivate SUP
+else jobId valide
+  JRW -> DB : findById(jobId)
+  activate DB
+  DB --> JRW : Optional<Job>
+  deactivate DB
+
+  alt job absent
+    JRW -> SUP : ack(msg)
+    note right : job supprimé,\non acquitte et on sort
+  else déjà COMPLETED / CANCELLED
+    JRW -> SUP : ack(msg)
+    note right : idempotence : skip
+  else exécutable
+    JRW -> REDIS : SET job:lease:{job} = nodeName NX EX 90s
+    activate REDIS
+    REDIS --> JRW : (valeur)
+    deactivate REDIS
+    JRW -> REDIS : GET job:lease:{job}
+
+    alt lease détenu ailleurs
+      note over JRW : skip SANS ack :\nl'autre nœud ackera.\nMessage reste en PEL.
+    else lease acquis
+      JRW -> SUP : recordAttempt(msg) -> deliveryCount
+      JRW -> JSVC : runJobSync(jobId)
+      activate JSVC
+      note right of JSVC : voir Phase 3/4\n(transition RUNNING + ScrapeEngine)
+      JSVC --> JRW : ok / exception
+      deactivate JSVC
+
+      alt succès
+        JRW -> SUP : ack(msg)
+        note over SUP : XACK + purge du compteur\nd'attempts
+      else exception
+        JRW -> SUP : handleFailure(deliveryCount, maxDeliveries=3)
+        activate SUP
+        alt deliveryCount >= maxDeliveries
+          SUP -> REDIS : XADD ...dlq + XACK
+          note right : envoi en DLQ
+        else
+          note over SUP : laissé en PEL\npour retry ultérieur
+        end
+        deactivate SUP
+      end
+
+      JRW -> JRW : releaseLease(jobId)\n(DEL si propriétaire)
+    end
+  end
+end
+deactivate JRW
+
+note over JRW, REDIS
+  renewLeases() (@Scheduled 30s) prolonge le TTL (EX 90s)
+  de chaque lease actif tant que le job tourne.
+  Si le nœud meurt : lease expiré + message en PEL
+  -> repris par le recovery scheduler.
+end note
+
+@enduml

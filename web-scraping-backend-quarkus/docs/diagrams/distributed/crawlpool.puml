@@ -1,0 +1,121 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam ArrowColor black
+skinparam ActivityBorderColor black
+skinparam ActivityBackgroundColor white
+skinparam ActivityDiamondBackgroundColor white
+skinparam NoteBackgroundColor white
+skinparam PartitionBorderColor black
+
+title Cycle de vie d'un job avec le pool de navigateurs
+
+|Worker de stream|
+start
+:Message reçu depuis\nstream:job.run;
+:BrowserFactory.create(request);
+
+if (session authentifiée\nou storageState ?) then ([oui])
+  :isolatedBrowser = true;
+else ([non])
+  :isolatedBrowser = false;
+endif
+
+:Construction des NewContextOptions\n(user-agent, viewport, locale,\ntimezone, storageState);
+
+|BrowserPool|
+if (pool activé ?) then ([non])
+  |Worker de stream|
+  :Mode standalone :\nPlaywright.create()\n+ chromium().launch();
+  note right
+    Comportement legacy
+    Un Chrome dédié par job
+  end note
+  |Traitement|
+  :Utilisation du navigateur;
+  |Worker de stream|
+  :Fermeture complète\n(context + browser + playwright);
+  stop
+else ([oui])
+endif
+
+:acquire() — attente d'un slot;
+
+if (slot disponible\navant timeout ?) then ([non])
+  :Compteur acquire_timeouts++;
+  :IllegalStateException;
+  stop
+else ([oui])
+endif
+
+:Slot retiré de la file;
+:Métrique in_use++;
+
+|Slot (thread propriétaire)|
+:Calcul de la clé de sortie réseau\n("direct" / "sidecar:..." / "proxy:...");
+
+if (Chrome vivant ?) then ([non])
+  if (Playwright démarré ?) then ([non])
+    :Playwright.create();
+    note right: ~2 s — évité aux jobs suivants
+  else ([oui])
+  endif
+  :chromium().launch()\navec le proxy de la clé;
+else ([oui])
+  if (clé identique ?) then ([non])
+    :Fermeture du Chrome;
+    :Relance avec la nouvelle sortie;
+    note right
+      Playwright conservé
+    end note
+  else ([oui])
+    :Réutilisation du Chrome existant;
+  endif
+endif
+
+:browser.newContext(options);
+:contextsServed++;
+
+|Worker de stream|
+:Application des scripts stealth\nsur le contexte;
+:context.newPage();
+
+|Traitement|
+:navigate / click / extract;
+
+if (exception ?) then ([oui])
+  :markPoisoned();
+  note right: force le recyclage
+else ([non])
+endif
+
+|Worker de stream|
+:close() — idempotent;
+
+|BrowserPool|
+:release(handle);
+
+|Slot (thread propriétaire)|
+:context.close();
+
+if (exclusif OU poisoned\nOU quota atteint ?) then ([oui])
+  :Fermeture du Chrome;
+  :contextsServed = 0;
+  :Métrique recycles++;
+  note right
+    Playwright reste vivant
+  end note
+else ([non])
+  :Chrome conservé\npour le job suivant;
+endif
+
+|BrowserPool|
+:Slot remis dans la file;
+:Métrique in_use--;
+
+|Worker de stream|
+:ACK du message Redis;
+stop
+
+@enduml

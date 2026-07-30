@@ -1,0 +1,64 @@
+@startuml C4_3b_Composants_stream_crawl
+' ============================================================
+' C4 - Niveau 3 : Composants — zoom distribution + join
+' ============================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+title Niveau 3 (Composants) — Zoom : distribution des jobs & join du crawl
+
+Container_Boundary(backend, "Backend de scraping (Quarkus)") {
+
+  Component(enqueue, "JobEnqueueService", "Domaine", "Passe le job en QUEUED puis délègue le dispatch (rollback si échec)")
+  Component(jobService, "JobServiceImpl", "Domaine", "runJobSync, buildRequestForJoin, transitions de statut")
+
+  Component(dispatch, "JobDispatchAdapter", "Stream", "XADD vers job.run et etl.process")
+  Component(jobWorker, "JobRunWorker", "Stream", "Poll job.run, lease SET NX EX, exécute, ack/DLQ")
+  Component(scrapePool, "ScrapeWorkerPool", "Stream", "Pool de threads borné ; slots libres = backpressure")
+  Component(joinDispatch, "CrawlJoinDispatcher", "Stream", "Publie (parallelism-1) messages de renfort")
+  Component(joinWorker, "CrawlJoinWorker", "Stream", "Poll crawl.join, construit la requête, rejoint le crawl")
+  Component(joinPool, "CrawlJoinWorkerPool", "Stream", "Pool de threads des renforts")
+  Component(etlWorker, "EtlWorker", "Stream", "Poll etl.process, exécute les steps")
+  Component(support, "StreamConsumerSupport", "Stream", "ensureGroup, ack, recordAttempt, DLQ")
+  Component(identity, "ConsumerIdentity", "Stream", "Identité unique du nœud (host+pid+aléa)")
+
+  Component(engine, "ScrapeEngine", "Moteur", "Route CRAWLER distribué vers le Coordinator")
+  Component(coordinator, "DistributedCrawlCoordinator", "Crawl", "Drain PRINCIPAL/RENFORT, seed, élection finalizer")
+  Component(frontier, "DistributedCrawlFrontier", "Crawl", "Frontier Redis : ready/seen/done/pages/records/finalized")
+  Component(persister, "CrawlResultPersister", "Crawl", "Persiste le résultat et dispatche l'ETL")
+}
+
+ContainerDb(redis, "Redis", "Streams + état partagé")
+ContainerDb(postgres, "PostgreSQL")
+
+' --- Distribution du job ---
+Rel(enqueue, dispatch, "dispatch(jobId)")
+Rel(dispatch, redis, "XADD stream:job.run")
+Rel(jobWorker, redis, "XREADGROUP > / XACK / lease", "job.run + job:lease")
+Rel(jobWorker, scrapePool, "submit(process)")
+Rel(jobWorker, support, "ensureGroup / ack / DLQ")
+Rel(jobWorker, identity, "nom du consommateur")
+Rel(jobWorker, jobService, "runJobSync(jobId)")
+Rel(jobService, engine, "runScrape(request)")
+
+' --- Ouverture du crawl + renforts ---
+Rel(engine, coordinator, "run(request) [PRINCIPAL]")
+Rel(coordinator, frontier, "ensureGroup / seed / claim / complete")
+Rel(frontier, redis, "Streams/Sets/Hash/compteurs", "ready/seen/done/pages/records")
+Rel(coordinator, joinDispatch, "publish(jobId, N)")
+Rel(joinDispatch, redis, "XADD stream:crawl.join")
+
+' --- Join des renforts ---
+Rel(joinWorker, redis, "XREADGROUP > / XACK", "crawl.join")
+Rel(joinWorker, joinPool, "submit(process)")
+Rel(joinWorker, jobService, "buildRequestForJoin(jobId)")
+Rel(joinWorker, coordinator, "joinExistingCrawl() [RENFORT]")
+
+' --- Finalisation + ETL ---
+Rel(coordinator, frontier, "tryBecomeFinalizer (SETNX)")
+Rel(coordinator, persister, "persistAndDispatch()")
+Rel(persister, postgres, "save + update statut")
+Rel(persister, dispatch, "dispatchEtl(jobId)")
+Rel(dispatch, redis, "XADD stream:etl.process")
+Rel(etlWorker, redis, "XREADGROUP >", "etl.process")
+
+@enduml

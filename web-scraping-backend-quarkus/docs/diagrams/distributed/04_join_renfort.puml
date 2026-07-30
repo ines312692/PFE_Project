@@ -1,0 +1,95 @@
+@startuml 04_join_renfort
+' ============================================================
+' Phase 5 : le renfort rejoint le crawl (crawl.join -> frontier)
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam sequenceArrowColor #333333
+skinparam sequenceLifeLineBorderColor #666666
+skinparam participantBorderColor #333333
+skinparam noteBorderColor #999999
+skinparam noteBackgroundColor #F4F4F4
+title Phase 5 — Le renfort rejoint le crawl existant
+
+participant "Scheduler\n(@Scheduled 1s)" as SCHED
+participant "CrawlJoinWorker" as CJW
+participant "CrawlJoinWorkerPool" as POOL
+database "Redis\nstream:crawl.join" as SCJ
+participant "JobPort" as DB
+participant "JobService" as JSVC
+participant "ProxyPoolService" as PROXY
+participant "Coordinator\n(RENFORT)" as COORD
+
+SCHED -> CJW : poll()
+activate CJW
+CJW -> POOL : freeSlots()
+POOL --> CJW : free
+
+alt free <= 0
+  CJW --> SCHED : return
+else
+  CJW -> SCJ : XREADGROUP crawl-joiners > (count = free)
+  activate SCJ
+  SCJ --> CJW : msgs
+  deactivate SCJ
+  alt NOGROUP
+    CJW -> CJW : ensureGroup(crawl.join)
+  else msgs présents
+    loop chaque message
+      CJW -> POOL : submit(process(msg))
+    end
+  end
+end
+deactivate CJW
+
+== Traitement d'un message de renfort ==
+
+CJW -> CJW : process(msg)
+activate CJW
+
+alt jobId absent / invalide
+  CJW -> SCJ : handleFailure -> PEL / DLQ (max-deliveries = 2)
+else jobId valide
+  CJW -> DB : findById(jobId)
+  DB --> CJW : Optional<Job>
+
+  alt job absent ou terminal\n(COMPLETED/FAILED/CANCELLED)
+    CJW -> SCJ : XACK
+    note right : ack sans renfort
+  else job actif
+    CJW -> JSVC : buildRequestForJoin(jobId)
+    activate JSVC
+    JSVC --> CJW : InternalScrapeRequest
+    deactivate JSVC
+
+    alt type != CRAWLER
+      CJW -> SCJ : XACK
+      note right : ignore, ce n'est pas\nun crawler
+    else CRAWLER
+      opt proxy activé
+        CJW -> PROXY : acquire(proxyConfig, jobId)
+        PROXY --> CJW : Optional<Proxy>
+        note over CJW : si vide -> renfort en IP directe
+      end
+
+      CJW -> COORD : joinExistingCrawl(request, browser, extractor)
+      activate COORD
+      COORD -> COORD : ensureGroup(jobId)\n(idempotent)
+      note over COORD : log "drain RENFORT"
+      COORD -> COORD : drainWithBrowser(...)\n(voir Phase 6)
+      note over COORD #EEEEEE : le renfort NE finalise PAS\nlog "renfort termine (no finalize)"
+      COORD --> CJW : PipelineResult (vide)
+      deactivate COORD
+
+      CJW -> SCJ : XACK
+      note right : renfort terminé, ack
+
+      opt proxy acquis
+        CJW -> PROXY : release(proxyId, success)
+      end
+    end
+  end
+end
+deactivate CJW
+
+@enduml

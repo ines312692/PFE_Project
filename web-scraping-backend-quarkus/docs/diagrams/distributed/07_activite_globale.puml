@@ -1,0 +1,75 @@
+@startuml 07_activite_globale
+' ============================================================
+' Diagramme d'activité global : de la création à la complétion
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam ArrowColor #333333
+skinparam ActivityBorderColor #333333
+skinparam ActivityBackgroundColor #F7F7F7
+skinparam ActivityDiamondBorderColor #333333
+skinparam ActivityDiamondBackgroundColor #FFFFFF
+skinparam NoteBorderColor #999999
+skinparam NoteBackgroundColor #F4F4F4
+title Vue d'activité de bout en bout — Distribution & Join du crawl
+
+start
+:Job créé / déclenché\n(manuel, cron, webhook);
+:enqueue -> statut QUEUED;
+:XADD stream:job.run;
+
+partition "Sur un nœud (poll 1s)" {
+  :XREADGROUP > (slots libres);
+  if (lease acquis ?\nSET NX EX 90s) then (oui)
+    :transition RUNNING;
+    :runJobSync -> ScrapeEngine;
+  else (non)
+    :skip sans ack\n(message reste en PEL);
+    stop
+  endif
+}
+
+if (type == CRAWLER\n&& distributed ?) then (oui)
+  partition "Nœud PRINCIPAL" {
+    :ensureGroup + seed frontier\n(XGROUP / SADD / XADD ready);
+    :publishJoins\n(parallelism - 1 renforts);
+    note right
+      dépose des tickets
+      dans stream:crawl.join
+    end note
+  }
+
+  fork
+    partition "PRINCIPAL — drain" {
+      :claim / reclaim / process / complete;
+    }
+  fork again
+    partition "RENFORT(s) — drain" {
+      :poll crawl.join -> joinExistingCrawl;
+      :claim / process / complete\n(même frontier);
+      :fin renfort (no finalize);
+    }
+  end fork
+
+  :élection finalizer\n(SETNX finalized);
+  if (finalizer gagné ?) then (oui)
+    :HGETALL records -> agrégation;
+    :persist + update statut\n+ notification;
+    if (status completed ?) then (oui)
+      :XADD stream:etl.process;
+    else (non)
+    endif
+    :cleanup frontier (DEL);
+  else (non)
+    :résultat vide\n(délégué);
+  endif
+
+else (non)
+  :CrawlPipeline / ScrapePipeline\n(mono-nœud);
+  :persist + notification;
+endif
+
+:Job COMPLETED / FAILED;
+stop
+
+@enduml

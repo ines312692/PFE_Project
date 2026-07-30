@@ -1,0 +1,59 @@
+@startuml C4_3a_Composants_backend
+' ============================================================
+' C4 - Niveau 3 : Composants — vue large du backend Quarkus
+' ============================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+title Niveau 3 (Composants) — Backend de scraping (vue large)
+
+Container_Boundary(backend, "Backend de scraping (Quarkus)") {
+
+  Component(api, "Couche API / Controllers", "JAX-RS", "Endpoints REST : jobs, schémas, proxies, monitoring, audit")
+  Component(jobDomain, "Service Job", "JobServiceImpl / JobEnqueueService", "Cycle de vie du job, construction de la requête interne, mise en file")
+  Component(scheduler, "Ordonnanceur", "QuartzJobScheduler", "Déclenchement planifié (cron) et bootstrap au démarrage")
+
+  Component(streamInfra, "Infrastructure Stream", "Redis Streams", "Dispatch, workers de job/join/ETL, pools, recovery, DLQ")
+  Component(engine, "Moteur de scraping", "ScrapeEngine", "Route le job selon son type ; rotation de proxies ; extraction LLM")
+  Component(crawl, "Crawl distribué", "Coordinator + Frontier", "Drain principal/renfort, frontier partagée, élection du finalizer")
+  Component(pipelines, "Pipelines mono-nœud", "ScrapePipeline / CrawlPipeline", "Exécution non distribuée (scraper simple, crawl local)")
+
+  Component(extractors, "Extracteurs", "CSS / XPath / Regex / LLM / Auto", "Extraction des données d'une page")
+  Component(antibot, "Anti-bot & résilience", "Stealth, CAPTCHA, CircuitBreaker, SSRF", "Contournement des protections et robustesse")
+  Component(etl, "Moteur ETL", "EtlPipelineRunner + steps", "Nettoyage, normalisation, validation, enrichissement IA")
+  Component(persistence, "Persistance & notifications", "Adapters + Ports", "Résultats, statut du job, notifications SSE")
+}
+
+ContainerDb(redis, "Redis", "Streams + état")
+ContainerDb(postgres, "PostgreSQL")
+Container(browser, "Navigateur headless")
+System_Ext(groq, "LLM Groq")
+
+Rel(api, jobDomain, "Délègue les opérations job")
+Rel(jobDomain, streamInfra, "Met en file + dispatch", "XADD job.run")
+Rel(scheduler, jobDomain, "Déclenche les jobs planifiés")
+
+Rel(streamInfra, redis, "Poll/ack des streams", "XREADGROUP / XACK")
+Rel(streamInfra, jobDomain, "runJobSync / buildRequestForJoin")
+Rel(jobDomain, engine, "runScrape(request)")
+
+Rel(engine, crawl, "run() [CRAWLER distribué]")
+Rel(engine, pipelines, "run() [mono-nœud]")
+Rel(engine, extractors, "extract(page)")
+Rel(crawl, extractors, "extract(page)")
+Rel(engine, antibot, "Applique stealth / CB / SSRF")
+Rel(crawl, antibot, "CircuitBreaker par domaine")
+
+Rel(crawl, redis, "Frontier partagée", "Streams/Sets/Hash")
+Rel(engine, browser, "Pilote la navigation")
+Rel(crawl, browser, "Pilote la navigation")
+Rel(engine, groq, "Extraction sémantique")
+
+Rel(crawl, persistence, "persistAndDispatch()")
+Rel(engine, persistence, "persistResult()")
+Rel(persistence, postgres, "Sauvegarde")
+Rel(persistence, streamInfra, "dispatchEtl()", "XADD etl.process")
+Rel(streamInfra, etl, "Exécute les steps ETL")
+Rel(etl, postgres, "Écrit les données traitées")
+
+@enduml

@@ -1,0 +1,175 @@
+private ABrowser resolveBrowser(InternalScrapeRequest request) {
+        if (requiresSeleniumByProbe(request.getTargetUrl())) {
+            log.info("[ENGINE] Anti-bot detected → SeleniumBrowser (stealth)");
+            return new SeleniumBrowser(asStealth(request));
+        }
+        log.info("[ENGINE] Standard/JS site → PlaywrightBrowser");
+        return new PlaywrightBrowser(request);
+    }
+
+
+
+RiHRkwqkZpZNGDQxb90w13Mc_PEnUPMJ65AI7Y6JovHledkC-XnV4wHCozCAYIP5
+
+
+SECRET="RiHRkwqkZpZNGDQxb90w13Mc_PEnUPMJ65AI7Y6JovHledkC-XnV4wHCozCAYIP5"
+TOKEN="Gtt4D2PjKR138ekZEtdaDUnL5YSF2Du4NvPlRqGoTyE"
+BASE_URL="http://localhost:8080"
+
+BODY='{"event":"deploy"}'
+TS=$(date +%s)
+
+# Payload = "timestamp.body" (exact match avec buildSignedPayload() dans ton code)
+SIG=$(printf "%s.%s" "$TS" "$BODY" \
+  | openssl dgst -sha256 -hmac "$SECRET" -hex \
+  | cut -d' ' -f2)
+
+curl -X POST "${BASE_URL}/v1/webhooks/jobs/${TOKEN}" \
+  -H "X-Webhook-Timestamp: ${TS}" \
+  -H "X-Webhook-Signature: sha256=${SIG}" \
+  -H "Content-Type: application/json" \
+  -d "${BODY}" \
+  -v
+
+
+
+
+
+0cAFcWeA6zt6OEyXDvUFZNXSVmIQlbxTwOb-Lh8hbUWKCjOuAXDdD27gPFikS-0Vm-I3q5dkdUwBBTUtLR4ROwOxabLlikozSqmXEtVQ1zCH0H4KTpdh0-heXRhBy22as8uLe8r5tgdYDppZxOsuOJssoKbJAT-ppa4BFl06t6ZqmFMFIoVov9xjHi2dGhcdF1y49gv0wxUWq5EV59zKbPWonMmSJCYFP6fvPMRdHBSXJvGUHHb0-3QTrUrXY3f-Cofm2u3A_WGaTu3zdndvz2zG9SgurAx4x02wL9e6qnZwmEjFs4sN_ce94E08ziyt2y8Nb_G7H5L_pFCNroEI6DAybK_QRwWtmLpp2rryNAMURovW-blHPKDA8XCmOb7V5Xiuq3h0Vd5ySBvOCPV6C4aqZXYwQCEWDx2bnlqlOuFyI6ceLUbB87FFmfMkwuxgjqV2bCDyks3ioZvD1vuH8S0FBbiRD0hu9Heu_MDLlDmOhiH42FsORSKO64QRYD23esVBOPR2Z_LavI0dIXXfjG24NIYwbBn252ACDMY04unIATbB3Ipl2Z7xTTCEIwE4Vh8aDE1NRPC0THyyXP0hRPq9gnqOq6PX-77kbOSaEdZqRN7JmOn_vze5MGL31Kt30rG-pCUou0PhHPnAOlpcw9Ml45dIr1QLubEmfvyDBUOMPDwZLJj-IDXoKXUb5WGzOciJwrA_aTRjoZ6-0Ew-UoZ_5nWlyLHf7M8ZCcGzAlXBGCBTrXjqm4XwE4cqjSin45QmTiObkkFthn0SNLngevDGNINW-a0poUBOxa3S5psAVnavXmsjv6sBEUKqsoia5VYYA91CWVL4Ozqy0Y8jt8Wy32bGStPFk__YuxDBSu02777y7OWQ9ow-i8al6NHT12Vu9ACg-R-Otp-Ut6G20YAue9AmHaGQu7bazbI0cExRzst3YiN4KNnGFlaU9isLiZns82_ywfnUuXxIFOQVqaZWelNSg5vBFo0kjfQBj7VxZUbz3gg02B_L-mvqM4HfJqfrUDIj53vlwPVMFKGRytXNGHpFKWBaWpFcNXT1V90dbySDMecXr_N9mqaoXN7nfwWORRTy9irguP
+
+curl -X POST http://localhost:8080/v1/captcha-interventions/b2652096-21d8-4dc3-9515-6a3af0756f16/submit \
+  -H "Content-Type: application/json" \
+  -d '{"token":"0cAFcWeA5Eab9E1UTLIFria9wTNI3_QanpkNX1XKJ54qm2Krvrid5FUI0YIXA4VvciKiR8T-YTFKTtIwVwLyvBB-nqNhnbXaNWKcMYIz1u82KnW-Mn7vZ-ppbcJDMz_s9zRPJprCEl_l6PCje-3zfh6edaxbez6sKsIfkscqhL6jn-JQeHVTD5XSLPfZ9-gCq2h6e_tz2L5LKKRUXoB9MWoAM0Ml-669j84Dw18j9uqlAlfpbyBea42u8PyiFx0pw2saVOIhkD7cFxKBjNOo0j-0YMTAxLv4rPruLXFg4x-5GPmhCvEku-Fq5G0PiMs6j3GYW3UyWXET3Z93x9tSeNG3WWEQHZRVGcdU6EZWEokO37KiDiMmHqduqGa6sOeWSEs-zcM_T4Tge043H2IsQr9RCDE8ZRj0byy8VwOvKu3cumfA8n_NGGlcWqTfguWo6DM9rRA1bxOcPjOdeTDTRnprPc7X7e8qOjBK6m6Vi1vXJFMTjgsbVepMp3LEftGyQTBZRpBHkbH2NNqHW1T2qWbzcM5bchhpt0Tq5KkLvFrVXTAea00fh0FzwbyBmMC7iX25890-9AwvwLedw5RE21ZF6HG9g2rN6WiOCw0J1Lo4FwybciJr8Ko987tI8xxqsera6T3PahfimTVoWx6WWY9NIuRdVkw9fqrmuPXCi_LyLL2M61tC9e-EqLnlrSMj3VLu5SLa2DCl8MbiiZH35AQJn9idlkehRFMImkqDW3EshGwD7sVza-E9R0JLA4X2svqe1fydetBo2LNgBIP3r2V2Vc_4SDM7wZ_4kLimri1BtVsrO6cBvvNPFIVbabSEFD9GR9vgoAkQrwWcOo3yNkfJvgRwMI_MXkLr0tn9diUIttDOzp-XBEXKjj5ifny58DMRF2uKls5FUoxYMsi7i9fVFV61FFIxbbuP6Q4kPKnWtx3XdCPVBltp-mZwmW8Ry9Ei24he2EG9de3yDnR4q2YRLO8L3zVSKfHFvzwA5kfqIVcQ_meBL2FTCA8GW9E5h2Az4_K_cZqT5Q0lD4dd-aN2UdvV8Y7m-klNd1uronWcrdCJklDT2h6_npzGEtCu4EKJEO7qAINK7YN7pHYdsdUEHTeFOpv07vWNjDu2CJPWIfR8xeCOYFzvE"}'
+
+
+
+curl http://localhost:8080/v1/captcha-interventions/b2652096-21d8-4dc3-9515-6a3af0756f16
+
+
+document.querySelector('textarea[name="g-recaptcha-response"]').value
+
+
+
+captcha:
+  enabled: true
+  preferred-provider: TWO_CAPTCHA
+  fallback-provider: MOCK
+  two-captcha:
+    api-key: "${TWO_CAPTCHA_API_KEY:}"
+  cache:
+    ttl-minutes: 5
+  force-human: true
+  llm-fallback:
+    enabled: false
+    min-confidence: 0.7
+
+  llm-pilot:
+    enabled: false
+    max-iterations: 4                   # baissé de 8 à 4 (quota Groq + loop-prevention)
+
+
+
+
+ curl -X POST \
+   http://localhost:8080/v1/captcha-interventions/a6896f39-d4e9-4bb8-b3f4-f512930bcaba/confirm \
+   -H "Content-Type: application/json"
+
+
+cd ../   # racine du backend Quarkus
+export TLS_SIDECAR_ENABLED=true
+export TLS_SIDECAR_URL=http://localhost:8888
+export QUARKUS_PROFILE=dev
+./mvnw quarkus:dev
+
+
+curl -s -x http://localhost:8888 --cacert ./ca/ca.crt \
+     https://tls.peet.ws/api/all | python3 -m json.tool
+
+
+
+
+
+
+
+
+
+
+sesionn
+
+curl -s -c cookies.txt \
+  -d "username=tomsmith&password=SuperSecretPassword!" \
+  https://the-internet.herokuapp.com/authenticate > /dev/null
+
+awk '
+  BEGIN { print "{\"cookies\":["; first=1 }
+  {
+    line=$0
+    sub(/^#HttpOnly_/, "", line)
+    if (line ~ /^#/ || line ~ /^[[:space:]]*$/) next
+    n=split(line, f, "\t")
+    if (n < 7) next
+    if (!first) printf ",\n"; first=0
+    val=f[7]
+    gsub(/%0A/, "", val)          # ← retire les retours-ligne encodés
+    printf "  {\"name\":\"%s\",\"value\":\"%s\",\"domain\":\"%s\",\"path\":\"%s\",\"expires\":-1,\"httpOnly\":true,\"secure\":true,\"sameSite\":\"Lax\"}", f[6], val, f[1], f[3]
+  }
+  END { print "\n],\"origins\":[]}" }
+' cookies.txt > storage_state.json
+
+cat storage_state.json
+
+
+
+./mvnw clean verify
+xdg-open target/jacoco-report/index.html
+
+
+./mvnw quarkus:dev 2>&1 | grep --line-buffered -E "\[ENGINE\]|\[PROXY-POOL\]|\[PIPELINE\]|\[PLAYWRIGHT\]|\[SELENIUM\]|\[PROBE\]"*
+
+
+long readMs = timing.readingTimeMs(textLen);
+
+
+
+
+
+
+
+
+
+
+{
+  for f in \
+    src/main/java/com/elyadata/feature/scraper/crawler/pipeline/DistributedCrawlCoordinator.java \
+    src/main/java/com/elyadata/feature/scraper/crawler/frontier/DistributedCrawlFrontier.java \
+    src/main/java/com/elyadata/feature/scraper/crawler/frontier/UrlFrontier.java \
+    src/main/java/com/elyadata/feature/scraper/crawler/frontier/CrawlNode.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/CrawlJoinDispatcher.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/CrawlJoinWorker.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/CrawlJoinWorkerPool.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/StreamConfig.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/StreamBootstrap.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/RedisStreamNames.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/ConsumerIdentity.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/StreamConsumerSupport.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/StreamRecoveryScheduler.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/JobDispatchAdapter.java \
+    src/main/java/com/elyadata/feature/job/infrastructure/stream/JobRunWorker.java \
+    src/main/java/com/elyadata/feature/job/domain/service/JobEnqueueService.java \
+  ; do echo "===== $f ====="; cat "$f" 2>/dev/null || echo "(introuvable)"; echo; done
+} > distribution_code.txt
+
+
+
+
+
+
+
+
+
+
+
+
+ HOSTNAME=nodeA SCRAPER_DISTRIBUTED_CRAWL=true HTTP_PORT=8080   ./mvnw quarkus:dev -Dquarkus.redis.devservices.enabled=false
+ HOSTNAME=nodeB SCRAPER_DISTRIBUTED_CRAWL=true HTTP_PORT=8081   ./mvnw quarkus:dev -Dquarkus.redis.devservices.enabled=false
+

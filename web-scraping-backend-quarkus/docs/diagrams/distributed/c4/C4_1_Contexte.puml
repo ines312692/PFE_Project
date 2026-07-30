@@ -1,0 +1,26 @@
+@startuml C4_1_Contexte
+' ============================================================
+' C4 - Niveau 1 : Contexte système
+' ============================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+title Niveau 1 (Contexte) — Plateforme de Web Scraping configurable
+
+Person(user, "Utilisateur", "Configure des jobs de scraping, consulte les résultats et le monitoring")
+
+System(platform, "Plateforme de Web Scraping", "Extrait des données structurées de sites web selon des schémas configurables, à l'échelle et en distribué")
+
+System_Ext(targets, "Sites web cibles", "Pages à scraper, éventuellement protégées (Cloudflare, DataDome, Akamai)")
+System_Ext(keycloak, "Keycloak", "Fournisseur d'identité (OIDC) — authentification BFF")
+System_Ext(groq, "LLM Groq", "Extraction sémantique, NER, classification, réparation de sélecteurs")
+System_Ext(proxies, "Fournisseurs de proxies", "Pools de proxies (rotation, géolocalisation) et sources publiques")
+System_Ext(captcha, "Service anti-CAPTCHA", "Résolution de CAPTCHA (ex. 2Captcha)")
+
+Rel(user, platform, "Crée/lance des jobs, consulte le dashboard", "HTTPS")
+Rel(platform, keycloak, "Authentifie les utilisateurs", "OIDC")
+Rel(platform, targets, "Navigue et extrait les pages", "HTTP(S) / headless")
+Rel(platform, groq, "Appelle pour l'extraction IA", "HTTPS/API")
+Rel(platform, proxies, "Acquiert et fait tourner des proxies", "HTTP(S)")
+Rel(platform, captcha, "Délègue la résolution de CAPTCHA", "HTTPS/API")
+
+@enduml

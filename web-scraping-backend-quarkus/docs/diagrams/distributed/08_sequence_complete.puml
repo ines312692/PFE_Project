@@ -1,0 +1,303 @@
+@startuml 08_sequence_complete
+' ============================================================
+' SÉQUENCE MAÎTRE — Flux complet de bout en bout
+' Distribution (stream + lease) + Join + mécanique frontier
+' (ready / seen / done / pages / records / finalized) + ETL
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam maxMessageSize 220
+skinparam sequenceArrowColor #333333
+skinparam sequenceLifeLineBorderColor #666666
+skinparam sequenceGroupBorderColor #888888
+skinparam sequenceGroupBackgroundColor #F0F0F0
+skinparam participantBorderColor #333333
+skinparam participantBackgroundColor #F7F7F7
+skinparam databaseBorderColor #333333
+skinparam noteBorderColor #999999
+skinparam noteBackgroundColor #F4F4F4
+title Séquence complète — Système distribué & mécanique de crawl (ready / seen / done / pages / records / finalized)
+
+actor "Utilisateur\n/ Trigger" as U
+
+box "Nœud A — PRINCIPAL" #FBFBFB
+  participant "JobEnqueue\nService" as ENQ
+  participant "JobDispatch\nAdapter" as DISP
+  participant "JobRunWorker\n(A)" as JRWA
+  participant "ScrapeEngine\n(A)" as ENGA
+  participant "Coordinator\n(A)" as COORDA
+end box
+
+box "Nœud B — RENFORT" #FBFBFB
+  participant "CrawlJoin\nWorker (B)" as CJWB
+  participant "Coordinator\n(B)" as COORDB
+end box
+
+participant "Frontier\n(façade)" as FRONT
+participant "Persister" as PERS
+participant "Browser +\nExtractor" as BREX
+
+box "Redis — bus & état partagé" #F2F2F2
+  database "stream:job.run\n(+ lease)" as RJOB
+  database "stream:crawl.join" as RJOIN
+  database "ready\n(stream + group)" as RRDY
+  database "seen / done\n(sets)" as RSD
+  database "pages / records\n(counter / hash)" as RPR
+  database "finalized\n(SETNX)" as RFIN
+  database "stream:etl.process" as RETL
+end box
+
+participant "EtlWorker" as ETLW
+
+' ================= PHASE 1 : DISPATCH =================
+group Phase 1 — Mise en file & dispatch
+  U -> ENQ : enqueue(jobId, trigger)
+  activate ENQ
+  ENQ -> ENQ : statut -> QUEUED (rollback si échec dispatch)
+  ENQ -> DISP : dispatch(jobId)
+  activate DISP
+  DISP -> RJOB : XADD stream:job.run { jobId, enqueuedAt }
+  deactivate DISP
+  ENQ --> U : true (QUEUED + dispatched)
+  deactivate ENQ
+end
+
+' ================= PHASE 2 : POLL + LEASE =================
+group Phase 2 — Détection par le worker (poll + lease + PEL/DLQ)
+  loop @Scheduled 1s, si slots libres
+    JRWA -> RJOB : XREADGROUP job-runners > (count = free)
+    activate JRWA
+    RJOB --> JRWA : message(s)
+  end
+  alt jobId invalide / job terminal
+    JRWA -> RJOB : handleFailure -> PEL ou DLQ (max-deliveries=3)
+  else exécutable
+    JRWA -> RJOB : SET job:lease:{job} NX EX 90s
+    RJOB --> JRWA : valeur du lease
+    alt lease détenu ailleurs
+      note over JRWA : skip SANS ack (message reste en PEL)
+    else lease acquis
+      note over JRWA : renewLeases() prolonge le TTL (30s) tant que le job tourne
+      JRWA -> ENGA : runJobSync -> runScrape(request)
+      deactivate JRWA
+      activate ENGA
+    end
+  end
+end
+
+' ================= PHASE 3 : ROUTAGE + OUVERTURE =================
+group Phase 3 — Routage & ouverture de la frontier (nœud A)
+  ENGA -> ENGA : SsrfGuard.evaluate(targetUrl)
+  note over ENGA : type == CRAWLER && distributed.enabled ?
+  ENGA -> COORDA : run(request, browser, extractor)
+  activate COORDA
+  ENGA --> ENGA : (attend le résultat)
+
+  COORDA -> FRONT : ensureGroup(jobId)
+  activate FRONT
+  FRONT -> RRDY : XGROUP CREATE ready "crawlers" MKSTREAM
+  note right of RRDY : BUSYGROUP ignoré (idempotent)
+  deactivate FRONT
+
+  group Seed initial
+    COORDA -> FRONT : seed(targetUrl) [+ seedUrls]
+    activate FRONT
+    FRONT -> RSD : SADD seen url
+    alt url nouvelle (SADD == 1)
+      FRONT -> RRDY : XADD ready { url, depth=0, parent }
+      FRONT -> RRDY : EXPIRE ready / seen (TTL 6h)
+    end
+    deactivate FRONT
+  end
+end
+
+' ================= PHASE 4 : PUBLICATION RENFORTS =================
+group Phase 4 — Publication des renforts (parallelism - 1)
+  COORDA -> COORDA : joins = parallelism - 1
+  alt joins > 0
+    COORDA -> RJOIN : XADD stream:crawl.join { jobId } (x joins)
+  else solo
+    note over COORDA : aucun renfort publié
+  end
+  note over COORDA : log "drain PRINCIPAL"
+end
+
+' ================= PHASE 5 : JOIN DU RENFORT =================
+group Phase 5 — Le renfort rejoint le crawl (nœud B)
+  loop @Scheduled 1s, si slots libres
+    CJWB -> RJOIN : XREADGROUP crawl-joiners > (count = free)
+    activate CJWB
+    RJOIN --> CJWB : message renfort
+  end
+  alt job absent / terminal / non-CRAWLER
+    CJWB -> RJOIN : XACK (pas de renfort)
+  else CRAWLER actif
+    CJWB -> CJWB : buildRequestForJoin(jobId) (+ proxy éventuel)
+    CJWB -> COORDB : joinExistingCrawl(request, browser, extractor)
+    activate COORDB
+    COORDB -> FRONT : ensureGroup(jobId)
+    note over COORDB : log "drain RENFORT"
+  end
+end
+
+' ================= PHASE 6 : DRAIN CONCURRENT =================
+group Phase 6 — Drain concurrent (A et B partagent la même frontier)
+
+  note over COORDA, COORDB
+    Le consumer group "crawlers" sur le stream ready garantit
+    qu'une même URL n'est distribuée qu'à un seul consommateur.
+    A et B tournent la MÊME boucle drain(), seul le finalize diffère.
+  end note
+
+  loop tant que ready existe && pages < maxPages   (nœud A)
+    == Reclaim périodique (A) ==
+    opt délai reclaim-every-ms écoulé
+      COORDA -> FRONT : reclaim(consumerA, minIdle, batch)
+      FRONT -> RRDY : XAUTOCLAIM ready "crawlers" (si ready existe)
+      note right of FRONT : garde anti-résurrection :\npas de claim sur stream nettoyé
+    end
+
+    == Claim d'un batch (A) ==
+    COORDA -> FRONT : claim(consumerA, batchSize)
+    activate FRONT
+    FRONT -> RRDY : XREADGROUP "crawlers" consumerA > (count=batchSize)
+    RRDY --> FRONT : batch d'URLs
+    deactivate FRONT
+
+    alt batch vide
+      alt ready absent
+        note over COORDA : frontier finalisée ailleurs -> stop drain
+      else isQuiescent : SCARD done >= SCARD seen
+        note over COORDA : plus rien à faire -> stop drain
+      else
+        COORDA -> COORDA : sleep(poll-delay-ms)
+      end
+    else batch présent
+      loop chaque URL du batch (A)
+        COORDA -> FRONT : processOne(entry)
+        activate FRONT
+
+        FRONT -> FRONT : pré-checks robots.txt + SSRF
+        opt circuit breaker OPEN
+          FRONT -> RPR : HINCRBY attempts url
+          note over FRONT : si < maxCbRetries : shouldComplete=false\n-> URL laissée en PEL (pas de XACK)
+        end
+
+        FRONT -> BREX : navigate(url) + snapshot (RetryExecutor)
+        activate BREX
+        alt Infrastructure5xx
+          BREX --> FRONT : throw -> CB.recordFailure
+        else ok
+          BREX --> FRONT : PageSnapshot -> CB.recordSuccess
+          FRONT -> BREX : extract(snapshot, request)
+          BREX --> FRONT : records
+        end
+        deactivate BREX
+
+        opt records non vides
+          FRONT -> RPR : HSET records url json
+        end
+        FRONT -> RPR : INCR pages
+        note right of RPR : underPageCap compare pages < maxPages
+
+        group Expansion des liens enfants
+          opt depth < maxDepth && sous le cap
+            loop chaque lien récolté
+              opt filtre accepte && url nouvelle
+                FRONT -> RSD : SADD seen child
+                FRONT -> RRDY : XADD ready { child, depth+1, parent }
+              end
+            end
+          end
+        end
+
+        alt shouldComplete
+          FRONT -> RSD : SADD done url
+          FRONT -> RRDY : XACK ready "crawlers" messageId
+          FRONT --> COORDA : isQuiescent ?
+        else
+          note over FRONT : laissé en PEL pour reprise (XAUTOCLAIM ultérieur)
+        end
+        deactivate FRONT
+      end
+    end
+  end
+
+  == En parallèle : drain du renfort (nœud B) ==
+  loop tant que ready existe && pages < maxPages   (nœud B)
+    COORDB -> FRONT : claim(consumerB, batchSize)
+    FRONT -> RRDY : XREADGROUP "crawlers" consumerB >
+    RRDY --> COORDB : batch (URLs distinctes de A)
+    COORDB -> FRONT : processOne(...) [même logique que A]
+    FRONT -> RPR : HSET records / INCR pages
+    FRONT -> RSD : SADD done + XACK
+  end
+  note over COORDB #EEEEEE : le renfort NE finalise PAS\nlog "renfort termine (no finalize)"
+  COORDB --> CJWB : PipelineResult (vide)
+  deactivate COORDB
+  CJWB -> RJOIN : XACK (renfort terminé)
+  deactivate CJWB
+end
+
+' ================= PHASE 7 : FINALISATION =================
+group Phase 7 — Élection du finalizer & agrégation (nœud A)
+  COORDA -> FRONT : tryBecomeFinalizer(jobId)
+  activate FRONT
+  FRONT -> RFIN : SETNX finalized 1
+  alt déjà pris (autre nœud)
+    FRONT --> COORDA : false -> résultat vide (délégué)
+  else gagné
+    FRONT -> RFIN : EXPIRE finalized (TTL 6h)
+    FRONT --> COORDA : true
+    deactivate FRONT
+    note over COORDA : log "elu FINALIZER"
+
+    COORDA -> FRONT : readAllRecords(jobId)
+    activate FRONT
+    FRONT -> RPR : HGETALL records
+    RPR --> FRONT : map url -> json
+    deactivate FRONT
+    COORDA -> FRONT : pagesCount(jobId)
+    FRONT -> RPR : GET pages
+    note over COORDA : status = records vides ? failed : completed
+  end
+end
+
+' ================= PHASE 8 : PERSIST + ETL + CLEANUP =================
+group Phase 8 — Persistance, dispatch ETL & nettoyage
+  COORDA -> PERS : persistAndDispatch(jobId, result)
+  activate PERS
+  PERS -> PERS : save(ScrapeResult) + update statut + notify
+  alt status completed
+    PERS -> RETL : XADD stream:etl.process { jobId }
+  end
+  PERS --> COORDA : ok / exception
+  deactivate PERS
+
+  alt persist échoue
+    note over COORDA #EEEEEE : cleanup ANNULÉ — records préservés pour reprise
+  else persist réussi
+    COORDA -> FRONT : cleanup(jobId)
+    FRONT -> RRDY : DEL ready
+    FRONT -> RSD : DEL seen, done
+    FRONT -> RPR : DEL pages, records, attempts
+    FRONT -> RFIN : DEL finalized
+    note over FRONT : frontier Redis nettoyée
+  end
+  COORDA --> ENGA : PipelineResult
+  deactivate COORDA
+  ENGA --> JRWA : fin runScrape
+  deactivate ENGA
+  JRWA -> RJOB : XACK stream:job.run (+ release lease)
+end
+
+' ================= PHASE 9 : ETL =================
+group Phase 9 — Traitement ETL (asynchrone)
+  loop @Scheduled 1s
+    ETLW -> RETL : XREADGROUP etl-runners >
+    RETL --> ETLW : message ETL
+  end
+  ETLW -> ETLW : exécute les steps (ou skip si aucun) puis XACK
+end
+
+@enduml

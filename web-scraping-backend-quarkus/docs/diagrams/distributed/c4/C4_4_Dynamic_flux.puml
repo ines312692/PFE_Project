@@ -1,0 +1,42 @@
+@startuml C4_4_Dynamic_flux
+' ============================================================
+' C4 - Dynamic diagram : flux distribution + join (numéroté)
+' ============================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+title C4 Dynamic — Flux de bout en bout : dispatch, join, finalisation
+
+Person(user, "Utilisateur")
+
+Container_Boundary(backend, "Backend de scraping (Quarkus)") {
+  Component(enqueue, "JobEnqueueService")
+  Component(dispatch, "JobDispatchAdapter")
+  Component(jobWorker, "JobRunWorker", "nœud A — PRINCIPAL")
+  Component(engine, "ScrapeEngine")
+  Component(coordA, "Coordinator", "nœud A — PRINCIPAL")
+  Component(frontier, "DistributedCrawlFrontier")
+  Component(joinDispatch, "CrawlJoinDispatcher")
+  Component(joinWorker, "CrawlJoinWorker", "nœud B — RENFORT")
+  Component(coordB, "Coordinator", "nœud B — RENFORT")
+  Component(persister, "CrawlResultPersister")
+}
+ContainerDb(redis, "Redis")
+
+Rel(user, enqueue, "Lance le job")
+Rel(enqueue, redis, "QUEUED puis XADD job.run")
+Rel(jobWorker, redis, "XREADGROUP > + lease SET NX EX")
+Rel(jobWorker, engine, "runJobSync -> runScrape")
+Rel(engine, coordA, "run() [CRAWLER distribué]")
+Rel(coordA, frontier, "ensureGroup + seed (XADD ready)")
+Rel(coordA, joinDispatch, "publish(jobId, parallelism-1)")
+Rel(joinDispatch, redis, "XADD crawl.join")
+Rel(joinWorker, redis, "XREADGROUP > crawl.join")
+Rel(joinWorker, coordB, "joinExistingCrawl() [RENFORT]")
+Rel(coordA, frontier, "claim/complete (drain PRINCIPAL)")
+Rel(coordB, frontier, "claim/complete (drain RENFORT)")
+Rel(coordB, coordB, "fin renfort (no finalize)")
+Rel(coordA, frontier, "tryBecomeFinalizer (SETNX) : gagné")
+Rel(coordA, persister, "agrège + persistAndDispatch")
+Rel(persister, redis, "XADD etl.process + cleanup frontier")
+
+@enduml

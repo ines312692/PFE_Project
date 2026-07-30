@@ -1,0 +1,85 @@
+@startuml 03_ouverture_crawl
+' ============================================================
+' Phase 3-4 : routage ScrapeEngine + ouverture frontier + renforts
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam sequenceArrowColor #333333
+skinparam sequenceLifeLineBorderColor #666666
+skinparam participantBorderColor #333333
+skinparam noteBorderColor #999999
+skinparam noteBackgroundColor #F4F4F4
+title Phases 3-4 — Routage, ouverture de la frontier & publication des renforts
+
+participant "JobServiceImpl" as JSVC
+participant "ScrapeEngine" as ENG
+participant "DistributedCrawl\nCoordinator (PRINCIPAL)" as COORD
+participant "DistributedCrawl\nFrontier" as FRONT
+participant "CrawlJoinDispatcher" as CJD
+database "Redis" as REDIS
+
+JSVC -> ENG : runScrape(request)
+activate ENG
+
+ENG -> ENG : SsrfGuard.evaluate(targetUrl)
+alt SSRF bloqué
+  ENG -> ENG : persistResult(status = failed)
+  ENG --> JSVC : return
+else autorisé
+  note over ENG : isDistributedCrawlerResult =\n(distributed.enabled && type == CRAWLER)
+
+  alt CRAWLER distribué
+    ENG -> COORD : run(request, browser, extractor)
+    activate COORD
+
+    COORD -> COORD : consumerId = host + "-" + aléa
+    COORD -> FRONT : ensureGroup(jobId)
+    activate FRONT
+    FRONT -> REDIS : XGROUP CREATE crawl:{job}:ready\n"crawlers" MKSTREAM
+    note right : BUSYGROUP ignoré\n(idempotent)
+    FRONT --> COORD : ok
+    deactivate FRONT
+
+    group seed de la frontier
+      COORD -> FRONT : seed(targetUrl)
+      activate FRONT
+      FRONT -> REDIS : SADD crawl:{job}:seen url
+      alt URL nouvelle
+        FRONT -> REDIS : XADD crawl:{job}:ready\n{ url, depth=0, parent }
+        FRONT -> REDIS : EXPIRE ready/seen (TTL 6h)
+      end
+      FRONT --> COORD : ok
+      deactivate FRONT
+      note over COORD : idem pour chaque seedUrl
+    end
+
+    group publication des renforts
+      COORD -> COORD : joins = parallelism - 1
+      alt joins > 0
+        COORD -> CJD : publish(jobId, joins)
+        activate CJD
+        loop joins fois
+          CJD -> REDIS : XADD stream:crawl.join\n{ jobId, enqueuedAt }
+        end
+        CJD --> COORD : ok
+        deactivate CJD
+      else joins == 0
+        note over COORD : crawl en solo,\naucun renfort publié
+      end
+    end
+
+    note over COORD : log "drain PRINCIPAL"
+    COORD -> COORD : drainWithBrowser(...)\n(voir Phase 6)
+    COORD -> COORD : finalizeAndPersist(...)\n(voir Phase 7)
+    COORD --> ENG : PipelineResult
+    deactivate COORD
+
+  else CRAWLER mono-nœud
+    ENG -> ENG : new CrawlPipeline(...).run()
+  else job simple
+    ENG -> ENG : new ScrapePipeline(...).run()
+  end
+end
+deactivate ENG
+
+@enduml

@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: elya-scraper
+
+scrape_configs:
+  - job_name: elya-scraper-backend
+    metrics_path: /q/metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "host.docker.internal:8080"
+        labels:
+          application: elya-scraper
+          env: local
+
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - "localhost:9090"

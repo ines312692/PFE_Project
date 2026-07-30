@@ -1,0 +1,70 @@
+@startuml 00_composants
+' ============================================================
+' Vue de composants : distribution des jobs + join du crawl
+' ============================================================
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam ArrowColor #333333
+skinparam componentBorderColor #333333
+skinparam databaseBorderColor #333333
+skinparam packageBorderColor #999999
+title Vue de composants — Distribution des jobs & Join du crawl distribué
+
+package "Domaine Job" {
+  [JobEnqueueService] as ENQ
+  [JobServiceImpl] as JSVC
+}
+
+package "Infrastructure Stream" {
+  [JobDispatchAdapter] as DISP
+  [JobRunWorker] as JRW
+  [ScrapeWorkerPool] as POOL
+  [CrawlJoinDispatcher] as CJD
+  [CrawlJoinWorker] as CJW
+  [CrawlJoinWorkerPool] as CJP
+  [EtlWorker] as ETLW
+  [StreamConsumerSupport] as SUP
+  [ConsumerIdentity] as ID
+}
+
+package "Moteur de scraping" {
+  [ScrapeEngine] as ENG
+  [DistributedCrawlCoordinator] as COORD
+  [DistributedCrawlFrontier] as FRONT
+  [CrawlResultPersister] as PERS
+}
+
+database "Redis" {
+  queue "stream:job.run" as SJR
+  queue "stream:crawl.join" as SCJ
+  queue "stream:etl.process" as SEP
+  queue "crawl:{job}:ready" as RDY
+  collections "seen / done / pages\nrecords / finalized" as STATE
+  card "job:lease:{job}" as LEASE
+}
+
+ENQ --> DISP : dispatch(jobId)
+DISP --> SJR : XADD
+JRW --> SJR : XREADGROUP >
+JRW --> POOL : submit()
+JRW --> LEASE : SET NX EX
+JRW --> JSVC : runJobSync()
+JSVC --> ENG : runScrape()
+ENG --> COORD : run() [CRAWLER distribué]
+COORD --> FRONT : seed / claim / complete
+FRONT --> RDY : XADD / XREADGROUP / XACK
+FRONT --> STATE : SADD / INCR / HSET / SETNX
+COORD --> CJD : publish(jobId, N)
+CJD --> SCJ : XADD (xN)
+CJW --> SCJ : XREADGROUP >
+CJW --> CJP : submit()
+CJW --> COORD : joinExistingCrawl()
+COORD --> PERS : persistAndDispatch()
+PERS --> SEP : XADD (ETL)
+ETLW --> SEP : XREADGROUP >
+SUP ..> SJR : ack / DLQ / attempts
+ID ..> JRW : identité nœud
+ID ..> CJW : identité nœud
+
+@enduml

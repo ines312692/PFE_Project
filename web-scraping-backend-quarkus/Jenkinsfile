@@ -1,0 +1,333 @@
+pipeline {
+    agent { label 'backend-quarkus-agent' }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '20', daysToKeepStr: '30'))
+        timeout(time: 60, unit: 'MINUTES')
+        timestamps()
+        ansiColor('xterm')
+        disableConcurrentBuilds(abortPrevious: true)
+        skipDefaultCheckout(false)
+    }
+
+    triggers {
+        pollSCM('* * * * *')
+    }
+
+    parameters {
+        booleanParam(name: 'SKIP_TESTS',        defaultValue: false, description: 'Skip unit and integration tests')
+        booleanParam(name: 'FORCE_DEPLOY_PROD', defaultValue: false, description: 'Force deploy to production without manual approval')
+        booleanParam(name: 'SKIP_SONAR',        defaultValue: false, description: 'Skip SonarQube analysis')
+        string(name: 'OVERRIDE_IMAGE_TAG',      defaultValue: '',    description: 'Override Docker image tag (empty = auto)')
+    }
+
+    environment {
+        APP_NAME             = 'web-scraping-backend-quarkus'
+        IMAGE_REPO           = "inestemimi/${APP_NAME}"
+        MAVEN_OPTS           = '-Xmx1536m -Xms256m -XX:+TieredCompilation -XX:TieredStopAtLevel=1'
+        MAVEN_CLI_OPTS       = '--batch-mode --no-transfer-progress --errors --fail-at-end'
+        SONAR_PROJECT_KEY    = 'elyadata-web-scraping-backend'
+        HEALTH_CHECK_RETRIES = '15'
+        HEALTH_CHECK_SLEEP   = '10'
+        TRIVY_SEVERITY       = 'HIGH,CRITICAL'
+    }
+
+    stages {
+
+        stage('Prepare') {
+            steps {
+                script {
+                    def pom          = readMavenPom(file: 'pom.xml')
+                    env.APP_VERSION  = pom.version
+                    env.JAVA_VERSION = pom.properties['maven.compiler.release'] ?: '21'
+
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
+                    def safeBranch = env.BRANCH_NAME.replaceAll('[^a-zA-Z0-9._-]', '-')
+
+                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
+                        env.IMAGE_TAG = params.OVERRIDE_IMAGE_TAG ?: env.APP_VERSION
+                    } else if (env.BRANCH_NAME == 'develop') {
+                        env.IMAGE_TAG = params.OVERRIDE_IMAGE_TAG ?: "${env.APP_VERSION}-dev-${env.GIT_COMMIT_SHORT}"
+                    } else {
+                        env.IMAGE_TAG = "${safeBranch}-${env.GIT_COMMIT_SHORT}"
+                    }
+
+                    env.IMAGE_FULL     = "${env.IMAGE_REPO}:${env.IMAGE_TAG}"
+                    env.IS_DEPLOYABLE  = (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop').toString()
+                    env.IS_PROD_BRANCH = (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master').toString()
+
+                    echo "Image: ${env.IMAGE_FULL}"
+                    echo "Branch: ${env.BRANCH_NAME} | Deployable: ${env.IS_DEPLOYABLE}"
+                }
+            }
+        }
+
+        stage('Validate Environment') {
+            steps {
+                sh '''
+                    java -version
+                    ./mvnw --version
+                    docker version --format "Client: {{.Client.Version}}"
+                    trivy --version 2>/dev/null || echo "Trivy not installed"
+                '''
+            }
+        }
+
+        stage('Build & Quality') {
+            parallel {
+
+                stage('Compile') {
+                    steps {
+                        sh """
+                            ./mvnw ${MAVEN_CLI_OPTS} \
+                                clean package \
+                                -DskipTests \
+                                -Dquarkus.package.jar.type=fast-jar \
+                                -T 1C
+                        """
+                    }
+                    post {
+                        success {
+                            archiveArtifacts(
+                                artifacts:         'target/quarkus-app/**',
+                                fingerprint:       true,
+                                allowEmptyArchive: false
+                            )
+                        }
+                    }
+                }
+
+                stage('Unit Tests') {
+                    when {
+                        not { expression { return params.SKIP_TESTS } }
+                    }
+                    steps {
+                        sh """
+                            ./mvnw ${MAVEN_CLI_OPTS} \
+                                test \
+                                -Dquarkus.test.profile=test \
+                                -Dsurefire.failIfNoSpecifiedTests=false \
+                                -Djava.util.logging.manager=org.jboss.logmanager.LogManager
+                        """
+                    }
+                    post {
+                        always {
+                            junit(
+                                testResults:          '**/target/surefire-reports/*.xml',
+                                allowEmptyResults:    true,
+                                skipPublishingChecks: false
+                            )
+                            jacoco(
+                                execPattern:          '**/target/jacoco.exec',
+                                classPattern:         '**/target/classes',
+                                sourcePattern:        '**/src/main/java',
+                                exclusionPattern:     '**/dto/**,**/mapper/**,**/model/**',
+                                minimumLineCoverage:  '60',
+                                minimumBranchCoverage:'50'
+                            )
+                        }
+                    }
+                }
+
+                stage('SonarQube Analysis') {
+                    when {
+                        allOf {
+                            not { expression { return params.SKIP_SONAR } }
+                            not { expression { return params.SKIP_TESTS } }
+                        }
+                    }
+                    steps {
+                        withSonarQubeEnv('SonarQube') {
+                            withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                                sh """
+                                    ./mvnw ${MAVEN_CLI_OPTS} \
+                                        sonar:sonar \
+                                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                                        -Dsonar.projectName="${APP_NAME}" \
+                                        -Dsonar.projectVersion=${APP_VERSION} \
+                                        -Dsonar.sources=src/main/java \
+                                        -Dsonar.tests=src/test/java \
+                                        -Dsonar.java.coveragePlugin=jacoco \
+                                        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                                        -Dsonar.branch.name=${BRANCH_NAME} \
+                                        -Dsonar.login=${SONAR_TOKEN}
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            when {
+                allOf {
+                    not { expression { return params.SKIP_SONAR } }
+                    not { expression { return params.SKIP_TESTS } }
+                }
+            }
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate(abortPipeline: true)
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            when {
+                expression { return env.IS_DEPLOYABLE == 'true' }
+            }
+            steps {
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId:    'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh """
+                            echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+
+                            docker build \
+                                --file Dockerfile \
+                                --target prod \
+                                --tag  ${IMAGE_FULL} \
+                                --tag  ${IMAGE_REPO}:latest \
+                                --label "git.commit=${GIT_COMMIT_SHORT}" \
+                                --label "git.branch=${BRANCH_NAME}" \
+                                --label "build.number=${BUILD_NUMBER}" \
+                                --label "build.date=\$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+                                --cache-from ${IMAGE_REPO}:latest \
+                                --build-arg  BUILDKIT_INLINE_CACHE=1 \
+                                .
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Container Security Scan') {
+            when {
+                allOf {
+                    expression { return env.IS_DEPLOYABLE == 'true' }
+                    expression { return sh(script: 'which trivy', returnStatus: true) == 0 }
+                }
+            }
+            steps {
+                sh """
+                    trivy image \
+                        --severity   ${TRIVY_SEVERITY} \
+                        --exit-code  0 \
+                        --no-progress \
+                        --format     table \
+                        --output     trivy-report.txt \
+                        ${IMAGE_FULL} || true
+
+                    cat trivy-report.txt || true
+                """
+            }
+            post {
+                always {
+                    archiveArtifacts(artifacts: 'trivy-report.txt', allowEmptyArchive: true)
+                }
+            }
+        }
+
+        stage('Push Image') {
+            when {
+                expression { return env.IS_DEPLOYABLE == 'true' }
+            }
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId:    'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+                        docker push ${IMAGE_FULL}
+                        docker push ${IMAGE_REPO}:latest
+                        echo "Pushed: ${IMAGE_FULL}"
+                    """
+                }
+            }
+            post {
+                always {
+                    sh "docker rmi ${IMAGE_FULL} ${IMAGE_REPO}:latest || true"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                expression { return env.IS_DEPLOYABLE == 'true' }
+            }
+            steps {
+                script {
+                    if (env.IS_PROD_BRANCH == 'true' && !params.FORCE_DEPLOY_PROD) {
+                        timeout(time: 15, unit: 'MINUTES') {
+                            input message: "Deploy ${env.IMAGE_FULL} to PRODUCTION?", ok: 'Deploy'
+                        }
+                    }
+
+                    sh """
+                        IMAGE_REPO=${IMAGE_REPO} IMAGE_TAG=${IMAGE_TAG} \
+                            docker compose --profile prod pull quarkus-backend
+                        IMAGE_REPO=${IMAGE_REPO} IMAGE_TAG=${IMAGE_TAG} \
+                            docker compose --profile prod up -d --no-build quarkus-backend
+                    """
+
+                    boolean healthy = false
+                    int retries = env.HEALTH_CHECK_RETRIES.toInteger()
+                    int sleepSecs = env.HEALTH_CHECK_SLEEP.toInteger()
+
+                    for (int i = 0; i < retries; i++) {
+                        String status = sh(
+                            script: "docker inspect --format='{{.State.Health.Status}}' quarkus-backend || echo unknown",
+                            returnStdout: true
+                        ).trim()
+
+                        if (status == 'healthy') {
+                            healthy = true
+                            break
+                        }
+
+                        echo "Health check ${i + 1}/${retries}: ${status} — retrying in ${sleepSecs}s"
+                        sleep(time: sleepSecs, unit: 'SECONDS')
+                    }
+
+                    if (!healthy) {
+                        sh 'docker compose --profile prod logs --tail=200 quarkus-backend || true'
+                        error "Deployment health check failed after ${retries} attempts — see container logs above"
+                    }
+
+                    echo "Deployed ${env.IMAGE_FULL} — quarkus-backend is healthy"
+                }
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo "Pipeline SUCCESS — image ${env.IMAGE_FULL} pushed to DockerHub"
+        }
+        failure {
+            echo "Pipeline FAILED — branch ${env.BRANCH_NAME} build #${BUILD_NUMBER}"
+        }
+        unstable {
+            echo "Pipeline UNSTABLE — branch ${env.BRANCH_NAME}"
+        }
+        always {
+            sh 'docker image prune -f --filter "dangling=true" || true'
+            publishHTML(target: [
+                allowMissing:          true,
+                alwaysLinkToLastBuild: true,
+                keepAll:               true,
+                reportDir:             'target/site/jacoco',
+                reportFiles:           'index.html',
+                reportName:            'JaCoCo Coverage Report'
+            ])
+        }
+    }
+}

@@ -1,0 +1,54 @@
+local.file_match "quarkus" {
+  path_targets = [{
+    __path__ = "/var/log/quarkus/*.log",
+    job      = "elya-scraper",
+    env      = "local",
+    service  = "web-scraping-backend-quarkus",
+  }]
+  sync_period = "10s"
+}
+
+loki.source.file "quarkus" {
+  targets    = local.file_match.quarkus.targets
+  forward_to = [loki.process.quarkus.receiver]
+  tail_from_end = false
+}
+loki.process "quarkus" {
+
+  stage.json {
+    expressions = {
+      level     = "level",
+      logger    = "loggerName",
+      thread    = "threadName",
+      message   = "message",
+      timestamp = "timestamp",
+      stack     = "stackTrace",
+    }
+  }
+
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339Nano"
+  }
+
+  stage.labels {
+    values = {
+      level = "",
+    }
+  }
+
+  stage.output {
+    source = "message"
+  }
+
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+  external_labels = {
+    host = "ines-latitude",
+  }
+}

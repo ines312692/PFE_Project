@@ -1,0 +1,98 @@
+x-backend-common: &backend-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      BUILDKIT_INLINE_CACHE: "1"
+  networks:
+    - scraping-network
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+
+services:
+
+  quarkus-backend-dev:
+    <<: *backend-common
+    profiles: [ dev ]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: scraping/backend:dev
+    container_name: quarkus-backend-dev
+    env_file:
+      - path: .env.docker
+        required: true
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    environment:
+      QUARKUS_PROFILE: dev
+      QUARKUS_LOG_LEVEL: DEBUG
+    volumes:
+      - type: bind
+        source: ./src
+        target: /app/src
+      - type: bind
+        source: ./pom.xml
+        target: /app/pom.xml
+      - maven-cache:/root/.m2
+    restart: "no"
+    healthcheck:
+      test: [ "CMD", "curl", "-fsS", "http://localhost:8080/q/health/live" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  quarkus-backend:
+    <<: *backend-common
+    profiles: [prod]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    image: ${IMAGE_REPO:-scraping/backend}:${IMAGE_TAG:-latest}
+    container_name: quarkus-backend
+    env_file:
+      - path: .env.docker
+        required: true
+    ports:
+      - "8080:8080"
+    environment:
+      QUARKUS_PROFILE: prod
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/q/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: elya-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+
+volumes:
+  maven-cache:
+    name: scraping-maven-cache
+
+networks:
+  scraping-network:
+    external: true
+    name: scraping-network

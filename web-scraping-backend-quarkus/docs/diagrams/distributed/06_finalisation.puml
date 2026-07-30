@@ -1,0 +1,75 @@
+@startuml 06_finalisation
+' ============================================================
+' Phase 7 : élection du finalizer, agrégation, persist, ETL, cleanup
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam sequenceArrowColor #333333
+skinparam sequenceLifeLineBorderColor #666666
+skinparam participantBorderColor #333333
+skinparam noteBorderColor #999999
+skinparam noteBackgroundColor #F4F4F4
+title Phase 7 — Élection du finalizer, agrégation & dispatch ETL
+
+participant "Coordinator\n(PRINCIPAL)" as COORD
+participant "DistributedCrawl\nFrontier" as FRONT
+participant "CrawlResultPersister" as PERS
+participant "JobPort" as DB
+participant "NotificationService" as NOTIF
+database "Redis" as REDIS
+database "stream:etl.process" as SEP
+
+COORD -> FRONT : tryBecomeFinalizer(jobId)
+activate FRONT
+FRONT -> REDIS : SETNX crawl:{job}:finalized 1
+alt déjà pris (autre nœud)
+  FRONT --> COORD : false
+  note over COORD : finalisation déléguée\n-> résultat vide
+  COORD --> COORD : emptyCompletedResult
+else gagné
+  FRONT -> REDIS : EXPIRE finalized (TTL 6h)
+  FRONT --> COORD : true
+  deactivate FRONT
+  note over COORD : log "elu FINALIZER"
+
+  group agrégation
+    COORD -> FRONT : readAllRecords(jobId)
+    activate FRONT
+    FRONT -> REDIS : HGETALL crawl:{job}:records
+    FRONT --> COORD : map url -> json
+    deactivate FRONT
+    COORD -> COORD : concatène tous les records
+    COORD -> FRONT : pagesCount(jobId)
+    FRONT -> REDIS : GET crawl:{job}:pages
+    note over COORD : status = records vides\n? failed : completed
+  end
+
+  group persist + dispatch (transactionnel)
+    COORD -> PERS : persistAndDispatch(jobId, result)
+    activate PERS
+    PERS -> DB : save(ScrapeResult)
+    PERS -> DB : update(job.status = COMPLETED/FAILED)
+    PERS -> NOTIF : notify(JOB_COMPLETED / JOB_FAILED)
+
+    alt status completed
+      PERS -> SEP : XADD stream:etl.process { jobId }
+      note right : ETL déclenché
+    end
+    PERS --> COORD : ok / exception
+    deactivate PERS
+  end
+
+  alt persist échoue
+    note over COORD #EEEEEE : cleanup ANNULÉ.\nClés Redis (dont records)\npréservées pour reprise.
+    COORD --> COORD : throw
+  else persist réussi
+    COORD -> FRONT : cleanup(jobId)
+    activate FRONT
+    FRONT -> REDIS : DEL ready, seen, done, pages,\nfinalized, records, attempts
+    FRONT --> COORD : ok
+    deactivate FRONT
+    note over COORD : frontier Redis nettoyée
+  end
+end
+
+@enduml

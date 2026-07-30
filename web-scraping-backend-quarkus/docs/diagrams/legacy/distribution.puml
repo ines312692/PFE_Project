@@ -1,0 +1,185 @@
+@startuml crawling-distribue-activite
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam ArrowColor #475569
+skinparam ArrowFontColor #334155
+skinparam ArrowThickness 1.1
+skinparam ActivityBorderThickness 1.1
+skinparam ActivityDiamondBorderThickness 1.1
+skinparam ActivityBackgroundColor #F8FAFC
+skinparam ActivityBorderColor #64748B
+skinparam ActivityFontColor #0F172A
+skinparam ActivityDiamondBackgroundColor #FFF7ED
+skinparam ActivityDiamondBorderColor #D97706
+skinparam ActivityDiamondFontColor #92400E
+skinparam NoteBackgroundColor #FEFCE8
+skinparam NoteBorderColor #EAB308
+skinparam NoteFontSize 10
+skinparam swimlaneWidth 260
+skinparam swimlaneBorderColor #CBD5E1
+skinparam swimlaneTitleFontStyle bold
+
+title Diagramme d'activite : Crawling distribue\nProjet AI-Assisted Web Scraping Platform (Elyadata)
+
+|#EEF2FF|Consumer de stream|
+start
+if (Source du message ?) then (stream:job.run)
+  :Worker PRINCIPAL\nJobRunWorker.process();
+  note right
+    infrastructure/stream/
+    JobRunWorker.java
+  end note
+  |#EFF6FF|DistributedCrawlCoordinator|
+  :run(request, browser, extractor);
+  note right
+    scraper/crawler/pipeline/
+    DistributedCrawlCoordinator.java
+  end note
+  :ensureGroup(jobId);
+  |#FDECEC|DistributedCrawlFrontier (Redis)|
+  :XGROUP CREATE ready\n(equipe crawlers);
+  note right
+    scraper/crawler/frontier/
+    DistributedCrawlFrontier.java
+  end note
+  |#EFF6FF|DistributedCrawlCoordinator|
+  :seedFrontier()\nUrlNormalizer.normalize();
+  note right
+    scraper/crawler/url/
+    UrlNormalizer.java
+  end note
+  |#FDECEC|DistributedCrawlFrontier (Redis)|
+  :SADD seen + XADD ready\n(URLs de depart);
+  |#EFF6FF|DistributedCrawlCoordinator|
+  :publishJoins(parallelism - 1);
+  |#EEF2FF|Consumer de stream|
+  :CrawlJoinDispatcher.publish()\nXADD stream:crawl.join x N;
+  note left
+    infrastructure/stream/
+    CrawlJoinDispatcher.java
+  end note
+else (stream:crawl.join)
+  :Worker RENFORT\nCrawlJoinWorker.process();
+  note left
+    infrastructure/stream/
+    CrawlJoinWorker.java
+  end note
+  if (job absent ou termine ?) then (oui)
+    :ACK, aucun renfort;
+    stop
+  else (non)
+  endif
+  |#EFF6FF|DistributedCrawlCoordinator|
+  :joinExistingCrawl(...)\nensureGroup (idempotent, sans seed);
+endif
+
+|#EFF6FF|DistributedCrawlCoordinator|
+:browser.start()\nBrowserFactory / ABrowser;
+note right
+  scraper/browser/
+  BrowserFactory.java, ABrowser.java
+end note
+
+repeat
+  |#FDECEC|DistributedCrawlFrontier (Redis)|
+  if (frontier existe ET pages < maxPages ?) then (non)
+    break
+  else (oui)
+  endif
+  :claim(jobId, consumer, 5)\nXREADGROUP ready '>';
+
+  |#EFF6FF|DistributedCrawlCoordinator|
+  :processOne() pour chaque URL du lot;
+  :RobotsTxtGate.isAllowed();
+  note right
+    scraper/crawler/robots/
+    RobotsTxtGate.java
+  end note
+  :SsrfGuard.isAllowed();
+  note right
+    scraper/security/
+    SsrfGuard.java
+  end note
+  :DomainCircuitBreaker.allowRequest();
+  note right
+    scraper/resilience/
+    DomainCircuitBreaker.java
+  end note
+  :RetryExecutor + ABrowser\nnavigate() / snapshot();
+  note right
+    scraper/resilience/
+    RetryExecutor.java
+  end note
+  :BaseExtractor.extract();
+  note right
+    scraper/extractor/
+    BaseExtractor.java
+  end note
+
+  |#FDECEC|DistributedCrawlFrontier (Redis)|
+  :saveRecords() : HSET records[url];
+  :incrementPages() : INCR pages;
+
+  |#EFF6FF|DistributedCrawlCoordinator|
+  if (depth < maxDepth ?) then (oui)
+    :LinkHarvester.harvest()\n+ UrlFilter.accepts();
+    note right
+      scraper/crawler/url/
+      LinkHarvester.java, UrlFilter.java
+    end note
+    |#FDECEC|DistributedCrawlFrontier (Redis)|
+    :expand() : SADD seen (dedup)\n+ XADD ready si nouveau;
+  else (non)
+  endif
+
+  |#FDECEC|DistributedCrawlFrontier (Redis)|
+  :complete() : SADD done + XACK ready;
+  :toutes les 30 s : reclaim()\nXAUTOCLAIM (idle >= 2 min);
+repeat while (file non vide OU pas quiescent ?) is (oui) not (non : done >= seen)
+
+|#EFF6FF|DistributedCrawlCoordinator|
+if (worker = RENFORT ?) then (oui)
+  :retour sans finaliser\n(finalisation laissee au principal);
+  stop
+else (non : PRINCIPAL)
+endif
+
+|#FDECEC|DistributedCrawlFrontier (Redis)|
+:tryBecomeFinalizer() : SETNX finalized;
+
+|#EFF6FF|DistributedCrawlCoordinator|
+if (elu finalizer ?) then (non)
+  :retour, finalisation deleguee;
+  stop
+else (oui)
+endif
+
+|#FDECEC|DistributedCrawlFrontier (Redis)|
+:readAllRecords() : HGETALL records;
+
+|#EFF6FF|DistributedCrawlCoordinator|
+:aggregate()\n+ SiteFileDiscoverer.discover();
+note right
+  scraper/crawler/discovery/
+  SiteFileDiscoverer.java
+end note
+:CrawlResultPersister.persist();
+note right
+  scraper/crawler/pipeline/
+  CrawlResultPersister.java
+end note
+
+if (persist OK ?) then (oui)
+  |#FDECEC|DistributedCrawlFrontier (Redis)|
+  :cleanup() : DEL des cles du job;
+  |#EFF6FF|DistributedCrawlCoordinator|
+  :resultat consolide en base;
+  stop
+else (non)
+  :throw : pas de cleanup\n(records preserves pour reprise);
+  stop
+endif
+
+@enduml
