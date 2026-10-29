@@ -1,6 +1,5 @@
 <div align="center">
 
-<img src="Frontend/src/assets/ElyadataLogoWhite.svg" alt="Elyadata" width="220"/>
 
 <br/>
 <br/>
